@@ -2169,6 +2169,34 @@ function prevWT(mod) { if (wtCurrent[mod] > 0) goWT(mod, wtCurrent[mod] - 1); }
 // ok: shown when correct (explains why it is right).
 // wrong: string diagnosing the typical error without giving away the answer.
 const EX_FEEDBACK = {
+  '0-2': {
+    ok: 'Richtig: $t = \\frac{s}{v} = \\frac{550\\,\\text{km}}{200\\,\\text{km/h}} = 2{,}75\\,\\text{h} \\approx 3\\,\\text{h}$. Weil Strecke in km und Geschwindigkeit in km/h gegeben sind, kürzt sich die Einheit direkt zu Stunden, ohne Umrechnung.',
+    wrong: 'Zeit berechnest du mit $t = \\frac{s}{v}$, also Strecke geteilt durch Geschwindigkeit. Überschlage zur Kontrolle: In einer Stunde schafft der Zug $200\\,\\text{km}$, in zwei Stunden $400\\,\\text{km}$. Wie lange braucht er dann für $550\\,\\text{km}$?'
+  },
+  '0-4': {
+    ok: 'Richtig: $s = \\frac{v^2}{2|a|} = \\frac{30^2}{2 \\cdot 6}\\,\\text{m} = \\frac{900}{12}\\,\\text{m} = 75\\,\\text{m}$. Merke die Reihenfolge: erst $v$ quadrieren, dann durch das Doppelte der Bremsverzögerung teilen.',
+    wrong: 'Kontrolliere den Nenner: In der Formel $s = \\frac{v^2}{2|a|}$ steht das <strong>Doppelte</strong> der Bremsverzögerung. Wer $v^2 = 900$ nur durch $6$ statt durch $2 \\cdot 6$ teilt, erhält den doppelten Bremsweg. Rechne mit dem korrigierten Nenner noch einmal.'
+  },
+  '1-2': {
+    ok: 'Richtig: relativer Fehler $= \\frac{\\Delta s}{s} \\cdot 100\\,\\% = \\frac{2\\,\\text{m}}{50\\,\\text{m}} \\cdot 100\\,\\% = 4\\,\\%$. Da sich die Einheit Meter wegkürzt, bleibt eine reine Prozentangabe übrig.',
+    wrong: 'Der relative Fehler ist das <strong>Verhältnis</strong> von absolutem Fehler zu Messwert: $\\frac{\\Delta s}{s}$. Achtung: $\\Delta s = 2\\,\\text{m}$ sind nicht automatisch $2\\,\\%$. Teile erst durch $s = 50\\,\\text{m}$ und multipliziere das Ergebnis dann mit $100\\,\\%$.'
+  },
+  '1-5': {
+    ok: 'Richtig: $\\Delta t = 5\\,\\% \\cdot t_0 = 0{,}05 \\cdot 8{,}0\\,\\text{s} = 0{,}4\\,\\text{s}$. Das vollständige Messergebnis lautet damit $t = (8{,}0 \\pm 0{,}4)\\,\\text{s}$.',
+    wrong: 'Wandle die Prozentangabe zuerst in eine Dezimalzahl um: $5\\,\\% = 0{,}05$. Diesen Faktor multiplizierst du mit $t_0 = 8{,}0\\,\\text{s}$. Häufige Fehler: die $5$ direkt mit $8$ verrechnen (Faktor 100 zu groß) oder nur den Umrechnungsfaktor $0{,}05$ als Ergebnis angeben.'
+  },
+  '2-1': {
+    ok: 'Richtig: $F_G = m \\cdot g = 1\\,800\\,\\text{kg} \\cdot 10\\,\\frac{\\text{m}}{\\text{s}^2} = 18\\,000\\,\\text{N}$. Plausibilitäts-Check: Jedes Kilogramm wiegt auf der Erde rund $10\\,\\text{N}$.',
+    wrong: 'Gewichtskraft ist Masse <strong>mal</strong> Fallbeschleunigung: $F_G = m \\cdot g$. Wenn dein Wert zu klein ist, hast du vermutlich vergessen, mit $g = 10\\,\\text{m/s}^2$ zu multiplizieren, oder versehentlich geteilt. Überschlag: Jedes Kilogramm trägt rund $10\\,\\text{N}$ bei.'
+  },
+  '2-2': {
+    ok: 'Richtig: $F_L = k \\cdot v^2 = 0{,}5 \\cdot (20)^2\\,\\text{N} = 0{,}5 \\cdot 400\\,\\text{N} = 200\\,\\text{N}$. Der Luftwiderstand wächst quadratisch: doppelte Geschwindigkeit bedeutet vierfache Kraft.',
+    wrong: 'Achte auf die Reihenfolge: erst $v$ <strong>quadrieren</strong> ($20^2 = 400$), dann mit $k = 0{,}5$ multiplizieren. Wer den Faktor $k$ weglässt oder das Quadrieren vergisst, landet bei einem zu großen bzw. zu kleinen Wert. Gehe beide Schritte nacheinander durch.'
+  },
+  '2-4': {
+    ok: 'Richtig: $s = \\frac{v^2}{2|a|} = \\frac{(30)^2}{2 \\cdot 8}\\,\\text{m} = \\frac{900}{16}\\,\\text{m} = 56{,}25\\,\\text{m}$. Plausibel: Bei $30\\,\\text{m/s}$ (also $108\\,\\text{km/h}$) ist ein Bremsweg von gut $50\\,\\text{m}$ realistisch.',
+    wrong: 'Prüfe den Nenner der Formel $s = \\frac{v^2}{2|a|}$: Dort steht das <strong>Doppelte</strong> von $8\\,\\text{m/s}^2$. Wer nur durch $8$ teilt, erhält den doppelten Bremsweg. Zähler: $30^2 = 900$, jetzt sauber durch $2 \\cdot 8$ teilen.'
+  }
 };
 
 // Tolerant matching on normalized strings: exact, numeric equality

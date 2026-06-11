@@ -1942,6 +1942,114 @@ function goLanding() {
 // wrong: string, or for MC an object keyed by the chosen option value,
 // diagnosing the typical error without giving away the answer.
 const EX_FEEDBACK = {
+  // B1.1 SI-Basiseinheiten
+  '0-1': {
+    ok: 'Richtig: Das Meter (m) ist die SI-Basiseinheit der Länge. Alle anderen Längeneinheiten (km, cm, mm) entstehen daraus durch Präfixe.',
+    wrong: {
+      'km': 'Kilometer ist Meter mit der Vorsilbe kilo, also schon eine abgewandelte Form. Gesucht ist die Einheit ganz ohne Vorsilbe.',
+      'cm': 'Zentimeter enthält das Präfix zenti ($10^{-2}$). Basiseinheiten kommen ohne Vorsilbe aus. Welche Längeneinheit bleibt dann übrig?',
+      'mi': 'Die Meile ist eine angloamerikanische Einheit und gehört gar nicht zum SI-System. Schau in die Tabelle der 7 Basiseinheiten.'
+    }
+  },
+  '0-2': {
+    ok: 'Richtig: Aus $F = m \\cdot a$ folgt $[F] = [m] \\cdot [a] = \\text{kg} \\cdot \\text{m/s}^2$, und diese Kombination heißt Newton (N).',
+    wrong: {
+      'J': 'Joule ist die Einheit der Energie, also Kraft mal Weg. Setze stattdessen die Einheiten von $m$ und $a$ in $F = m \\cdot a$ ein.',
+      'W': 'Watt ist die Einheit der Leistung, also Energie pro Zeit. Nutze $F = m \\cdot a$: Welche Einheiten haben Masse und Beschleunigung?',
+      'Pa': 'Pascal ist die Einheit des Drucks, also Kraft pro Fläche. Gesucht ist die Einheit der Kraft selbst. Setze in $F = m \\cdot a$ ein.'
+    }
+  },
+  '0-3': {
+    ok: 'Richtig: $[E] = [m] \\cdot [v]^2 = \\text{kg} \\cdot (\\text{m/s})^2 = \\text{kg} \\cdot \\text{m}^2/\\text{s}^2$, und das ist genau das Joule (J).',
+    wrong: {
+      'N': 'Newton ist die Einheit der Kraft. Energie ist Kraft mal Weg, da kommt also noch ein Meter dazu. Setze die Einheiten in $E_{kin} = \\frac{1}{2}mv^2$ ein.',
+      'W': 'Watt ist Energie pro Zeit, also die Einheit der Leistung. Hier ist aber die Energie selbst gefragt. Setze kg und $(\\text{m/s})^2$ zusammen.',
+      'Pa': 'Pascal ist die Einheit des Drucks (Kraft pro Fläche). Setze in $E_{kin} = \\frac{1}{2}mv^2$ ein: kg mal $(\\text{m/s})^2$ ergibt welche bekannte Einheit?'
+    }
+  },
+  '0-4': {
+    ok: 'Richtig: Die eckigen Klammern bedeuten "die Einheit von". $[P] = \\text{W}$ liest man also: Die Einheit der Leistung $P$ ist Watt.',
+    wrong: {
+      'gleich': 'Die Klammern vergleichen keine Zahlenwerte. $[P]$ ist eine Kurzschreibweise für eine Eigenschaft der Größe $P$. Schau in den Tipp.',
+      'formel': 'Es geht nicht um eine Rechenvorschrift. Die eckigen Klammern fragen nach etwas, das jede Messgröße hat: Was schreibt man hinter jeden Messwert?',
+      'geteilt': 'Eine Division steckt hier nicht drin. $[P]$ steht für eine Eigenschaft der Größe $P$, nicht für eine Rechnung mit zwei Größen.'
+    }
+  },
+  // B1.2 Präfixe und Zehnerpotenzen
+  '1-1': {
+    ok: 'Richtig: kilo bedeutet $\\times 1000$, also $3{,}5\\,\\text{km} = 3{,}5 \\cdot 1000\\,\\text{m} = 3500\\,\\text{m}$.',
+    wrong: 'Prüfe die Richtung: km ist die größere Einheit, in Metern muss die Zahl also größer werden. Multipliziere mit 1000, das Komma wandert um drei Stellen nach rechts.'
+  },
+  '1-2': {
+    ok: 'Richtig: milli bedeutet $\\times 10^{-3}$, also $8\\,\\text{mm} = 8 \\div 1000\\,\\text{m} = 0{,}008\\,\\text{m}$.',
+    wrong: 'mm ist die kleinere Einheit: In Metern muss die Zahl kleiner werden. Dividiere durch 1000 und zähle die Nullen nach dem Komma genau ab (drei Stellen).'
+  },
+  '1-3': {
+    ok: 'Richtig: $1\\,\\text{kg} = 1000\\,\\text{g}$, also $750\\,\\text{g} = 750 \\div 1000\\,\\text{kg} = 0{,}75\\,\\text{kg}$.',
+    wrong: 'Von g nach kg wird die Zahl kleiner: durch 1000 teilen. Wenn du 750000 herausbekommst, hast du in die falsche Richtung gerechnet. Kontrolle: 750 g ist weniger als ein ganzes Kilogramm.'
+  },
+  '1-4': {
+    ok: 'Richtig: $1\\,\\text{cm} = 0{,}01\\,\\text{m}$, also $250\\,\\text{cm} = 250 \\cdot 0{,}01\\,\\text{m} = 2{,}5\\,\\text{m}$.',
+    wrong: 'Achtung, zenti bedeutet $10^{-2}$, nicht $10^{-3}$: Das Komma wandert nur um zwei Stellen. Teile durch 100, nicht durch 1000.'
+  },
+  '1-5': {
+    ok: 'Richtig: Von m nach km teilt man durch 1000: $4200 \\div 1000 = 4{,}2\\,\\text{km}$.',
+    wrong: 'Hier geht es in die Gegenrichtung: von der kleinen Einheit (m) zur großen (km) wird die Zahl kleiner. Teile durch 1000 statt zu multiplizieren.'
+  },
+  // B1.3 km/h und m/s
+  '2-1': {
+    ok: 'Richtig: $72 \\div 3{,}6 = 20\\,\\text{m/s}$. Von km/h nach m/s wird die Zahl immer kleiner.',
+    wrong: 'Von km/h nach m/s musst du durch $3{,}6$ teilen, nicht multiplizieren: In m/s ist die Zahl immer kleiner als in km/h. Kontrolle: Hier kommt eine glatte Zahl heraus.'
+  },
+  '2-2': {
+    ok: 'Richtig: $15 \\cdot 3{,}6 = 54\\,\\text{km/h}$. Von m/s nach km/h wird die Zahl größer.',
+    wrong: 'Hier geht es von m/s nach km/h: multipliziere mit $3{,}6$. Wenn dein Ergebnis kleiner als 15 ist, hast du in die falsche Richtung gerechnet.'
+  },
+  '2-3': {
+    ok: 'Richtig: $50 \\div 3{,}6 \\approx 13{,}9\\,\\text{m/s}$. Stadttempo bedeutet also fast 14 Meter in jeder Sekunde.',
+    wrong: 'km/h nach m/s: durch $3{,}6$ teilen und auf eine Dezimalstelle runden. Wenn du 180 erhältst, hast du multipliziert statt dividiert.'
+  },
+  '2-4': {
+    ok: 'Richtig: $10 \\cdot 3{,}6 = 36\\,\\text{km/h}$. Ein Topsprinter ist damit schneller als die meisten Radfahrer.',
+    wrong: 'm/s nach km/h heißt mal $3{,}6$. Plausibilitätscheck: 10 m/s ist Sprinttempo, das müssen deutlich mehr als 10 km/h sein.'
+  },
+  '2-5': {
+    ok: 'Richtig: $108 \\div 3{,}6 = 30\\,\\text{m/s}$, eine schöne runde Zahl.',
+    wrong: 'km/h nach m/s: durch $3{,}6$ teilen. Das Ergebnis ist glatt, ganz ohne Kommastellen. Wenn du auf fast 400 kommst, war es die falsche Richtung.'
+  },
+  // B1.4 Einheiten aus Formeln
+  '3-1': {
+    ok: 'Richtig: $[F] = [m] \\cdot [a] = \\text{kg} \\cdot \\text{m/s}^2 = \\text{N}$ (Newton).',
+    wrong: {
+      'm/s': 'Das ist die Einheit der Geschwindigkeit. In $F = m \\cdot a$ steckt aber auch die Masse: Die Einheit kg muss im Ergebnis auftauchen.',
+      'kg*m/s': 'Fast: kg ist richtig, aber $a$ ist eine Beschleunigung, keine Geschwindigkeit. Welche Einheit hat $a$? Achte auf das Quadrat bei der Sekunde.',
+      'J': 'Joule ist die Einheit der Energie (Kraft mal Weg). Hier ist nur $m \\cdot a$ gefragt, ohne zusätzlichen Weg. Setze kg und $\\text{m/s}^2$ zusammen.'
+    }
+  },
+  '3-2': {
+    ok: 'Richtig: $[v] = \\frac{[s]}{[t]} = \\frac{\\text{m}}{\\text{s}} = \\text{m/s}$.',
+    wrong: {
+      'm/s^2': 'Das ist die Einheit der Beschleunigung (Geschwindigkeit pro Zeit). In $v = s/t$ wird der Weg nur einmal durch die Zeit geteilt.',
+      'km/h': 'km/h ist zwar eine Geschwindigkeitseinheit, aber keine SI-Einheit. Setze die SI-Basiseinheiten von $s$ und $t$ ein.',
+      'N': 'Newton ist die Einheit der Kraft ($m \\cdot a$). Setze in $v = s/t$ einfach die Einheiten Meter und Sekunde ein.'
+    }
+  },
+  '3-3': {
+    ok: 'Richtig: $[P] = \\frac{[W]}{[t]} = \\frac{\\text{J}}{\\text{s}}$, und diese Einheit hat den eigenen Namen Watt (W).',
+    wrong: 'Setze die Einheiten ein: Arbeit $W$ wird in Joule gemessen, Zeit $t$ in Sekunden. Schreibe das Ergebnis als Bruch mit Schrägstrich (Einheit/Einheit), ohne Zahlen.'
+  },
+  '3-4': {
+    ok: 'Richtig: $[p] = \\frac{[F]}{[A]} = \\frac{\\text{N}}{\\text{m}^2} = \\text{Pa}$ (Pascal).',
+    wrong: {
+      'N*m^2': 'Du hast multipliziert statt dividiert: In $p = F/A$ steht die Fläche im Nenner, nicht im Zähler.',
+      'N/m': 'Die Richtung stimmt, aber $A$ ist eine Fläche. Welche Einheit hat eine Fläche? Achte auf den Exponenten beim Meter.',
+      'kg/m^3': 'Das ist die Einheit der Dichte (Masse pro Volumen). Druck ist Kraft pro Fläche: Setze in $p = F/A$ die Einheiten von $F$ und $A$ ein.'
+    }
+  },
+  '3-5': {
+    ok: 'Richtig: $[E] = [m] \\cdot [v]^2 = \\text{kg} \\cdot (\\text{m/s})^2 = \\frac{\\text{kg} \\cdot \\text{m}^2}{\\text{s}^2} = \\text{J}$ (Joule).',
+    wrong: 'Setze ein: $[m] = \\text{kg}$ und $[v] = \\text{m/s}$. Das Quadrat wirkt auf Zähler und Nenner von m/s, also müssen m und s beide quadriert werden. Der Faktor $\\frac{1}{2}$ hat keine Einheit. Schreibe mit * für mal und ^ für hoch.'
+  }
 };
 
 // Tolerant matching on normalized strings: exact, numeric equality

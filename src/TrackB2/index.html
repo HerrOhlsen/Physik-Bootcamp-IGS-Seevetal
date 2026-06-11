@@ -1355,6 +1355,154 @@ function goLanding() {
 // wrong: string, or for MC an object keyed by the chosen option value,
 // diagnosing the typical error without giving away the answer.
 const EX_FEEDBACK = {
+  '0-1': {
+    ok: 'Richtig: $v = g \\cdot t = 10\\,\\text{m/s}^2 \\cdot 3\\,\\text{s} = 30\\,\\text{m/s}$. Die Einheiten passen: $\\text{m/s}^2 \\cdot \\text{s} = \\text{m/s}$.',
+    wrong: {
+      '3.3': 'Das ist $g \\div t$ gerechnet. Die Formel steht aber in der Aufgabe: $v = g \\cdot t$, also multiplizieren, nicht dividieren.',
+      '10': 'Das ist nur der Wert von $g$, also der Geschwindigkeitszuwachs in einer einzigen Sekunde. Der Stein fällt aber 3 Sekunden lang: Multipliziere mit der Fallzeit.',
+      '300': 'Um den Faktor 10 zu groß: Das wären über 1000 km/h. Rechne $g \\cdot t = 10 \\cdot 3$ noch einmal nach und mache den Plausibilitätscheck.'
+    }
+  },
+  '0-2': {
+    ok: 'Richtig: $s = v \\cdot t = 15\\,\\text{km/h} \\cdot 2\\,\\text{h} = 30\\,\\text{km}$. Hier passten die Einheiten schon zusammen: km/h mal h ergibt direkt km.',
+    wrong: 'Schau auf die Einheiten: $v$ ist in km/h und $t$ in Stunden gegeben, das passt bereits zusammen, hier muss nichts umgerechnet werden. Rechne einfach $s = v \\cdot t$ und gib das Ergebnis in km an.'
+  },
+  '0-3': {
+    ok: 'Richtig: Erst umrechnen: $v = 72 \\div 3{,}6 = 20\\,\\text{m/s}$, dann $s = v \\cdot t = 20\\,\\text{m/s} \\cdot 45\\,\\text{s} = 900\\,\\text{m}$.',
+    wrong: 'Typische Falle: km/h und Sekunden passen nicht zusammen. Rechne zuerst die $72\\,\\text{km/h}$ durch Teilen durch $3{,}6$ in m/s um und multipliziere erst danach mit den 45 Sekunden.'
+  },
+  '0-4': {
+    ok: 'Richtig: $F = m \\cdot a = 4\\,\\text{kg} \\cdot 3\\,\\text{m/s}^2 = 12\\,\\text{N}$, denn $\\text{kg} \\cdot \\text{m/s}^2 = \\text{N}$.',
+    wrong: {
+      '1.33': 'Das ist $m \\div a$ gerechnet. Die Formel $F = m \\cdot a$ verlangt aber ein Produkt, keine Division.',
+      '7': 'Das ist $m + a$ gerechnet. Größen mit verschiedenen Einheiten (kg und $\\text{m/s}^2$) kann man nicht addieren, die Formel verlangt ein Produkt.',
+      '120': 'Um den Faktor 10 zu groß: Beide Werte sind schon in SI-Einheiten, hier muss nichts umgerechnet werden. Rechne $4 \\cdot 3$ noch einmal nach.'
+    }
+  },
+  '0-5': {
+    ok: 'Richtig: Schritt 1: $W = m \\cdot g \\cdot h = 500 \\cdot 10 \\cdot 8 = 40\\,000\\,\\text{J}$. Schritt 2: $P = \\frac{W}{t} = \\frac{40\\,000\\,\\text{J}}{40\\,\\text{s}} = 1000\\,\\text{W}$.',
+    wrong: 'Hier sind zwei Schritte nötig: Erst die Hubarbeit $W = m \\cdot g \\cdot h$ in Joule berechnen, dann durch die Zeit teilen: $P = W/t$. Prüfe, ob du beide Schritte gemacht und keinen der drei Faktoren in $W$ vergessen hast.'
+  },
+  '1-1': {
+    ok: 'Richtig: $54\\,\\text{km/h}$ hätte erst in m/s umgerechnet werden müssen. Nur mit m/s und s passen die Einheiten zusammen, $54 \\cdot 10$ mischt km/h mit Sekunden.',
+    wrong: {
+      'A': 'Die Formel $s = v \\cdot t$ ist völlig korrekt. Schau stattdessen auf die Einheiten der eingesetzten Werte: Passen km/h und Sekunden zusammen?',
+      'C': 'Minuten helfen nicht weiter: Die SI-Einheit der Zeit ist die Sekunde, und $t = 10\\,\\text{s}$ ist schon in SI. Das Problem liegt bei der anderen Größe.',
+      'D': 'Runden ändert nichts daran, dass der Wert um den Faktor $3{,}6$ daneben liegt. Schau dir die Einheit der Geschwindigkeit an.'
+    }
+  },
+  '1-2': {
+    ok: 'Richtig: $v = 54 \\div 3{,}6 = 15\\,\\text{m/s}$, also $s = 15\\,\\text{m/s} \\cdot 10\\,\\text{s} = 150\\,\\text{m}$ statt der falschen 540 m.',
+    wrong: 'Erst umrechnen, dann rechnen: Teile $54\\,\\text{km/h}$ durch $3{,}6$, das gibt die Geschwindigkeit in m/s. Erst danach mit den 10 Sekunden multiplizieren.'
+  },
+  '1-3': {
+    ok: 'Richtig: Die Eingangswerte haben 3 signifikante Stellen, also bekommt auch das Ergebnis 3 Stellen: $21{,}3\\,\\text{m/s}$.',
+    wrong: {
+      'A': 'Zu grob gerundet: 21 hat nur zwei signifikante Stellen, die Eingangswerte haben drei. Damit verschenkst du Genauigkeit, die in den Daten steckt.',
+      'C': 'Das sind vier signifikante Stellen, die Eingangswerte haben aber nur drei. Das Ergebnis täuscht eine Genauigkeit vor, die die Daten nicht hergeben.',
+      'D': 'Fünf signifikante Stellen bei nur drei Stellen in den Eingangswerten: Die angehängte Null behauptet sogar noch mehr Genauigkeit als das reine Taschenrechner-Ergebnis.'
+    }
+  },
+  '1-4': {
+    ok: 'Richtig: $E_{kin} = \\frac{1}{2}mv^2$, nicht $m \\cdot v$. Die Dimensionsprobe entlarvt es: $\\text{kg} \\cdot \\text{m/s}$ ist die Einheit des Impulses, kein Joule.',
+    wrong: {
+      'A': 'Die Masse in kg ist die korrekte SI-Einheit. Mache stattdessen die Dimensionsprobe: Welche Einheit hat $m \\cdot v$, und ist das wirklich ein Joule?',
+      'B': 'Gerundet wurde hier gar nicht, das Problem liegt tiefer. Vergleiche die verwendete Formel mit der korrekten Formel für kinetische Energie.',
+      'D': 'm/s ist die korrekte SI-Einheit der Geschwindigkeit. Prüfe stattdessen die Formel selbst: Fehlt da nicht ein Quadrat und ein Faktor?'
+    }
+  },
+  '1-5': {
+    ok: 'Richtig: $E_{kin} = \\frac{1}{2} \\cdot 2 \\cdot 6^2 = 1 \\cdot 36 = 36\\,\\text{J}$.',
+    wrong: 'Zwei klassische Stolperfallen: das Quadrat ($v^2 = 6^2$, nicht $6$) und der Faktor $\\frac{1}{2}$. Prüfe, ob du beides berücksichtigt hast.'
+  },
+  '2-1': {
+    ok: 'Richtig: $[m \\cdot a] = \\text{kg} \\cdot \\text{m/s}^2 = \\text{N}$, genau die Definition des Newton.',
+    wrong: {
+      'A': '$\\text{kg} \\cdot \\text{m/s}$ ist die Einheit des Impulses, nicht der Kraft. Für ein Newton ($\\text{kg} \\cdot \\text{m/s}^2$) fehlt eine weitere Division durch s. Welche Größe liefert das?',
+      'C': '$\\text{kg} \\cdot \\text{m}$ ist kein Newton: Der Zeitbezug ($\\text{s}^2$ im Nenner) fehlt komplett. Suche die Option, in der eine Beschleunigung vorkommt.',
+      'D': 'kg und $\\text{m/s}^2$ sind verschiedene Einheiten, eine Summe daraus ist physikalisch sinnlos. Gesucht ist ein Produkt.'
+    }
+  },
+  '2-2': {
+    ok: 'Richtig: $\\text{kg} \\cdot \\text{m}^2/\\text{s}^2 = \\text{J}$, und Joule pro Sekunde ist Watt: $\\text{J/s} = \\text{W}$.',
+    wrong: {
+      'A': 'Fast: $\\text{kg} \\cdot \\text{m}^2/\\text{s}^2$ allein wäre tatsächlich ein Joule. Hier wird aber noch durch eine weitere Sekunde geteilt. Was wird aus Energie pro Zeit?',
+      'C': 'Newton wäre $\\text{kg} \\cdot \\text{m/s}^2$, hier steht aber $\\text{m}^2$ im Zähler und eine zusätzliche Sekunde im Nenner. Erkenne zuerst das Joule im Zähler, dann teile durch s.',
+      'D': 'Pascal ist $\\text{N/m}^2$, also Kraft pro Fläche. Hier wird aber durch eine Zeit geteilt, nicht durch eine Fläche.'
+    }
+  },
+  '2-3': {
+    ok: 'Richtig: $\\text{kg} \\cdot \\frac{\\text{m}}{\\text{s}^2} \\cdot \\text{m} = \\frac{\\text{kg} \\cdot \\text{m}^2}{\\text{s}^2} = \\text{J}$. Die Formel für die Lageenergie besteht die Dimensionsprobe.',
+    wrong: {
+      'A': '$\\text{kg} \\cdot \\text{m/s}^2 = \\text{N}$ wäre nur $m \\cdot g$. Hier wird aber zusätzlich mit der Höhe $h$ (Einheit m) multipliziert. Was wird aus Newton mal Meter?',
+      'B': 'Watt wäre Energie pro Zeit, aber in $m \\cdot g \\cdot h$ taucht gar keine Zeit im Nenner auf, die sich nicht wegkürzt. Multipliziere die drei Einheiten Schritt für Schritt.',
+      'D': 'Pascal wäre Kraft geteilt durch Fläche. Hier wird aber nur multipliziert. Rechne $\\text{kg} \\cdot \\text{m/s}^2 \\cdot \\text{m}$ in Ruhe aus.'
+    }
+  },
+  '2-4': {
+    ok: 'Richtig: $\\frac{\\text{N}}{\\text{m}^2} = \\text{Pa}$ (Pascal), die SI-Einheit des Drucks. Der Zahlenwert wäre hier $\\frac{200}{0{,}5} = 400\\,\\text{Pa}$.',
+    wrong: 'Kraft geteilt durch Fläche ergibt einen Druck. Gesucht ist der Kurzname der Einheit $\\text{N/m}^2$: benannt nach einem französischen Physiker und Mathematiker.'
+  },
+  '2-5': {
+    ok: 'Richtig: $[F/t] = \\text{N/s}$, und das ist keine Längeneinheit. Die Dimensionsprobe entlarvt die Formel als falsch: Ein Weg muss in Metern herauskommen.',
+    wrong: {
+      'A': 'Ein Weg muss die Einheit Meter haben. N/s ist Kraft pro Zeit, das passt nicht zu einer Länge. Was sagt dir das über die Formel?',
+      'B': 'Rechne nach: $\\text{N} \\div \\text{s}$ kürzt sich nicht zu Metern. Ein Newton ist $\\text{kg} \\cdot \\text{m/s}^2$, da bleiben kg und Sekunden übrig.',
+      'D': 'Runden ändert die Einheit nicht: Auch ein gerundetes Ergebnis in N/s ist kein Weg. Das Problem steckt in der Formel selbst.'
+    }
+  },
+  '3-1': {
+    ok: 'Richtig: $v = \\frac{108}{3{,}6} = 30\\,\\text{m/s}$. Kontrolle: Der Zahlenwert in m/s ist immer kleiner als der in km/h.',
+    wrong: 'Von km/h nach m/s wird durch $3{,}6$ geteilt, nicht multipliziert. Kontrolle: Der Zahlenwert in m/s muss kleiner sein als der in km/h.'
+  },
+  '3-2': {
+    ok: 'Richtig: $12\\,\\text{min} = \\frac{12}{60}\\,\\text{h} = 0{,}2\\,\\text{h}$, also $s = 250\\,\\text{km/h} \\cdot 0{,}2\\,\\text{h} = 50\\,\\text{km}$.',
+    wrong: 'Die Zeit passt noch nicht zur Geschwindigkeit: Rechne die 12 Minuten in Stunden um (durch 60 teilen), bevor du mit den 250 km/h multiplizierst.'
+  },
+  '3-3': {
+    ok: 'Richtig: $100\\,\\text{km/h} = \\frac{100}{3{,}6} \\approx 27{,}8\\,\\text{m/s}$, also $a = \\frac{\\Delta v}{t} = \\frac{27{,}8\\,\\text{m/s}}{5\\,\\text{s}} \\approx 5{,}6\\,\\text{m/s}^2$.',
+    wrong: {
+      'A': 'Das wäre $100 \\div 5$, aber die 100 sind in km/h gegeben. Rechne die Geschwindigkeit erst in m/s um, sonst stimmt die Einheit von $a$ nicht.',
+      'C': 'Viel zu klein: Ein Sportwagen drückt dich spürbar in den Sitz. Rechne $\\Delta v$ in m/s um und teile dann durch die Zeit, nicht umgekehrt.',
+      'D': 'Das wäre etwa die zehnfache Erdbeschleunigung, das schafft kein Auto. Prüfe, ob du wirklich $\\Delta v \\div t$ mit $\\Delta v$ in m/s gerechnet hast.'
+    }
+  },
+  '3-4': {
+    ok: 'Richtig: $F = m \\cdot a = 8\\,\\text{kg} \\cdot 2{,}5\\,\\text{m/s}^2 = 20\\,\\text{N}$.',
+    wrong: 'Beide Werte sind schon in SI-Einheiten, du musst nur $F = m \\cdot a$ rechnen. Achte beim Multiplizieren mit $2{,}5$ auf das Komma.'
+  },
+  '3-5': {
+    ok: 'Richtig: $W = m \\cdot g \\cdot h = 30 \\cdot 10 \\cdot 1{,}5 = 450\\,\\text{J}$.',
+    wrong: 'Hubarbeit braucht drei Faktoren: $W = m \\cdot g \\cdot h$. Prüfe, ob du $g = 10\\,\\text{m/s}^2$ und die Höhe $1{,}5\\,\\text{m}$ beide eingesetzt hast.'
+  },
+  '3-6': {
+    ok: 'Richtig: $E_{kin} = \\frac{1}{2} \\cdot 0{,}5 \\cdot 10^2 = 0{,}25 \\cdot 100 = 25\\,\\text{J}$.',
+    wrong: {
+      'A': 'Das wäre $m \\cdot v = 0{,}5 \\cdot 10$. In der Formel stehen aber $v^2$ und der Faktor $\\frac{1}{2}$.',
+      'C': 'Das ist $m \\cdot v^2$ ohne den Faktor $\\frac{1}{2}$. Der gehört fest zur Formel für die kinetische Energie.',
+      'D': 'Um den Faktor 20 zu groß. Rechne Schritt für Schritt: erst $v^2$, dann mal $m$, dann mal $\\frac{1}{2}$.'
+    }
+  },
+  '3-7': {
+    ok: 'Richtig: $t = 4 \\cdot 60 = 240\\,\\text{s}$, also $P = \\frac{W}{t} = \\frac{96\\,000\\,\\text{J}}{240\\,\\text{s}} = 400\\,\\text{W}$.',
+    wrong: 'Watt ist Joule pro Sekunde: Rechne die 4 Minuten erst in Sekunden um (mal 60), bevor du $P = W/t$ rechnest.'
+  },
+  '3-8': {
+    ok: 'Richtig: $p = \\frac{F}{A} = \\frac{600\\,\\text{N}}{0{,}3\\,\\text{m}^2} = 2000\\,\\text{Pa}$.',
+    wrong: 'Druck ist Kraft geteilt durch Fläche: $p = F/A$. Achtung beim Teilen durch $0{,}3$: Das Ergebnis wird größer als 600, nicht kleiner.'
+  },
+  '3-9': {
+    ok: 'Richtig: $36\\,\\text{km/h} = 10\\,\\text{m/s}$, also $s = 10\\,\\text{m/s} \\cdot 20\\,\\text{s} = 200\\,\\text{m}$. Der Fehler war, km/h direkt mit Sekunden zu multiplizieren.',
+    wrong: {
+      'A': 'Die Formel $s = v \\cdot t$ ist korrekt, an der Struktur der Rechnung liegt es nicht. Schau dir die Einheiten der eingesetzten Werte an.',
+      'C': 'Die Einheit einfach umzubenennen repariert die Rechnung nicht: 720 ist weder in m noch in km das richtige Ergebnis. Wo passen die Einheiten nicht zusammen?',
+      'D': 'Die Zeit ist mit 20 s schon in der SI-Einheit Sekunde gegeben, da muss nichts umgerechnet werden. Die andere Größe ist das Problem.'
+    }
+  },
+  '3-10': {
+    ok: 'Richtig: $t = \\frac{\\Delta v}{|a|} = \\frac{20\\,\\text{m/s}}{5\\,\\text{m/s}^2} = 4\\,\\text{s}$.',
+    wrong: 'Teile die Geschwindigkeitsänderung durch den Betrag der Beschleunigung: $t = \\Delta v / |a|$. Das Minuszeichen von $a$ gibt nur die Richtung an und gehört nicht ins Ergebnis.'
+  }
 };
 
 // Tolerant matching on normalized strings: exact, numeric equality
