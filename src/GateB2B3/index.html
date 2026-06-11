@@ -310,12 +310,12 @@ function restoreUI() {
   updateProgress();
 }
 function checkText(q, val) {
-  const v = String(val).replace(',','.').trim();
-  if (q === 1) return v === '10' || v === '10.0';
-  if (q === 3) return v === '200000' || v === '200000.0';
-  if (q === 5) return v === '3.5' || v === '3,5';
-  if (q === 6) return v === '360000' || v === '360000.0';
-  if (q === 9) return v === '150' || v === '150.0';
+  const n = parseFloat(String(val).replace(',','.').trim());
+  if (q === 1) return n === 10;
+  if (q === 3) return n === 200000;
+  if (q === 5) return n === 3.5;
+  if (q === 6) return n === 360000;
+  if (q === 9) return n === 150;
   return false;
 }
 function submitTest() {

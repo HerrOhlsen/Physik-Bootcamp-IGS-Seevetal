@@ -1968,6 +1968,21 @@ const exCounts = [5, 5, 5];
 // ══════════════════════════════════════════
 // NORMALIZE
 // ══════════════════════════════════════════
+// Tolerant matching on normalized strings: exact, numeric equality
+// ("5" == "5.0" == "5,0"), or containment for pure-text answers of 5+
+// letters with a negation guard ("nichtverdoppelt" must not match).
+function matchesPattern(val, p) {
+  if (val === p) return true;
+  if (/^[-+]?[0-9.]+$/.test(val) && /^[-+]?[0-9.]+$/.test(p)) {
+    const nv = parseFloat(val), np = parseFloat(p);
+    if (!Number.isNaN(nv) && !Number.isNaN(np)) return nv === np;
+  }
+  if (/^[a-zäöüß]{5,}$/.test(p) && val.includes(p)) {
+    return !/(nicht|kein|niemals|falsch)/.test(val.split(p).join(''));
+  }
+  return false;
+}
+
 function normalize(v) {
   return v.trim().replace(/\s+/g, '').toLowerCase().replace(/,/g, '.').replace(/[·×]/g, '*').replace(/([a-z])\./g, '$1*');
 }
@@ -2022,7 +2037,7 @@ function checkEx(key) {
   if (!val) return;
 
   const accepted = def.answers.split('|').map(normalize);
-  const correct = accepted.some(a => val === a);
+  const correct = accepted.some(a => matchesPattern(val, a));
 
   if (correct) {
     fb.className = 'fb-block correct';
@@ -2053,7 +2068,7 @@ function checkExtra(inputId, fbId, patterns) {
   const fb = document.getElementById(fbId);
   if (!inp || !fb) return;
   const val = normalize(inp.value);
-  const ok = patterns.toLowerCase().split('|').some(p => val === normalize(p));
+  const ok = patterns.toLowerCase().split('|').some(p => matchesPattern(val, normalize(p)));
   if (ok) {
     fb.className = 'fb-block correct';
     fb.innerHTML = '&#10003; Richtig!';

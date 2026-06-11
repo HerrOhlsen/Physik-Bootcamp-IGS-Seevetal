@@ -298,10 +298,10 @@ function updateProgress(){
   document.getElementById('btnSubmit').disabled=done<TOTAL;
 }
 function checkText(q,val){
-  const v=String(val).replace(',','.').trim();
-  if(q===3)return v==='10'||v==='10.0';
-  if(q===4)return v==='5000'||v==='5000.0';
-  if(q===7)return v==='20'||v==='20.0';
+  const n=parseFloat(String(val).replace(',','.').trim());
+  if(q===3)return n===10;
+  if(q===4)return n===5000;
+  if(q===7)return n===20;
   return false;
 }
 function restoreUI() {

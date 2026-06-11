@@ -1981,6 +1981,21 @@ const exCounts = [5, 5, 5, 5];
 // ══════════════════════════════════════════
 // NORMALIZE
 // ══════════════════════════════════════════
+// Tolerant matching on normalized strings: exact, numeric equality
+// ("5" == "5.0" == "5,0"), or containment for pure-text answers of 5+
+// letters with a negation guard ("nichtverdoppelt" must not match).
+function matchesPattern(val, p) {
+  if (val === p) return true;
+  if (/^[-+]?[0-9.]+$/.test(val) && /^[-+]?[0-9.]+$/.test(p)) {
+    const nv = parseFloat(val), np = parseFloat(p);
+    if (!Number.isNaN(nv) && !Number.isNaN(np)) return nv === np;
+  }
+  if (/^[a-zäöüß]{5,}$/.test(p) && val.includes(p)) {
+    return !/(nicht|kein|niemals|falsch)/.test(val.split(p).join(''));
+  }
+  return false;
+}
+
 function normalize(v) {
   return v.trim().replace(/\s+/g, '').toLowerCase()
     .replace(/,/g, '.').replace(/\u00d7/g, '*').replace(/\u00b7/g, '*').replace(/\u22c5/g, '*');
@@ -2002,7 +2017,7 @@ function checkEx(mod, ex) {
   if (!val) return;
 
   const accepted = def.answers.split('|').map(normalize);
-  const correct = accepted.some(a => val === a);
+  const correct = accepted.some(a => matchesPattern(val, a));
 
   fb.className = 'ex-feedback show ' + (correct ? 'ok' : 'err');
   fb.textContent = correct ? def.ok : def.err;

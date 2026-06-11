@@ -340,8 +340,8 @@ function submitTest() {
   for(let i=0;i<TOTAL;i++){
     let ok;
     if(i===7){
-      const v = String(answers[i]).replace(',','.').trim();
-      ok = v==='100'||v==='100.0';
+      const n = parseFloat(String(answers[i]).replace(',','.').trim());
+      ok = n===100;
     } else {
       ok = answers[i]===CORRECT[i];
     }

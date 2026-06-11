@@ -758,12 +758,27 @@ function checkMC(t, i, oi, correct) {
   revealNext(t, i);
 }
 
+// Tolerant matching on normalized strings: exact, numeric equality
+// ("5" == "5.0" == "5,0"), or containment for pure-text answers of 5+
+// letters with a negation guard ("nichtverdoppelt" must not match).
+function matchesPattern(val, p) {
+  if (val === p) return true;
+  if (/^[-+]?[0-9.]+$/.test(val) && /^[-+]?[0-9.]+$/.test(p)) {
+    const nv = parseFloat(val), np = parseFloat(p);
+    if (!Number.isNaN(nv) && !Number.isNaN(np)) return nv === np;
+  }
+  if (/^[a-zäöüß]{5,}$/.test(p) && val.includes(p)) {
+    return !/(nicht|kein|niemals|falsch)/.test(val.split(p).join(''));
+  }
+  return false;
+}
+
 function checkText(t, i) {
   const inp = document.getElementById(`inp-${t}-${i}`);
   const fb  = document.getElementById(`fb-${t}-${i}`);
   const raw = inp.value.trim().toLowerCase().replace(/,/g,'.').replace(/\s/g,'');
   const patterns = CARDS[t][i].answer.split('|');
-  const ok = patterns.some(p => raw === p.toLowerCase());
+  const ok = patterns.some(p => matchesPattern(raw, p.toLowerCase()));
   if (ok) {
     inp.classList.add('correct');
     fb.textContent = '✅ Richtig!';

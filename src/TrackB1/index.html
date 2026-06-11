@@ -1937,6 +1937,21 @@ function goLanding() {
 /* ────────────────────────────────────────────
    EXERCISE SYSTEM
    ──────────────────────────────────────────── */
+// Tolerant matching on normalized strings: exact, numeric equality
+// ("5" == "5.0" == "5,0"), or containment for pure-text answers of 5+
+// letters with a negation guard ("nichtverdoppelt" must not match).
+function matchesPattern(val, p) {
+  if (val === p) return true;
+  if (/^[-+]?[0-9.]+$/.test(val) && /^[-+]?[0-9.]+$/.test(p)) {
+    const nv = parseFloat(val), np = parseFloat(p);
+    if (!Number.isNaN(nv) && !Number.isNaN(np)) return nv === np;
+  }
+  if (/^[a-zäöüß]{5,}$/.test(p) && val.includes(p)) {
+    return !/(nicht|kein|niemals|falsch)/.test(val.split(p).join(''));
+  }
+  return false;
+}
+
 function normalize(v) {
   return v.trim().replace(/\s+/g, '').toLowerCase()
     .replace(/,/g, '.').replace(/\u00d7/g, '*').replace(/\u00b7/g, '*').replace(/\u00f7/g, '/').replace(/\u22c5/g, '*');
@@ -1976,7 +1991,7 @@ function checkInput(mod, ex, inputId, fbId, patterns) {
   const val = normalize(document.getElementById(inputId).value);
   if (!val) return;
   const accepted = patterns.split('|').map(normalize);
-  const correct = accepted.some(p => val === p);
+  const correct = accepted.some(p => matchesPattern(val, p));
   const fb = document.getElementById(fbId);
   const inp = document.getElementById(inputId);
   const card = document.getElementById('m' + mod + '-ex' + ex);
@@ -2003,7 +2018,7 @@ function checkExtra(inputId, fbId, patterns, okMsg, wrongMsg) {
   const fb = document.getElementById(fbId);
   if (!inp || !fb) return;
   const val = normalize(inp.value);
-  const ok = patterns.split('|').some(p => normalize(p) === val);
+  const ok = patterns.split('|').some(p => matchesPattern(val, normalize(p)));
   if (ok) {
     fb.className = 'fb-block correct';
     fb.innerHTML = okMsg || '&#10003; Richtig!';

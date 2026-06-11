@@ -372,10 +372,10 @@ function updateProgress(){
 }
 function checkAnswer(k){
   if(k in MC_CORRECT) return ANS[k]===MC_CORRECT[k];
-  const v=String(ANS[k]).replace(',','.').trim();
-  if(k==='1b') return v==='36'||v==='36.0';
-  if(k==='2b') return v==='12'||v==='12.0';
-  if(k==='3a') return v==='4'||v==='4.0';
+  const n=parseFloat(String(ANS[k]).replace(',','.').trim());
+  if(k==='1b') return n===36;
+  if(k==='2b') return n===12;
+  if(k==='3a') return n===4;
   return false;
 }
 
