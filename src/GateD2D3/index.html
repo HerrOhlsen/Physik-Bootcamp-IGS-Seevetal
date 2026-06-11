@@ -528,25 +528,42 @@ Antworte mit diesem JSON-Format:
 }`;
 
   try {
+    // The Make.com fallback route expects {system_prompt, user_text}, not an
+    // OpenAI messages array. Whitespace is collapsed because the scenario
+    // interpolates the fields into a JSON body where raw newlines break parsing.
     const response = await fetch(WEBHOOK_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify({
-        messages: [
-          { role: 'system', content: systemPrompt },
-          { role: 'user', content: userPrompt }
-        ]
+        system_prompt: systemPrompt.replace(/\s+/g, ' ').trim(),
+        user_text: userPrompt.replace(/\s+/g, ' ').trim()
       })
     });
 
     if (!response.ok) throw new Error('HTTP ' + response.status);
     const raw = await response.text();
+    if (raw.trim() === 'Accepted') throw new Error('KI-Dienst ist gerade nicht aktiv');
 
-    // Parse JSON — strip markdown fences if present
-    let data;
+    // Unwrap the webhook envelope (shape varies), then parse the rubric JSON.
+    let data = null;
     try {
-      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-      data = JSON.parse(cleaned);
+      let content = raw;
+      try {
+        const wrapper = JSON.parse(raw);
+        if (wrapper && Array.isArray(wrapper.aufgaben)) {
+          data = wrapper;
+        } else if (wrapper) {
+          content = wrapper.response || wrapper.text || wrapper.content
+            || (wrapper.choices && wrapper.choices[0] && wrapper.choices[0].message && wrapper.choices[0].message.content)
+            || raw;
+        }
+      } catch(e) { /* raw is not JSON, treat it as the model output itself */ }
+      if (!data) {
+        // Strip markdown fences if present
+        const cleaned = String(content).replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+        data = JSON.parse(cleaned);
+      }
+      if (!Array.isArray(data.aufgaben) || data.aufgaben.length !== 5) throw new Error('shape');
     } catch(e) {
       throw new Error('Ungültige Antwort vom Server');
     }
