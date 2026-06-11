@@ -2165,6 +2165,12 @@ function prevWT(mod) { if (wtCurrent[mod] > 0) goWT(mod, wtCurrent[mod] - 1); }
 /* ────────────────────────────────────────────
    EXERCISE SYSTEM
    ──────────────────────────────────────────── */
+// Per-exercise feedback, key '<mod>-<ex>'.
+// ok: shown when correct (explains why it is right).
+// wrong: string diagnosing the typical error without giving away the answer.
+const EX_FEEDBACK = {
+};
+
 // Tolerant matching on normalized strings: exact, numeric equality
 // ("5" == "5.0" == "5,0"), or containment for pure-text answers of 5+
 // letters with a negation guard ("nichtverdoppelt" must not match).
@@ -2221,16 +2227,18 @@ function checkInput(mod, ex, inputId, fbId, patterns) {
   const fb = document.getElementById(fbId);
   const inp = document.getElementById(inputId);
   const card = document.getElementById('m' + mod + '-ex' + ex);
+  const fbData = EX_FEEDBACK[key] || {};
+  const wrongMsg = typeof fbData.wrong === 'object' ? fbData.wrong[val] : fbData.wrong;
 
   if (correct) {
     fb.className = 'fb-block correct';
-    fb.innerHTML = '&#10003; Richtig!';
+    fb.innerHTML = '&#10003; ' + (fbData.ok || 'Richtig!');
     inp.className = 'answer-input correct';
     card.classList.add('solved');
     exerciseStates[key] = true;
   } else {
     fb.className = 'fb-block incorrect';
-    fb.innerHTML = '&#10007; Noch nicht ganz – schau dir den Tipp an.';
+    fb.innerHTML = '&#10007; ' + (wrongMsg || 'Noch nicht ganz - schau dir den Tipp an.');
     inp.className = 'answer-input incorrect';
     card.classList.add('wrong-state');
   }
