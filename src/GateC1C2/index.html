@@ -6,88 +6,198 @@
 <script>MathJax={tex:{inlineMath:[['$','$']]},startup:{typeset:false}};</script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
-/* ── iOS-Kompatibilität ─────────────────────────────────────── */
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+/* ══════════════════════════════════════════
+   TOKENS (v3-Design, identisch zu den Track-Modulen)
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #6668a0;
+
+  --accent: #6366f1;
+  --accent-bright: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.35);
+  --accent-deep: #4f46e5;
+  --accent-subtle: rgba(99, 102, 241, 0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+
+  --border: rgba(129, 140, 248, 0.15);
+  --border-strong: rgba(129, 140, 248, 0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-full: 100px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+/* -- iOS-Kompatibilitaet ------------------------------------------------- */
 /* font-size 16px verhindert Auto-Zoom beim Tippen auf iPhone */
 input, textarea, select { font-size: 16px; }
 /* dvh-Fallback: Safari-Adressleiste nicht in Viewport einrechnen */
 html { height: 100%; }
 body { min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
-/* Touch-Action für alle klickbaren Elemente */
-button, [onclick], .tab-btn, .exercise, .drag-item, .drop-zone {
+/* Touch-Action fuer alle klickbaren Elemente */
+button, [onclick], .opt {
   touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
-/* Momentum-Scrolling für iOS */
-.tab-content, .scrollable-area, .modal-body {
-  -webkit-overflow-scrolling: touch;
-  overflow-y: auto;
-}
-/* backdrop-filter mit webkit-Präfix */
+/* Momentum-Scrolling fuer iOS */
+.modal-body { -webkit-overflow-scrolling: touch; overflow-y: auto; }
+/* backdrop-filter mit webkit-Praefix */
 .modal-overlay, .blur-bg {
   -webkit-backdrop-filter: blur(8px);
   backdrop-filter: blur(8px);
 }
-/* ── Ende iOS-Kompatibilität ────────────────────────────────── */
-/* Touch-Geräte: Hover-States nicht kleben lassen */
+/* -- Ende iOS-Kompatibilitaet -------------------------------------------- */
+/* Touch-Geraete: Hover-States nicht kleben lassen */
 @media (hover: none) and (pointer: coarse) {
-  .mc-opt:hover, .mc-option:hover, .btn-primary:hover, .btn-ghost:hover,
-  .tab-btn:hover, .check-btn:hover, .opt-label:hover, .drag-item:hover,
-  .sym-btn:hover, .btn-check:hover, .op-btn:hover, .cl-item:hover,
-  .check-item:hover, .flashcard:hover, .graph-choice:hover {
-    /* Reset to base state on touch */
+  .opt:hover, .btn-submit:hover, .btn-retry:hover {
     filter: none;
     transform: none;
   }
 }
+
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;min-height:100dvh;}
-.header{background:linear-gradient(135deg,#c2410c,#f97316);color:#fff;padding:20px max(16px,calc(50% - 364px))}
+body{
+  font-family:var(--font);font-size:1rem;line-height:1.6;
+  color:var(--ink);background:var(--bg-deep);
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
+}
+/* Dezentes Punktraster wie auf den Modulseiten */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(circle at 1px 1px, rgba(99,102,241,0.05) 1px, transparent 0);
+  background-size:32px 32px;pointer-events:none;z-index:0;
+}
+.header{
+  position:relative;z-index:1;
+  background:var(--bg-glass-heavy);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:28px max(16px,calc(50% - 364px)) 24px;
+}
 .header-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.5px}
-.track-badge{background:rgba(255,255,255,.2);color:#fff}
-.gate-badge{background:#fff;color:#c2410c}
-.header h1{font-size:1.4rem;font-weight:700;margin-top:8px}
-.header p{font-size:.9rem;opacity:.9;margin-top:4px}
-.threshold{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 14px;font-size:.85rem;margin-top:10px}
-.container{max-width:760px;margin:0 auto;padding:24px 16px}
-.diagram-box{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.07);text-align:center}
-.diagram-box h3{font-size:1rem;font-weight:700;margin-bottom:12px;color:#ea580c}
-.diagram-box p{font-size:.85rem;color:#64748b;margin-top:10px}
-.q-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #e2e8f0;transition:border-color .2s}
-.q-card.answered{border-left-color:#f97316}
-.q-num{font-size:.8rem;font-weight:700;color:#ea580c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.q-text{font-size:1rem;line-height:1.6;margin-bottom:14px}
+.badge{display:inline-block;padding:4px 14px;border-radius:var(--r-full);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase}
+.track-badge{background:rgba(79,70,229,0.3);border:1px solid var(--accent);color:var(--accent-bright)}
+.gate-badge{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+.header h1{
+  font-size:clamp(1.5rem,4.5vw,2rem);font-weight:800;letter-spacing:-0.02em;line-height:1.15;margin-top:14px;
+  background:linear-gradient(135deg,#ffffff 0%,var(--accent-bright) 60%,#c7d2fe 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.header p{font-size:0.9rem;color:var(--ink-muted);margin-top:6px}
+.threshold{
+  display:inline-block;background:var(--accent-subtle);border:1px solid var(--border-strong);
+  border-radius:var(--r-md);padding:7px 16px;font-size:0.85rem;color:var(--ink-muted);margin-top:14px;
+}
+.threshold strong{color:var(--accent-bright)}
+.container{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:24px 16px}
+.diagram-box{
+  background:var(--bg-glass);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:22px;margin-bottom:20px;
+  box-shadow:var(--shadow-sm);text-align:center;
+}
+.diagram-box h3{font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--accent-bright)}
+.diagram-box p{font-size:0.85rem;color:var(--ink-muted);margin-top:10px}
+.q-card{
+  background:var(--bg-glass);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-left:3px solid var(--border);
+  border-radius:var(--r-lg);padding:22px;margin-bottom:16px;
+  box-shadow:var(--shadow-sm);transition:border-color .25s;
+}
+.q-card.answered{border-left-color:var(--accent)}
+.q-num{font-family:var(--mono);font-size:0.68rem;font-weight:700;color:var(--accent-bright);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:10px}
+.q-text{font-size:1rem;line-height:1.65;margin-bottom:14px;color:var(--ink)}
 .options{display:flex;flex-direction:column;gap:8px}
-.opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;transition:all .15s;font-size:.95rem}
-.opt:hover{background:#fff7ed;border-color:#fdba74}
-.opt input[type=radio]{accent-color:#ea580c;width:16px;height:16px;flex-shrink:0}
-.opt.selected{background:#fff7ed;border-color:#f97316}
-.text-input{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s}
-.text-input:focus{border-color:#f97316;box-shadow:0 0 0 3px rgba(249,115,22,.1)}
-.unit-hint{font-size:.82rem;color:#64748b;margin-top:6px}
+.opt{
+  display:flex;align-items:center;gap:10px;padding:11px 14px;
+  border-radius:var(--r-md);border:1px solid var(--border);
+  background:rgba(255,255,255,0.02);
+  cursor:pointer;transition:all .15s;font-size:0.95rem;color:var(--ink);
+}
+.opt:hover{background:var(--accent-subtle);border-color:var(--border-strong)}
+.opt input[type=radio]{accent-color:var(--accent);width:16px;height:16px;flex-shrink:0}
+.opt.selected{background:var(--accent-subtle);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.text-input{
+  width:100%;border:1px solid var(--border);border-radius:var(--r-md);
+  padding:11px 14px;font-size:0.95rem;font-family:var(--font);
+  background:var(--bg-surface);color:var(--ink);
+  outline:none;transition:border-color .2s, box-shadow .2s;
+}
+.text-input::placeholder{color:var(--ink-dim)}
+.text-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.unit-hint{font-size:0.8rem;color:var(--ink-dim);margin-top:8px;font-family:var(--mono)}
 .submit-area{text-align:center;padding:16px 0 32px}
-.btn-submit{background:#ea580c;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(234,88,12,.3)}
-.btn-submit:hover{background:#c2410c;transform:translateY(-1px)}
-.btn-submit:disabled{background:#94a3b8;cursor:not-allowed;transform:none;box-shadow:none}
-.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;margin:16px 0 24px;overflow:hidden}
-.progress-fill{height:100%;background:#f97316;border-radius:3px;transition:width .3s}
-.progress-info{font-size:.85rem;color:#64748b;text-align:right;margin-top:-20px;margin-bottom:20px}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:16px}
+.btn-submit{
+  background:linear-gradient(135deg,var(--accent-deep),var(--accent));color:#fff;
+  border:none;border-radius:var(--r-md);padding:14px 40px;
+  font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;
+  transition:all .2s;box-shadow:var(--shadow), var(--glow);
+}
+.btn-submit:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.btn-submit:disabled{background:var(--bg-elevated);color:var(--ink-dim);cursor:not-allowed;transform:none;box-shadow:none;filter:none}
+.submit-hint{font-size:0.8rem;color:var(--ink-dim);margin-top:10px}
+.progress-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:var(--r-full);margin:8px 0 6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-deep),var(--accent-bright),#c7d2fe);border-radius:var(--r-full);transition:width .3s}
+.progress-info{font-family:var(--mono);font-size:0.75rem;color:var(--ink-muted);text-align:right;margin-bottom:20px}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,15,0.7);z-index:100;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.show{display:flex}
-.modal{background:#fff;border-radius:16px;padding:32px;max-width:480px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.15);animation:popIn .3s ease;max-height:90vh;max-height:90dvh;overflow-y:auto}
+.modal{
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:var(--r-lg);padding:32px;max-width:520px;width:100%;
+  max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  text-align:center;box-shadow:var(--shadow-lg);animation:popIn .3s ease;
+}
 @keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.score-big{font-size:3rem;font-weight:800;margin:12px 0 4px}
-.score-label{font-size:.9rem;color:#64748b;margin-bottom:16px}
-.result-badge{display:inline-block;padding:8px 24px;border-radius:24px;font-size:1rem;font-weight:700;margin-bottom:16px}
-.pass{background:#dcfce7;color:#166534}
-.fail{background:#fee2e2;color:#991b1b}
-.result-text{font-size:.95rem;color:#475569;line-height:1.6;margin-bottom:16px}
-.btn-retry{background:#f1f5f9;color:#475569;border:none;border-radius:8px;padding:10px 24px;font-size:.95rem;font-weight:600;cursor:pointer}
-.btn-retry:hover{background:#e2e8f0}
-.answers-review{margin-top:16px;text-align:left}
-.review-item{padding:8px 12px;margin-bottom:6px;border-radius:8px;font-size:.9rem;display:flex;align-items:flex-start;gap:8px}
-.review-item.correct{background:#f0fdf4;border-left:3px solid #22c55e}
-.review-item.wrong{background:#fef2f2;border-left:3px solid #ef4444}
-.version-footer{text-align:center;padding:12px;font-size:.75rem;color:#94a3b8}
+.score-big{font-family:var(--mono);font-size:3rem;font-weight:700;margin:12px 0 4px;color:#fff}
+.score-label{font-size:0.85rem;color:var(--ink-dim);margin-bottom:16px}
+.result-badge{display:inline-block;padding:8px 24px;border-radius:var(--r-full);font-size:1rem;font-weight:700;margin-bottom:16px;border:1px solid transparent}
+.pass{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+.fail{background:var(--err-bg);color:var(--err);border-color:var(--err-border)}
+.result-text{font-size:0.95rem;color:var(--ink-muted);line-height:1.6;margin-bottom:8px;text-align:left}
+.recommend-list{text-align:left;margin:10px 0 12px}
+.recommend-item{
+  padding:9px 12px;margin-bottom:6px;border-radius:var(--r-sm);font-size:0.88rem;
+  background:var(--accent-subtle);border-left:3px solid var(--accent);color:var(--ink);
+}
+.recommend-item .mod-name{font-weight:700;color:var(--accent-bright)}
+.recommend-item .mod-qs{color:var(--ink-muted)}
+.btn-retry{
+  background:var(--bg-elevated);color:var(--ink-muted);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:10px 24px;font-family:var(--font);
+  font-size:0.95rem;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.btn-retry:hover{border-color:var(--accent);color:var(--accent-bright)}
+.answers-review{margin-top:20px;text-align:left}
+.review-item{padding:8px 12px;margin-bottom:6px;border-radius:var(--r-sm);font-size:0.88rem;display:flex;align-items:flex-start;gap:8px;color:var(--ink)}
+.review-item.correct{background:var(--ok-bg);border-left:3px solid var(--ok)}
+.review-item.wrong{background:var(--err-bg);border-left:3px solid var(--err)}
+.footer-version{text-align:center;padding:8px;font-size:0.7rem;color:var(--ink-dim);font-family:var(--mono);margin-top:8px;position:relative;z-index:1}
 </style>
 </head>
 <body>
@@ -98,143 +208,59 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
   </div>
   <h1>Gate-Test: Level 1 → Level 2</h1>
   <p>Diagramme lesen &amp; Grundbegriffe</p>
-  <div class="threshold">🎯 Ziel: mindestens <strong>5 von 6 Punkten</strong> (83 %)</div>
+  <div class="threshold">🎯 Ziel: mindestens <strong>6 von 8 Punkten</strong> (75 %)</div>
 </div>
 
 <div class="container">
   <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
-  <div class="progress-info" id="progInfo">0 von 6 beantwortet</div>
+  <div class="progress-info" id="progInfo">0 von 8 beantwortet</div>
 
-  <!-- Diagram -->
+  <!-- s-t-Diagramm fuer Q1 bis Q7 (dark theme: helle Achsen/Schrift auf dunklem Grund) -->
   <div class="diagram-box">
-    <h3>📈 s-t-Diagramm – Lies das Diagramm für alle Aufgaben!</h3>
-    <svg viewBox="0 0 400 260" width="100%" style="max-width:420px">
-      <!-- Grid -->
+    <h3>📈 s-t-Diagramm – Grundlage für Aufgabe 1 bis 7</h3>
+    <svg viewBox="0 0 420 270" width="100%" style="max-width:440px;display:block;margin:0 auto" role="img" aria-label="s-t-Diagramm mit drei Phasen A, B und C">
       <defs>
-        <pattern id="grid" width="50" height="40" patternUnits="userSpaceOnUse">
-          <path d="M 50 0 L 0 0 0 40" fill="none" stroke="#f1f5f9" stroke-width="1"/>
-        </pattern>
-      </defs>
-      <rect x="50" y="10" width="320" height="200" fill="url(#grid)"/>
-      <!-- Axes -->
-      <line x1="50" y1="210" x2="380" y2="210" stroke="#334155" stroke-width="2"/>
-      <line x1="50" y1="10" x2="50" y2="210" stroke="#334155" stroke-width="2"/>
-      <!-- Axis arrows -->
-      <polygon points="380,206 388,210 380,214" fill="#334155"/>
-      <polygon points="46,10 50,2 54,10" fill="#334155"/>
-      <!-- Axis labels -->
-      <text x="390" y="214" font-size="13" fill="#334155" font-weight="bold">t/s</text>
-      <text x="30" y="14" font-size="13" fill="#334155" font-weight="bold">s/m</text>
-      <!-- t tick marks and labels -->
-      <line x1="100" y1="207" x2="100" y2="213" stroke="#334155" stroke-width="1.5"/>
-      <text x="96" y="226" font-size="11" fill="#64748b">1</text>
-      <line x1="150" y1="207" x2="150" y2="213" stroke="#334155" stroke-width="1.5"/>
-      <text x="146" y="226" font-size="11" fill="#64748b">2</text>
-      <line x1="200" y1="207" x2="200" y2="213" stroke="#334155" stroke-width="1.5"/>
-      <text x="196" y="226" font-size="11" fill="#64748b">3</text>
-      <line x1="250" y1="207" x2="250" y2="213" stroke="#334155" stroke-width="1.5"/>
-      <text x="246" y="226" font-size="11" fill="#64748b">4</text>
-      <line x1="300" y1="207" x2="300" y2="213" stroke="#334155" stroke-width="1.5"/>
-      <text x="296" y="226" font-size="11" fill="#64748b">5</text>
-      <line x1="350" y1="207" x2="350" y2="213" stroke="#334155" stroke-width="1.5"/>
-      <text x="346" y="226" font-size="11" fill="#64748b">6</text>
-      <!-- s tick marks and labels -->
-      <line x1="47" y1="170" x2="53" y2="170" stroke="#334155" stroke-width="1.5"/>
-      <text x="28" y="174" font-size="11" fill="#64748b">1</text>
-      <line x1="47" y1="130" x2="53" y2="130" stroke="#334155" stroke-width="1.5"/>
-      <text x="28" y="134" font-size="11" fill="#64748b">3</text>
-      <line x1="47" y1="90" x2="53" y2="90" stroke="#334155" stroke-width="1.5"/>
-      <text x="28" y="94" font-size="11" fill="#64748b">5</text>
-      <line x1="47" y1="50" x2="53" y2="50" stroke="#334155" stroke-width="1.5"/>
-      <text x="28" y="54" font-size="11" fill="#64748b">8</text>
-      <!-- Motion line: 0-2s: s=0 to s=3 -->
-      <line x1="50" y1="210" x2="150" y2="130" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
-      <!-- 2-4s: horizontal (s=3m, v=0) -->
-      <line x1="150" y1="130" x2="250" y2="130" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
-      <!-- 4-6s: s=3 to s=9 (v=3 m/s) → s=9 → y = 210 - (9/10)*160 = 210-144=66, but let's cap at 50 for s=8 and go to 50+some for s=9... Actually let me recalculate.
-           Scale: y=210 is s=0; each 40px = 1m... wait: from s=0 at y=210, going up...
-           From s=0(y=210) to s=3(y=130): delta_y = 80px for 3m → each m = 26.67px
-           At s=9: y = 210 - 9*26.67 = 210 - 240 = too high. Let me adjust.
-           Let me use: y = 210 - s*(160/8) where max s shown = 8m at y=50
-           s=0: y=210; s=3: y=210-3*20=210-60=150... hmm that's different.
-
-           Let me set scale more carefully:
-           s tick marks I placed:
-           y=170 → s=1 (210-170=40px for 1m → 40px/m)
-           y=130 → s=3 (210-130=80px for 3m → hmm 80/3 = 26.7px/m)
-
-           I have inconsistent ticks. Let me fix properly.
-
-           Let me use: y=210 for s=0, each 40px = 2m (so 20px/m)
-           s=0: y=210
-           s=2: y=170 (40px up)
-           s=4: y=130 (80px up)
-           s=6: y=90 (120px up)
-           s=8: y=50 (160px up)
-
-           Then: tick labels should be 2,4,6,8
-           Line from 0-2s: slope = (3m-0m)/2s = 1.5 m/s
-               at t=0: (50, 210)
-               at t=2 (x=150): s=3m → y = 210 - 3*20 = 210-60 = 150
-           Line 2-4s: s=3m constant → y=150
-               from (150, 150) to (250, 150)
-           Line 4-6s: v=3m/s, s goes from 3 to 9m
-               at t=4 (x=250): s=3m → y=150
-               at t=6 (x=350): s=3+3*2=9m → y = 210-9*20=210-180=30
-
-           Let me redo the SVG properly.
-      -->
-      <!-- I need to redo this. Let me fix the tick marks and data line to be consistent. -->
-      <!-- Points actually drawn above are wrong. Let me just use explicit coordinates. -->
-    </svg>
-    <!-- Let me redraw with correct coordinates -->
-    <svg viewBox="0 0 420 270" width="100%" style="max-width:440px;display:block;margin:0 auto">
-      <defs>
-        <pattern id="grid2" width="50" height="40" patternUnits="userSpaceOnUse" x="50" y="10">
-          <path d="M 50 0 L 0 0 0 40" fill="none" stroke="#f1f5f9" stroke-width="1"/>
+        <pattern id="gridST" width="50" height="40" patternUnits="userSpaceOnUse" x="50" y="10">
+          <path d="M 50 0 L 0 0 0 40" fill="none" stroke="rgba(129,140,248,0.14)" stroke-width="1"/>
         </pattern>
       </defs>
       <!-- Grid background -->
-      <rect x="50" y="10" width="300" height="200" fill="url(#grid2)"/>
+      <rect x="50" y="10" width="300" height="200" fill="url(#gridST)"/>
       <!-- Axes -->
-      <line x1="50" y1="210" x2="365" y2="210" stroke="#334155" stroke-width="2"/>
-      <line x1="50" y1="210" x2="50" y2="5" stroke="#334155" stroke-width="2"/>
-      <polygon points="361,205 370,210 361,215" fill="#334155"/>
-      <polygon points="45,6 50,0 55,6" fill="#334155"/>
+      <line x1="50" y1="210" x2="365" y2="210" stroke="#a8a8c8" stroke-width="2"/>
+      <line x1="50" y1="210" x2="50" y2="5" stroke="#a8a8c8" stroke-width="2"/>
+      <polygon points="361,205 370,210 361,215" fill="#a8a8c8"/>
+      <polygon points="45,6 50,0 55,6" fill="#a8a8c8"/>
       <!-- Axis titles -->
-      <text x="372" y="214" font-size="13" fill="#334155" font-weight="bold">t / s</text>
-      <text x="12" y="14" font-size="13" fill="#334155" font-weight="bold">s / m</text>
+      <text x="372" y="214" font-size="13" fill="#e8e8f0" font-weight="bold">t / s</text>
+      <text x="12" y="14" font-size="13" fill="#e8e8f0" font-weight="bold">s / m</text>
       <!-- t-axis: each 50px = 1s, marks at t=1..6 -->
-      <line x1="100" y1="207" x2="100" y2="213" stroke="#334155" stroke-width="1.5"/><text x="96" y="228" font-size="12" fill="#64748b">1</text>
-      <line x1="150" y1="207" x2="150" y2="213" stroke="#334155" stroke-width="1.5"/><text x="146" y="228" font-size="12" fill="#64748b">2</text>
-      <line x1="200" y1="207" x2="200" y2="213" stroke="#334155" stroke-width="1.5"/><text x="196" y="228" font-size="12" fill="#64748b">3</text>
-      <line x1="250" y1="207" x2="250" y2="213" stroke="#334155" stroke-width="1.5"/><text x="246" y="228" font-size="12" fill="#64748b">4</text>
-      <line x1="300" y1="207" x2="300" y2="213" stroke="#334155" stroke-width="1.5"/><text x="296" y="228" font-size="12" fill="#64748b">5</text>
-      <line x1="350" y1="207" x2="350" y2="213" stroke="#334155" stroke-width="1.5"/><text x="346" y="228" font-size="12" fill="#64748b">6</text>
+      <line x1="100" y1="207" x2="100" y2="213" stroke="#a8a8c8" stroke-width="1.5"/><text x="96" y="228" font-size="12" fill="#a8a8c8">1</text>
+      <line x1="150" y1="207" x2="150" y2="213" stroke="#a8a8c8" stroke-width="1.5"/><text x="146" y="228" font-size="12" fill="#a8a8c8">2</text>
+      <line x1="200" y1="207" x2="200" y2="213" stroke="#a8a8c8" stroke-width="1.5"/><text x="196" y="228" font-size="12" fill="#a8a8c8">3</text>
+      <line x1="250" y1="207" x2="250" y2="213" stroke="#a8a8c8" stroke-width="1.5"/><text x="246" y="228" font-size="12" fill="#a8a8c8">4</text>
+      <line x1="300" y1="207" x2="300" y2="213" stroke="#a8a8c8" stroke-width="1.5"/><text x="296" y="228" font-size="12" fill="#a8a8c8">5</text>
+      <line x1="350" y1="207" x2="350" y2="213" stroke="#a8a8c8" stroke-width="1.5"/><text x="346" y="228" font-size="12" fill="#a8a8c8">6</text>
       <!-- s-axis: each 40px = 2m (20px/m), marks at s=2,4,6,8 -->
-      <!-- s=2: y=210-40=170 -->
-      <line x1="47" y1="170" x2="53" y2="170" stroke="#334155" stroke-width="1.5"/><text x="28" y="174" font-size="12" fill="#64748b">2</text>
-      <!-- s=4: y=210-80=130 -->
-      <line x1="47" y1="130" x2="53" y2="130" stroke="#334155" stroke-width="1.5"/><text x="28" y="134" font-size="12" fill="#64748b">4</text>
-      <!-- s=6: y=210-120=90 -->
-      <line x1="47" y1="90" x2="53" y2="90" stroke="#334155" stroke-width="1.5"/><text x="28" y="94" font-size="12" fill="#64748b">6</text>
-      <!-- s=8: y=210-160=50 -->
-      <line x1="47" y1="50" x2="53" y2="50" stroke="#334155" stroke-width="1.5"/><text x="28" y="54" font-size="12" fill="#64748b">8</text>
-      <!-- Phase A: t=0→2s, s=0→3m: x=50→150, y=210→150 (s=3→y=210-60=150) -->
-      <line x1="50" y1="210" x2="150" y2="150" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
-      <!-- Phase B: t=2→4s, s=3m constant: x=150→250, y=150 -->
-      <line x1="150" y1="150" x2="250" y2="150" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
-      <!-- Phase C: t=4→6s, s=3→9m: x=250→350, y=150→30 (s=9→y=210-180=30) -->
-      <line x1="250" y1="150" x2="350" y2="30" stroke="#f97316" stroke-width="3" stroke-linecap="round"/>
+      <line x1="47" y1="170" x2="53" y2="170" stroke="#a8a8c8" stroke-width="1.5"/><text x="28" y="174" font-size="12" fill="#a8a8c8">2</text>
+      <line x1="47" y1="130" x2="53" y2="130" stroke="#a8a8c8" stroke-width="1.5"/><text x="28" y="134" font-size="12" fill="#a8a8c8">4</text>
+      <line x1="47" y1="90" x2="53" y2="90" stroke="#a8a8c8" stroke-width="1.5"/><text x="28" y="94" font-size="12" fill="#a8a8c8">6</text>
+      <line x1="47" y1="50" x2="53" y2="50" stroke="#a8a8c8" stroke-width="1.5"/><text x="28" y="54" font-size="12" fill="#a8a8c8">8</text>
+      <!-- Phase A: t=0 to 2s, s=0 to 3m: (50,210) to (150,150) -->
+      <line x1="50" y1="210" x2="150" y2="150" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+      <!-- Phase B: t=2 to 4s, s=3m constant: (150,150) to (250,150) -->
+      <line x1="150" y1="150" x2="250" y2="150" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+      <!-- Phase C: t=4 to 6s, s=3 to 9m: (250,150) to (350,30) -->
+      <line x1="250" y1="150" x2="350" y2="30" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
       <!-- Data point markers -->
-      <circle cx="50" cy="210" r="4" fill="#f97316"/>
-      <circle cx="150" cy="150" r="4" fill="#f97316"/>
-      <circle cx="250" cy="150" r="4" fill="#f97316"/>
-      <circle cx="350" cy="30" r="4" fill="#f97316"/>
+      <circle cx="50" cy="210" r="4" fill="#c7d2fe"/>
+      <circle cx="150" cy="150" r="4" fill="#c7d2fe"/>
+      <circle cx="250" cy="150" r="4" fill="#c7d2fe"/>
+      <circle cx="350" cy="30" r="4" fill="#c7d2fe"/>
       <!-- Phase labels -->
-      <text x="75" y="198" font-size="10" fill="#ea580c" font-weight="bold">A</text>
-      <text x="193" y="144" font-size="10" fill="#ea580c" font-weight="bold">B</text>
-      <text x="295" y="88" font-size="10" fill="#ea580c" font-weight="bold">C</text>
+      <text x="75" y="196" font-size="11" fill="#c7d2fe" font-weight="bold">A</text>
+      <text x="193" y="142" font-size="11" fill="#c7d2fe" font-weight="bold">B</text>
+      <text x="295" y="86" font-size="11" fill="#c7d2fe" font-weight="bold">C</text>
     </svg>
     <p>Das Diagramm zeigt die Bewegung eines Körpers in drei Phasen (A, B, C). Lies alle Werte direkt ab.</p>
   </div>
@@ -263,11 +289,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
     </div>
   </div>
 
-  <!-- Q3 -->
+  <!-- Q3 number input -->
   <div class="q-card" id="qc3">
-    <div class="q-num">Aufgabe 3</div>
+    <div class="q-num">Aufgabe 3 – Berechnung</div>
     <div class="q-text">Berechne die Geschwindigkeit in Phase A ($t = 0$ bis $2\,\text{s}$). Tipp: $v = s/t$</div>
-    <input type="number" class="text-input" id="ans3" placeholder="Zahl eingeben" oninput="pickText(3)">
+    <input type="number" step="any" class="text-input" id="ans3" placeholder="Zahl eingeben …" oninput="pickText(3)">
     <div class="unit-hint">Einheit: m/s (Steigung des Graphen)</div>
   </div>
 
@@ -298,7 +324,7 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
   <!-- Q6 -->
   <div class="q-card" id="qc6">
     <div class="q-num">Aufgabe 6</div>
-    <div class="q-text">Welchen Gesamtweg hat der Körper nach $t = 6\,\text{s}$ zurückgelegt (lese vom Diagramm)?</div>
+    <div class="q-text">Welchen Gesamtweg hat der Körper nach $t = 6\,\text{s}$ zurückgelegt? Lies im Diagramm ab.</div>
     <div class="options" id="opts6">
       <label class="opt"><input type="radio" name="q6" value="0" onchange="pick(6,0)"> $6\,\text{m}$</label>
       <label class="opt"><input type="radio" name="q6" value="1" onchange="pick(6,1)"> $9\,\text{m}$</label>
@@ -307,192 +333,336 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
     </div>
   </div>
 
+  <!-- Q7 (neu): Achsen interpretieren -->
+  <div class="q-card" id="qc7">
+    <div class="q-num">Aufgabe 7</div>
+    <div class="q-text">Schau auf die Achsen des s-t-Diagramms oben: Welche Größe ist auf der <strong>senkrechten Achse</strong> aufgetragen, und in welcher Einheit?</div>
+    <div class="options" id="opts7">
+      <label class="opt"><input type="radio" name="q7" value="0" onchange="pick(7,0)"> Die Zeit $t$ in Sekunden</label>
+      <label class="opt"><input type="radio" name="q7" value="1" onchange="pick(7,1)"> Der Weg $s$ in Metern</label>
+      <label class="opt"><input type="radio" name="q7" value="2" onchange="pick(7,2)"> Die Geschwindigkeit $v$ in m/s</label>
+      <label class="opt"><input type="radio" name="q7" value="3" onchange="pick(7,3)"> Die Beschleunigung $a$ in m/s²</label>
+    </div>
+  </div>
+
+  <!-- Q8 (neu): Wert aus v-t-Diagramm ablesen, Zahleneingabe -->
+  <div class="q-card" id="qc8">
+    <div class="q-num">Aufgabe 8 – Ablesen</div>
+    <div class="q-text">Das folgende <strong>v-t-Diagramm</strong> zeigt die Fahrt eines Fahrrads. Lies ab: Wie groß ist die Geschwindigkeit bei $t = 5\,\text{s}$?</div>
+    <svg viewBox="0 0 420 230" width="100%" style="max-width:440px;display:block;margin:0 auto 14px" role="img" aria-label="v-t-Diagramm: konstant 4 m/s bis t=3s, danach konstant 2 m/s bis t=6s">
+      <defs>
+        <pattern id="gridVT" width="50" height="30" patternUnits="userSpaceOnUse" x="50" y="10">
+          <path d="M 50 0 L 0 0 0 30" fill="none" stroke="rgba(129,140,248,0.14)" stroke-width="1"/>
+        </pattern>
+      </defs>
+      <!-- Grid background -->
+      <rect x="50" y="10" width="300" height="160" fill="url(#gridVT)"/>
+      <!-- Axes -->
+      <line x1="50" y1="170" x2="365" y2="170" stroke="#a8a8c8" stroke-width="2"/>
+      <line x1="50" y1="170" x2="50" y2="5" stroke="#a8a8c8" stroke-width="2"/>
+      <polygon points="361,165 370,170 361,175" fill="#a8a8c8"/>
+      <polygon points="45,6 50,0 55,6" fill="#a8a8c8"/>
+      <!-- Axis titles -->
+      <text x="372" y="174" font-size="13" fill="#e8e8f0" font-weight="bold">t / s</text>
+      <text x="6" y="14" font-size="13" fill="#e8e8f0" font-weight="bold">v / m/s</text>
+      <!-- t-axis: each 50px = 1s, marks at t=1..6 -->
+      <line x1="100" y1="167" x2="100" y2="173" stroke="#a8a8c8" stroke-width="1.5"/><text x="96" y="188" font-size="12" fill="#a8a8c8">1</text>
+      <line x1="150" y1="167" x2="150" y2="173" stroke="#a8a8c8" stroke-width="1.5"/><text x="146" y="188" font-size="12" fill="#a8a8c8">2</text>
+      <line x1="200" y1="167" x2="200" y2="173" stroke="#a8a8c8" stroke-width="1.5"/><text x="196" y="188" font-size="12" fill="#a8a8c8">3</text>
+      <line x1="250" y1="167" x2="250" y2="173" stroke="#a8a8c8" stroke-width="1.5"/><text x="246" y="188" font-size="12" fill="#a8a8c8">4</text>
+      <line x1="300" y1="167" x2="300" y2="173" stroke="#a8a8c8" stroke-width="1.5"/><text x="296" y="188" font-size="12" fill="#a8a8c8">5</text>
+      <line x1="350" y1="167" x2="350" y2="173" stroke="#a8a8c8" stroke-width="1.5"/><text x="346" y="188" font-size="12" fill="#a8a8c8">6</text>
+      <!-- v-axis: each 30px = 1 m/s, marks at v=1..5 -->
+      <line x1="47" y1="140" x2="53" y2="140" stroke="#a8a8c8" stroke-width="1.5"/><text x="32" y="144" font-size="12" fill="#a8a8c8">1</text>
+      <line x1="47" y1="110" x2="53" y2="110" stroke="#a8a8c8" stroke-width="1.5"/><text x="32" y="114" font-size="12" fill="#a8a8c8">2</text>
+      <line x1="47" y1="80" x2="53" y2="80" stroke="#a8a8c8" stroke-width="1.5"/><text x="32" y="84" font-size="12" fill="#a8a8c8">3</text>
+      <line x1="47" y1="50" x2="53" y2="50" stroke="#a8a8c8" stroke-width="1.5"/><text x="32" y="54" font-size="12" fill="#a8a8c8">4</text>
+      <line x1="47" y1="20" x2="53" y2="20" stroke="#a8a8c8" stroke-width="1.5"/><text x="32" y="24" font-size="12" fill="#a8a8c8">5</text>
+      <!-- Phase 1: t=0 to 3s, v=4 m/s constant: (50,50) to (200,50) -->
+      <line x1="50" y1="50" x2="200" y2="50" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+      <!-- Drop at t=3s: v=4 to v=2 -->
+      <line x1="200" y1="50" x2="200" y2="110" stroke="#818cf8" stroke-width="3" stroke-linecap="round" stroke-dasharray="4 4"/>
+      <!-- Phase 2: t=3 to 6s, v=2 m/s constant: (200,110) to (350,110) -->
+      <line x1="200" y1="110" x2="350" y2="110" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+      <!-- Data point markers -->
+      <circle cx="50" cy="50" r="4" fill="#c7d2fe"/>
+      <circle cx="200" cy="50" r="4" fill="#c7d2fe"/>
+      <circle cx="200" cy="110" r="4" fill="#c7d2fe"/>
+      <circle cx="350" cy="110" r="4" fill="#c7d2fe"/>
+    </svg>
+    <input type="number" step="any" class="text-input" id="ans8" placeholder="Zahl eingeben …" oninput="pickText(8)">
+    <div class="unit-hint">Einheit: m/s</div>
+  </div>
+
   <div class="submit-area">
     <button class="btn-submit" id="btnSubmit" onclick="submitTest()" disabled>Test auswerten</button>
-    <p style="font-size:.82rem;color:#94a3b8;margin-top:8px">Beantworte alle 6 Aufgaben.</p>
+    <p class="submit-hint">Beantworte alle 8 Aufgaben, um auszuwerten.</p>
   </div>
 </div>
 
+<!-- Result Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div style="font-size:2.5rem" id="modalIcon">🎉</div>
-    <div class="score-big" id="scoreDisplay">0/6</div>
+    <div class="score-big" id="scoreDisplay">0/8</div>
     <div class="score-label">Punkte erreicht</div>
     <div class="result-badge" id="resultBadge">Bestanden ✓</div>
     <div class="result-text" id="resultText"></div>
+    <div class="recommend-list" id="recommendList"></div>
     <div class="answers-review" id="reviewList"></div>
-    <div style="margin-top:16px"><button class="btn-retry" onclick="retryTest()">🔄 Nochmal versuchen</button></div>
+    <div style="margin-top:20px">
+      <button class="btn-retry" onclick="retryTest()">🔄 Nochmal versuchen</button>
+    </div>
   </div>
 </div>
 
-<div class="version-footer">Gate-Test C1→C2 · v4</div>
+<div class="footer-version">Gate-Test C1→C2 · v5</div>
 
-<!-- ── SCORM 1.2 API Wrapper ──────────────────────────────────── -->
 <script>
-var SCORM = (function(){
-  function findAPI(win){
-    var attempts = 0;
-    while(win && !win.API && attempts < 10){
-      if(win.parent && win.parent !== win) win = win.parent;
-      else if(win.opener) win = win.opener;
+// SCORM 1.2 API Wrapper
+const SCORM = (() => {
+  let api = null, initialized = false;
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) win = win.parent;
+      else if (win.opener) win = win.opener;
       else break;
-      attempts++;
     }
-    return win && win.API ? win.API : null;
+    return win ? win.API : null;
   }
-  var api = null;
-  function init(){
-    api = findAPI(window);
-    if(!api) return;
-    api.LMSInitialize('');
-    var status = api.LMSGetValue('cmi.core.lesson_status');
-    if(status === '' || status === 'not attempted'){
-      api.LMSSetValue('cmi.core.lesson_status','incomplete');
-      api.LMSCommit('');
-    }
-    // Restore bookmark
-    var bookmark = api.LMSGetValue('cmi.core.lesson_location');
-    if(bookmark){
-      try {
-        var saved = JSON.parse(bookmark);
-        if(saved && saved.answers){
-          for(var i = 0; i < saved.answers.length; i++){
-            answers[i] = saved.answers[i];
-          }
-          restoreUI();
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === '' || status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
         }
-      } catch(e){}
-    }
+        // Restore saved answers from bookmark
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.answers) {
+              for (let i = 0; i < saved.answers.length; i++) {
+                if (saved.answers[i] !== null) {
+                  answers[i] = saved.answers[i];
+                }
+              }
+              restoreUI();
+            }
+          } catch(e) {}
+        }
+      }
+    } catch(e) { console.log('SCORM init:', e); }
   }
-  function save(score, max, passed){
-    if(!api) return;
-    var scaled = Math.round((score / max) * 100);
-    api.LMSSetValue('cmi.core.score.raw', String(scaled));
-    api.LMSSetValue('cmi.core.score.min', '0');
-    api.LMSSetValue('cmi.core.score.max', '100');
-    api.LMSSetValue('cmi.core.lesson_status', passed ? 'passed' : 'failed');
-    // Save bookmark
-    api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({answers: answers}));
-    api.LMSCommit('');
+  function save(score, total, passed) {
+    if (!api || !initialized) return;
+    try {
+      // Save answers as bookmark
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ answers }));
+      if (score !== undefined) {
+        const pct = Math.round((score / total) * 100);
+        api.LMSSetValue('cmi.core.score.raw', String(pct));
+        api.LMSSetValue('cmi.core.score.min', '0');
+        api.LMSSetValue('cmi.core.score.max', '100');
+        api.LMSSetValue('cmi.core.lesson_status', passed ? 'passed' : 'failed');
+      }
+      api.LMSCommit('');
+    } catch(e) { console.log('SCORM save:', e); }
   }
-  function setInteraction(index, id, type, response, correct, result){
-    if(!api) return;
-    var prefix = 'cmi.interactions.' + index;
-    api.LMSSetValue(prefix + '.id', id);
-    api.LMSSetValue(prefix + '.type', type);
-    api.LMSSetValue(prefix + '.student_response', response);
-    api.LMSSetValue(prefix + '.correct_responses.0.pattern', correct);
-    api.LMSSetValue(prefix + '.result', result);
+  function setInteraction(idx, id, type, response, correct, result) {
+    if (!api || !initialized) return;
+    try {
+      api.LMSSetValue(`cmi.interactions.${idx}.id`, id);
+      api.LMSSetValue(`cmi.interactions.${idx}.type`, type);
+      api.LMSSetValue(`cmi.interactions.${idx}.student_response`, String(response));
+      api.LMSSetValue(`cmi.interactions.${idx}.correct_responses.0.pattern`, String(correct));
+      api.LMSSetValue(`cmi.interactions.${idx}.result`, result);
+    } catch(e) {}
   }
-  function finish(){
-    if(!api) return;
-    // Save bookmark on exit
-    api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({answers: answers}));
-    api.LMSCommit('');
-    api.LMSFinish('');
+  function finish() {
+    if (!api || !initialized) return;
+    try {
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ answers }));
+      api.LMSCommit('');
+      api.LMSFinish('');
+    } catch(e) {}
   }
-  return { init: init, save: save, setInteraction: setInteraction, finish: finish };
+  return { init, save, setInteraction, finish };
 })();
-</script>
 
-<script>
-const CORRECT=[2,1,null,2,1,1];
-const THRESHOLD=5;const TOTAL=6;
-const answers=new Array(TOTAL).fill(null);
+// ── Antwort-Pruefung via FNV-1a-Hash ────────────────────────────────────
+// Statt eines Klartext-Loesungsarrays liegt pro Frage nur der Hash von
+// 'q<Aufgabennummer>:<korrekter Wert>:bootcampC1C2' vor (Aufgabennummer
+// 1-basiert). MC-Werte sind die stabilen value-Attribute der Optionen
+// (NICHT die DOM-Position, die wird gemischt). Zahlenantworten werden vor
+// dem Hashen normalisiert (normNum), damit 1.5 und 1,5 gleich hashen.
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16);
+}
+const SALT = ':bootcampC1C2';
+const HASHES = ['a99fb4c3','cf1bb3bf','75f4fc71','4ccc4e82','bdd84228','231091db','70b2d6ee','364ebb7e'];
+const NUMERIC = [3, 8]; // question numbers (1-based) with number input
+const THRESHOLD = 6; const TOTAL = 8;
+const answers = new Array(TOTAL).fill(null);
 
-function pick(q,val){
-  answers[q-1]=val;
-  document.querySelectorAll(`#opts${q} .opt`).forEach((o,i)=>o.classList.toggle('selected',i===val));
+// Tolerant number normalization: trim, comma to dot, parseFloat round-trip
+function normNum(v) {
+  return String(parseFloat(String(v).replace(',', '.').trim()));
+}
+function isCorrect(i) { // i = 0-based question index
+  if (answers[i] === null) return false;
+  const val = NUMERIC.includes(i + 1) ? normNum(answers[i]) : String(answers[i]);
+  return fnv1a('q' + (i + 1) + ':' + val + SALT) === HASHES[i];
+}
+
+// ── Fisher-Yates-Mischen der MC-Optionen im DOM ─────────────────────────
+// Runs before SCORM.init()/restoreUI(). Option identity lives in the
+// stable input value attribute, so shuffling never breaks restore logic.
+function shuffleOptions() {
+  for (let q = 1; q <= TOTAL; q++) {
+    const box = document.getElementById('opts' + q);
+    if (!box) continue; // number-input questions have no options
+    const opts = Array.from(box.children);
+    for (let j = opts.length - 1; j > 0; j--) {
+      const k = Math.floor(Math.random() * (j + 1));
+      [opts[j], opts[k]] = [opts[k], opts[j]];
+    }
+    opts.forEach(o => box.appendChild(o));
+  }
+}
+
+function pick(q, val) {
+  answers[q-1] = val;
+  // Match by input value, not by DOM position (options are shuffled)
+  document.querySelectorAll(`#opts${q} .opt`).forEach(o => {
+    o.classList.toggle('selected', Number(o.querySelector('input').value) === val);
+  });
   document.getElementById('qc'+q).classList.add('answered');
   updateProgress();
 }
-function pickText(q){
-  const v=document.getElementById('ans'+q).value.trim();
-  answers[q-1]=v===''?null:v;
-  document.getElementById('qc'+q).classList.toggle('answered',v!=='');
+function pickText(q) {
+  const v = document.getElementById('ans'+q).value.trim();
+  answers[q-1] = v === '' ? null : v;
+  document.getElementById('qc'+q).classList.toggle('answered', v!=='');
   updateProgress();
 }
-function updateProgress(){
-  const done=answers.filter(a=>a!==null).length;
-  document.getElementById('progFill').style.width=(done/TOTAL*100)+'%';
-  document.getElementById('progInfo').textContent=done+' von '+TOTAL+' beantwortet';
-  document.getElementById('btnSubmit').disabled=done<TOTAL;
+function updateProgress() {
+  const done = answers.filter(a=>a!==null).length;
+  document.getElementById('progFill').style.width = (done/TOTAL*100)+'%';
+  document.getElementById('progInfo').textContent = done+' von '+TOTAL+' beantwortet';
+  document.getElementById('btnSubmit').disabled = done < TOTAL;
 }
-
-function restoreUI(){
-  for(let i=0;i<TOTAL;i++){
-    if(answers[i]!==null){
-      if(i===2){
-        document.getElementById('ans3').value=answers[i];
+function restoreUI() {
+  for (let i = 0; i < TOTAL; i++) {
+    if (answers[i] !== null) {
+      if (NUMERIC.includes(i + 1)) {
+        document.getElementById('ans'+(i+1)).value = answers[i];
+        document.getElementById('qc'+(i+1)).classList.add('answered');
       } else {
-        const opts=document.querySelectorAll(`#opts${i+1} .opt`);
-        if(opts[answers[i]]){
-          opts[answers[i]].querySelector('input').checked=true;
-          opts[answers[i]].classList.add('selected');
+        // Find option by its stable input value (DOM order is shuffled)
+        const inp = document.querySelector(`#opts${i+1} input[value="${answers[i]}"]`);
+        if (inp) {
+          inp.checked = true;
+          inp.closest('.opt').classList.add('selected');
         }
+        document.getElementById('qc'+(i+1)).classList.add('answered');
       }
-      document.getElementById('qc'+(i+1)).classList.add('answered');
     }
   }
   updateProgress();
 }
-
-function submitTest(){
-  let score=0;
-  const LABELS=['Weg nach 2s ablesen','Bedeutung waagerechter Abschnitt','Geschwindigkeit Phase A','Größte Geschwindigkeit','Bedeutung Steigung s-t','Gesamtweg nach 6s'];
-  const results=[];
+// Question -> Track C1 module mapping (real module names from TrackC1)
+const MODULES = [
+  {id:'C1.1', name:'Achsen lesen & Werte ablesen'},  // Q1: Wert aus Diagramm ablesen
+  {id:'C1.2', name:'s-t-Diagramm: Grundlagen'},      // Q2: waagerechter Abschnitt
+  {id:'C1.2', name:'s-t-Diagramm: Grundlagen'},      // Q3: Steigung = Geschwindigkeit
+  {id:'C1.2', name:'s-t-Diagramm: Grundlagen'},      // Q4: Steigungen vergleichen
+  {id:'C1.2', name:'s-t-Diagramm: Grundlagen'},      // Q5: Bedeutung der Steigung
+  {id:'C1.1', name:'Achsen lesen & Werte ablesen'},  // Q6: Wert aus Diagramm ablesen
+  {id:'C1.1', name:'Achsen lesen & Werte ablesen'},  // Q7: Achsen interpretieren
+  {id:'C1.3', name:'v-t-Diagramm: Grundlagen'}       // Q8: Wert aus v-t-Diagramm ablesen
+];
+function joinQs(qs) {
+  if (qs.length === 1) return 'Aufgabe ' + qs[0];
+  return 'Aufgabe ' + qs.slice(0, -1).join(', ') + ' und ' + qs[qs.length - 1];
+}
+function submitTest() {
+  let score = 0;
+  const results = [];
+  const LABELS = ['Weg nach 2 s ablesen','Bedeutung waagerechter Abschnitt','Geschwindigkeit Phase A berechnen','Größte Geschwindigkeit finden','Bedeutung der Steigung im s-t-Diagramm','Gesamtweg nach 6 s ablesen','Achsen des Diagramms interpretieren','Wert aus dem v-t-Diagramm ablesen'];
   for(let i=0;i<TOTAL;i++){
-    let ok;
-    if(i===2){// Q3 text: v = 3m/2s = 1.5 m/s
-      const v=String(answers[i]).replace(',','.').trim();
-      ok=v==='1.5'||v==='1,5';
-    } else {
-      ok=answers[i]===CORRECT[i];
-    }
-    if(ok)score++;
-    results.push({ok,label:LABELS[i]});
+    const ok = isCorrect(i);
+    if(ok) score++;
+    results.push({ok, label:LABELS[i]});
   }
-  const passed=score>=THRESHOLD;
-  document.getElementById('scoreDisplay').textContent=score+'/'+TOTAL;
-  document.getElementById('modalIcon').textContent=passed?'🎉':'💪';
-  document.getElementById('resultBadge').textContent=passed?'Bestanden ✓':'Noch nicht bestanden';
-  document.getElementById('resultBadge').className='result-badge '+(passed?'pass':'fail');
-  document.getElementById('resultText').textContent=passed
-    ?'Super! Du kannst s-t-Diagramme lesen und auswerten. Weiter zu Level 2!'
-    :'Du hast '+score+' von '+THRESHOLD+' benötigten Punkten. Übe nochmal das Ablesen von Diagrammen!';
-  const rl=document.getElementById('reviewList');
-  rl.innerHTML=results.map(r=>`<div class="review-item ${r.ok?'correct':'wrong'}">${r.ok?'✅':'❌'} ${r.label}</div>`).join('');
-  document.getElementById('modal').classList.add('show');
-  MathJax.typesetPromise([rl]);
+  const passed = score >= THRESHOLD;
 
-  // SCORM: track interactions and save score
+  // SCORM interaction tracking (correct pattern = answer hash, not plaintext)
   results.forEach((r, i) => {
-    const type = (i === 2) ? 'fill-in' : 'choice';
-    const correctVal = (i === 2) ? '1.5' : String(CORRECT[i]);
-    SCORM.setInteraction(i, `gate-c1c2-q${i+1}`, type,
-      String(answers[i]), correctVal, r.ok ? 'correct' : 'wrong');
+    SCORM.setInteraction(i, `gate-c1c2-q${i+1}`,
+      NUMERIC.includes(i + 1) ? 'numeric' : 'choice',
+      String(answers[i]), HASHES[i], r.ok ? 'correct' : 'wrong');
   });
   SCORM.save(score, TOTAL, passed);
-}
 
-function retryTest(){
+  document.getElementById('scoreDisplay').textContent = score+'/'+TOTAL;
+  document.getElementById('modalIcon').textContent = passed?'🎉':'💪';
+  document.getElementById('resultBadge').textContent = passed?'Bestanden ✓':'Noch nicht bestanden';
+  document.getElementById('resultBadge').className = 'result-badge '+(passed?'pass':'fail');
+  const recBox = document.getElementById('recommendList');
+  if (passed) {
+    document.getElementById('resultText').textContent = 'Super! Du kannst Diagramme lesen, Achsen interpretieren und die Steigung deuten. Du kannst jetzt mit Level 2 starten.';
+    recBox.innerHTML = '';
+  } else {
+    document.getElementById('resultText').textContent = 'Du hast '+score+' von '+THRESHOLD+' benötigten Punkten erreicht. Wiederhole gezielt diese Module aus Level 1, dann schaffst du es:';
+    // Group failed questions by module, keep module order C1.1 .. C1.4
+    const byModule = {};
+    results.forEach((r, i) => {
+      if (!r.ok) {
+        const m = MODULES[i];
+        if (!byModule[m.id]) byModule[m.id] = { name: m.name, qs: [] };
+        byModule[m.id].qs.push(i + 1);
+      }
+    });
+    recBox.innerHTML = Object.keys(byModule).sort().map(id =>
+      `<div class="recommend-item">📘 <span class="mod-name">Modul ${id} (${byModule[id].name})</span> <span class="mod-qs">für ${joinQs(byModule[id].qs)}</span></div>`
+    ).join('');
+  }
+  const rl = document.getElementById('reviewList');
+  rl.innerHTML = results.map(r=>`<div class="review-item ${r.ok?'correct':'wrong'}">${r.ok?'✅':'❌'} ${r.label}</div>`).join('');
+  document.getElementById('modal').classList.add('show');
+  MathJax.typesetPromise([rl]);
+}
+function retryTest() {
   answers.fill(null);
   document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
-  const el=document.getElementById('ans3');if(el)el.value='';
+  NUMERIC.forEach(q => { document.getElementById('ans'+q).value=''; });
   document.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
   document.querySelectorAll('.q-card').forEach(c=>c.classList.remove('answered'));
   document.getElementById('progFill').style.width='0%';
-  document.getElementById('progInfo').textContent='0 von 6 beantwortet';
+  document.getElementById('progInfo').textContent='0 von '+TOTAL+' beantwortet';
   document.getElementById('btnSubmit').disabled=true;
   document.getElementById('modal').classList.remove('show');
   window.scrollTo(0,0);
 }
-
-document.addEventListener('DOMContentLoaded',()=>{
+document.addEventListener('DOMContentLoaded', () => {
+  shuffleOptions(); // must run before SCORM.init() restores the bookmark
+  MathJax.startup.promise.then(() => MathJax.typesetPromise());
   SCORM.init();
-  MathJax.startup.promise.then(()=>MathJax.typesetPromise());
 });
-window.addEventListener('beforeunload',()=>SCORM.finish());
+window.addEventListener('beforeunload', () => SCORM.finish());
 </script>
 </body>
 </html>

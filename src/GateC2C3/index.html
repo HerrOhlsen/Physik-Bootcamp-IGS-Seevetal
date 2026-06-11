@@ -6,63 +6,202 @@
 <script>MathJax={tex:{inlineMath:[['$','$']]},startup:{typeset:false}};</script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+/* ══════════════════════════════════════════
+   TOKENS (v3-Design, identisch zu den Track-Modulen)
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #6668a0;
+
+  --accent: #6366f1;
+  --accent-bright: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.35);
+  --accent-deep: #4f46e5;
+  --accent-subtle: rgba(99, 102, 241, 0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+
+  --border: rgba(129, 140, 248, 0.15);
+  --border-strong: rgba(129, 140, 248, 0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-full: 100px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+/* -- iOS-Kompatibilitaet ------------------------------------------------- */
+/* font-size 16px verhindert Auto-Zoom beim Tippen auf iPhone */
 input, textarea, select { font-size: 16px; }
+/* dvh-Fallback: Safari-Adressleiste nicht in Viewport einrechnen */
 html { height: 100%; }
 body { min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
-button, [onclick], .tab-btn, .exercise, .drag-item, .drop-zone { touch-action: manipulation; }
-.tab-content, .scrollable-area, .modal-body { -webkit-overflow-scrolling: touch; overflow-y: auto; }
-.modal-overlay, .blur-bg { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-@media (hover: none) and (pointer: coarse) {
-  .opt:hover { filter: none; transform: none; }
+/* Touch-Action fuer alle klickbaren Elemente */
+button, [onclick], .opt {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
+/* Momentum-Scrolling fuer iOS */
+.modal-body { -webkit-overflow-scrolling: touch; overflow-y: auto; }
+/* backdrop-filter mit webkit-Praefix */
+.modal-overlay, .blur-bg {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+/* -- Ende iOS-Kompatibilitaet -------------------------------------------- */
+/* Touch-Geraete: Hover-States nicht kleben lassen */
+@media (hover: none) and (pointer: coarse) {
+  .opt:hover, .btn-submit:hover, .btn-retry:hover {
+    filter: none;
+    transform: none;
+  }
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;min-height:100dvh;}
-.header{background:linear-gradient(135deg,#9a3412,#ea580c);color:#fff;padding:20px max(16px,calc(50% - 364px))}
+body{
+  font-family:var(--font);font-size:1rem;line-height:1.6;
+  color:var(--ink);background:var(--bg-deep);
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
+}
+/* Dezentes Punktraster wie auf den Modulseiten */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(circle at 1px 1px, rgba(99,102,241,0.05) 1px, transparent 0);
+  background-size:32px 32px;pointer-events:none;z-index:0;
+}
+.header{
+  position:relative;z-index:1;
+  background:var(--bg-glass-heavy);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:28px max(16px,calc(50% - 364px)) 24px;
+}
 .header-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
-.track-badge{background:rgba(255,255,255,.2);color:#fff}
-.gate-badge{background:#fff;color:#9a3412}
-.header h1{font-size:1.4rem;font-weight:700;margin-top:8px}
-.header p{font-size:.9rem;opacity:.9;margin-top:4px}
-.threshold{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 14px;font-size:.85rem;margin-top:10px}
-.container{max-width:760px;margin:0 auto;padding:24px 16px}
-.diagram-box{background:#fff;border-radius:12px;padding:20px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.07)}
-.diagram-box h3{font-size:1rem;font-weight:700;margin-bottom:12px;color:#ea580c}
+.badge{display:inline-block;padding:4px 14px;border-radius:var(--r-full);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase}
+.track-badge{background:rgba(79,70,229,0.3);border:1px solid var(--accent);color:var(--accent-bright)}
+.gate-badge{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+.header h1{
+  font-size:clamp(1.5rem,4.5vw,2rem);font-weight:800;letter-spacing:-0.02em;line-height:1.15;margin-top:14px;
+  background:linear-gradient(135deg,#ffffff 0%,var(--accent-bright) 60%,#c7d2fe 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.header p{font-size:0.9rem;color:var(--ink-muted);margin-top:6px}
+.threshold{
+  display:inline-block;background:var(--accent-subtle);border:1px solid var(--border-strong);
+  border-radius:var(--r-md);padding:7px 16px;font-size:0.85rem;color:var(--ink-muted);margin-top:14px;
+}
+.threshold strong{color:var(--accent-bright)}
+.container{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:24px 16px}
+.diagram-box{
+  background:var(--bg-glass);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border:1px solid var(--border);
+  border-radius:var(--r-lg);padding:20px;margin-bottom:20px;
+  box-shadow:var(--shadow-sm);
+}
+.diagram-box h3{font-size:1rem;font-weight:700;margin-bottom:12px;color:var(--accent-bright)}
+.diagram-box .diagram-note{font-size:0.82rem;color:var(--ink-muted);margin-top:8px}
 .diagrams-row{display:flex;gap:16px;flex-wrap:wrap;justify-content:center}
-.q-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #e2e8f0;transition:border-color .2s}
-.q-card.answered{border-left-color:#ea580c}
-.q-num{font-size:.8rem;font-weight:700;color:#c2410c;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.q-text{font-size:1rem;line-height:1.6;margin-bottom:14px}
+.data-table{border-collapse:collapse;margin:10px auto 4px;font-family:var(--mono);font-size:0.85rem}
+.data-table th,.data-table td{border:1px solid var(--border-strong);padding:6px 14px;text-align:center;color:var(--ink)}
+.data-table th{background:var(--accent-subtle);color:var(--accent-bright);font-weight:700}
+.q-card{
+  background:var(--bg-glass);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-left:3px solid var(--border);
+  border-radius:var(--r-lg);padding:22px;margin-bottom:16px;
+  box-shadow:var(--shadow-sm);transition:border-color .25s;
+}
+.q-card.answered{border-left-color:var(--accent)}
+.q-num{font-family:var(--mono);font-size:0.68rem;font-weight:700;color:var(--accent-bright);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:10px}
+.q-text{font-size:1rem;line-height:1.65;margin-bottom:14px;color:var(--ink)}
 .options{display:flex;flex-direction:column;gap:8px}
-.opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;transition:all .15s;font-size:.95rem}
-.opt:hover{background:#fff7ed;border-color:#fdba74}
-.opt input[type=radio]{accent-color:#c2410c;width:16px;height:16px;flex-shrink:0}
-.opt.selected{background:#fff7ed;border-color:#ea580c}
-.text-input{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:.95rem;font-family:inherit;outline:none}
-.text-input:focus{border-color:#ea580c;box-shadow:0 0 0 3px rgba(234,88,12,.1)}
-.unit-hint{font-size:.82rem;color:#64748b;margin-top:6px}
+.opt{
+  display:flex;align-items:center;gap:10px;padding:11px 14px;
+  border-radius:var(--r-md);border:1px solid var(--border);
+  background:rgba(255,255,255,0.02);
+  cursor:pointer;transition:all .15s;font-size:0.95rem;color:var(--ink);
+}
+.opt:hover{background:var(--accent-subtle);border-color:var(--border-strong)}
+.opt input[type=radio]{accent-color:var(--accent);width:16px;height:16px;flex-shrink:0}
+.opt.selected{background:var(--accent-subtle);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.text-input{
+  width:100%;border:1px solid var(--border);border-radius:var(--r-md);
+  padding:11px 14px;font-size:0.95rem;font-family:var(--font);
+  background:var(--bg-surface);color:var(--ink);
+  outline:none;transition:border-color .2s, box-shadow .2s;
+}
+.text-input::placeholder{color:var(--ink-dim)}
+.text-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.unit-hint{font-size:0.8rem;color:var(--ink-dim);margin-top:8px;font-family:var(--mono)}
 .submit-area{text-align:center;padding:16px 0 32px}
-.btn-submit{background:#c2410c;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s}
-.btn-submit:hover{background:#9a3412;transform:translateY(-1px)}
-.btn-submit:disabled{background:#94a3b8;cursor:not-allowed;transform:none}
-.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;margin:16px 0 24px;overflow:hidden}
-.progress-fill{height:100%;background:#f97316;border-radius:3px;transition:width .3s}
-.progress-info{font-size:.85rem;color:#64748b;text-align:right;margin-top:-20px;margin-bottom:20px}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:16px}
+.btn-submit{
+  background:linear-gradient(135deg,var(--accent-deep),var(--accent));color:#fff;
+  border:none;border-radius:var(--r-md);padding:14px 40px;
+  font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;
+  transition:all .2s;box-shadow:var(--shadow), var(--glow);
+}
+.btn-submit:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.btn-submit:disabled{background:var(--bg-elevated);color:var(--ink-dim);cursor:not-allowed;transform:none;box-shadow:none;filter:none}
+.submit-hint{font-size:0.8rem;color:var(--ink-dim);margin-top:10px}
+.progress-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:var(--r-full);margin:8px 0 6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-deep),var(--accent-bright),#c7d2fe);border-radius:var(--r-full);transition:width .3s}
+.progress-info{font-family:var(--mono);font-size:0.75rem;color:var(--ink-muted);text-align:right;margin-bottom:20px}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,15,0.7);z-index:100;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.show{display:flex}
-.modal{background:#fff;border-radius:16px;padding:32px;max-width:480px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.15);animation:popIn .3s ease;max-height:90vh;max-height:90dvh;overflow-y:auto}
+.modal{
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:var(--r-lg);padding:32px;max-width:520px;width:100%;
+  max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  text-align:center;box-shadow:var(--shadow-lg);animation:popIn .3s ease;
+}
 @keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.score-big{font-size:3rem;font-weight:800;margin:12px 0 4px}
-.score-label{font-size:.9rem;color:#64748b;margin-bottom:16px}
-.result-badge{display:inline-block;padding:8px 24px;border-radius:24px;font-size:1rem;font-weight:700;margin-bottom:16px}
-.pass{background:#dcfce7;color:#166534}
-.fail{background:#fee2e2;color:#991b1b}
-.result-text{font-size:.95rem;color:#475569;line-height:1.6;margin-bottom:16px}
-.btn-retry{background:#f1f5f9;color:#475569;border:none;border-radius:8px;padding:10px 24px;font-size:.95rem;font-weight:600;cursor:pointer}
-.answers-review{margin-top:16px;text-align:left}
-.review-item{padding:8px 12px;margin-bottom:6px;border-radius:8px;font-size:.9rem;display:flex;align-items:flex-start;gap:8px}
-.review-item.correct{background:#f0fdf4;border-left:3px solid #22c55e}
-.review-item.wrong{background:#fef2f2;border-left:3px solid #ef4444}
+.score-big{font-family:var(--mono);font-size:3rem;font-weight:700;margin:12px 0 4px;color:#fff}
+.score-label{font-size:0.85rem;color:var(--ink-dim);margin-bottom:16px}
+.result-badge{display:inline-block;padding:8px 24px;border-radius:var(--r-full);font-size:1rem;font-weight:700;margin-bottom:16px;border:1px solid transparent}
+.pass{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+.fail{background:var(--err-bg);color:var(--err);border-color:var(--err-border)}
+.result-text{font-size:0.95rem;color:var(--ink-muted);line-height:1.6;margin-bottom:8px;text-align:left}
+.recommend-list{text-align:left;margin:10px 0 12px}
+.recommend-item{
+  padding:9px 12px;margin-bottom:6px;border-radius:var(--r-sm);font-size:0.88rem;
+  background:var(--accent-subtle);border-left:3px solid var(--accent);color:var(--ink);
+}
+.recommend-item .mod-name{font-weight:700;color:var(--accent-bright)}
+.recommend-item .mod-qs{color:var(--ink-muted)}
+.btn-retry{
+  background:var(--bg-elevated);color:var(--ink-muted);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:10px 24px;font-family:var(--font);
+  font-size:0.95rem;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.btn-retry:hover{border-color:var(--accent);color:var(--accent-bright)}
+.answers-review{margin-top:20px;text-align:left}
+.review-item{padding:8px 12px;margin-bottom:6px;border-radius:var(--r-sm);font-size:0.88rem;display:flex;align-items:flex-start;gap:8px;color:var(--ink)}
+.review-item.correct{background:var(--ok-bg);border-left:3px solid var(--ok)}
+.review-item.wrong{background:var(--err-bg);border-left:3px solid var(--err)}
+.footer-version{text-align:center;padding:8px;font-size:0.7rem;color:var(--ink-dim);font-family:var(--mono);margin-top:8px;position:relative;z-index:1}
 </style>
 </head>
 <body>
@@ -73,51 +212,51 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
   </div>
   <h1>Gate-Test: Level 2 → Level 3</h1>
   <p>Diagramme vergleichen, zeichnen &amp; interpretieren</p>
-  <div class="threshold">🎯 Ziel: mindestens <strong>6 von 8 Punkten</strong> (75 %)</div>
+  <div class="threshold">🎯 Ziel: mindestens <strong>9 von 12 Punkten</strong> (75 %)</div>
 </div>
 
 <div class="container">
   <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
-  <div class="progress-info" id="progInfo">0 von 8 beantwortet</div>
+  <div class="progress-info" id="progInfo">0 von 12 beantwortet</div>
 
-  <!-- Diagrams -->
+  <!-- Diagram 1: v-t (questions 1-6) -->
   <div class="diagram-box">
-    <h3>v-t-Diagramm – für Aufgaben 1–5</h3>
+    <h3>v-t-Diagramm – für Aufgaben 1–6</h3>
     <div class="diagrams-row">
-      <svg viewBox="0 0 340 230" width="100%" style="max-width:360px">
-        <rect x="50" y="10" width="260" height="180" fill="#fff7ed" rx="4"/>
-        <line x1="50" y1="190" x2="322" y2="190" stroke="#334155" stroke-width="2"/>
-        <line x1="50" y1="190" x2="50" y2="5" stroke="#334155" stroke-width="2"/>
-        <polygon points="318,185 327,190 318,195" fill="#334155"/>
-        <polygon points="45,6 50,0 55,6" fill="#334155"/>
-        <text x="329" y="194" font-size="12" fill="#334155" font-weight="bold">t/s</text>
-        <text x="10" y="14" font-size="12" fill="#334155" font-weight="bold">v/m/s</text>
-        <line x1="50" y1="187" x2="50" y2="193" stroke="#334155" stroke-width="1.5"/><text x="46" y="207" font-size="11" fill="#64748b">0</text>
-        <line x1="83" y1="187" x2="83" y2="193" stroke="#334155" stroke-width="1.5"/><text x="79" y="207" font-size="11" fill="#64748b">1</text>
-        <line x1="116" y1="187" x2="116" y2="193" stroke="#334155" stroke-width="1.5"/><text x="112" y="207" font-size="11" fill="#64748b">2</text>
-        <line x1="149" y1="187" x2="149" y2="193" stroke="#334155" stroke-width="1.5"/><text x="145" y="207" font-size="11" fill="#64748b">3</text>
-        <line x1="182" y1="187" x2="182" y2="193" stroke="#334155" stroke-width="1.5"/><text x="178" y="207" font-size="11" fill="#64748b">4</text>
-        <line x1="215" y1="187" x2="215" y2="193" stroke="#334155" stroke-width="1.5"/><text x="211" y="207" font-size="11" fill="#64748b">5</text>
-        <line x1="248" y1="187" x2="248" y2="193" stroke="#334155" stroke-width="1.5"/><text x="244" y="207" font-size="11" fill="#64748b">6</text>
-        <line x1="281" y1="187" x2="281" y2="193" stroke="#334155" stroke-width="1.5"/><text x="277" y="207" font-size="11" fill="#64748b">7</text>
-        <line x1="314" y1="187" x2="314" y2="193" stroke="#334155" stroke-width="1.5"/><text x="310" y="207" font-size="11" fill="#64748b">8</text>
-        <line x1="47" y1="154" x2="53" y2="154" stroke="#334155" stroke-width="1.5"/><text x="24" y="158" font-size="11" fill="#64748b">2</text>
-        <line x1="47" y1="118" x2="53" y2="118" stroke="#334155" stroke-width="1.5"/><text x="24" y="122" font-size="11" fill="#64748b">4</text>
-        <line x1="47" y1="82" x2="53" y2="82" stroke="#334155" stroke-width="1.5"/><text x="24" y="86" font-size="11" fill="#64748b">6</text>
-        <line x1="47" y1="46" x2="53" y2="46" stroke="#334155" stroke-width="1.5"/><text x="24" y="50" font-size="11" fill="#64748b">8</text>
-        <line x1="47" y1="10" x2="53" y2="10" stroke="#334155" stroke-width="1.5"/><text x="18" y="14" font-size="11" fill="#64748b">10</text>
-        <polygon points="50,190 182,10 248,10 314,190" fill="#fed7aa" opacity="0.4"/>
-        <line x1="50" y1="190" x2="182" y2="10" stroke="#c2410c" stroke-width="3" stroke-linecap="round"/>
-        <line x1="182" y1="10" x2="248" y2="10" stroke="#c2410c" stroke-width="3" stroke-linecap="round"/>
-        <line x1="248" y1="10" x2="314" y2="190" stroke="#c2410c" stroke-width="3" stroke-linecap="round"/>
-        <circle cx="50" cy="190" r="4" fill="#c2410c"/>
-        <circle cx="182" cy="10" r="4" fill="#c2410c"/>
-        <circle cx="248" cy="10" r="4" fill="#c2410c"/>
-        <circle cx="314" cy="190" r="4" fill="#c2410c"/>
-        <text x="160" y="120" font-size="10" fill="#c2410c" font-style="italic">Fläche = Weg</text>
+      <svg viewBox="0 0 340 230" width="100%" style="max-width:360px" role="img" aria-label="v-t-Diagramm mit drei Bewegungsphasen">
+        <rect x="50" y="10" width="260" height="180" fill="rgba(99,102,241,0.06)" rx="4"/>
+        <line x1="50" y1="190" x2="322" y2="190" stroke="#a8a8c8" stroke-width="2"/>
+        <line x1="50" y1="190" x2="50" y2="5" stroke="#a8a8c8" stroke-width="2"/>
+        <polygon points="318,185 327,190 318,195" fill="#a8a8c8"/>
+        <polygon points="45,6 50,0 55,6" fill="#a8a8c8"/>
+        <text x="329" y="194" font-size="12" fill="#e8e8f0" font-weight="bold">t/s</text>
+        <text x="10" y="14" font-size="12" fill="#e8e8f0" font-weight="bold">v/m/s</text>
+        <line x1="50" y1="187" x2="50" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="46" y="207" font-size="11" fill="#a8a8c8">0</text>
+        <line x1="83" y1="187" x2="83" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="79" y="207" font-size="11" fill="#a8a8c8">1</text>
+        <line x1="116" y1="187" x2="116" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="112" y="207" font-size="11" fill="#a8a8c8">2</text>
+        <line x1="149" y1="187" x2="149" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="145" y="207" font-size="11" fill="#a8a8c8">3</text>
+        <line x1="182" y1="187" x2="182" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="178" y="207" font-size="11" fill="#a8a8c8">4</text>
+        <line x1="215" y1="187" x2="215" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="211" y="207" font-size="11" fill="#a8a8c8">5</text>
+        <line x1="248" y1="187" x2="248" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="244" y="207" font-size="11" fill="#a8a8c8">6</text>
+        <line x1="281" y1="187" x2="281" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="277" y="207" font-size="11" fill="#a8a8c8">7</text>
+        <line x1="314" y1="187" x2="314" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="310" y="207" font-size="11" fill="#a8a8c8">8</text>
+        <line x1="47" y1="154" x2="53" y2="154" stroke="#a8a8c8" stroke-width="1.5"/><text x="24" y="158" font-size="11" fill="#a8a8c8">2</text>
+        <line x1="47" y1="118" x2="53" y2="118" stroke="#a8a8c8" stroke-width="1.5"/><text x="24" y="122" font-size="11" fill="#a8a8c8">4</text>
+        <line x1="47" y1="82" x2="53" y2="82" stroke="#a8a8c8" stroke-width="1.5"/><text x="24" y="86" font-size="11" fill="#a8a8c8">6</text>
+        <line x1="47" y1="46" x2="53" y2="46" stroke="#a8a8c8" stroke-width="1.5"/><text x="24" y="50" font-size="11" fill="#a8a8c8">8</text>
+        <line x1="47" y1="10" x2="53" y2="10" stroke="#a8a8c8" stroke-width="1.5"/><text x="18" y="14" font-size="11" fill="#a8a8c8">10</text>
+        <polygon points="50,190 182,10 248,10 314,190" fill="#6366f1" opacity="0.25"/>
+        <line x1="50" y1="190" x2="182" y2="10" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+        <line x1="182" y1="10" x2="248" y2="10" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+        <line x1="248" y1="10" x2="314" y2="190" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+        <circle cx="50" cy="190" r="4" fill="#c7d2fe"/>
+        <circle cx="182" cy="10" r="4" fill="#c7d2fe"/>
+        <circle cx="248" cy="10" r="4" fill="#c7d2fe"/>
+        <circle cx="314" cy="190" r="4" fill="#c7d2fe"/>
+        <text x="160" y="120" font-size="10" fill="#c7d2fe" font-style="italic">Fläche = Weg</text>
       </svg>
     </div>
-    <p style="font-size:.82rem;color:#64748b;margin-top:8px">Das v-t-Diagramm zeigt die Bewegung eines Körpers über 8 Sekunden.</p>
+    <p class="diagram-note">Das v-t-Diagramm zeigt die Bewegung eines Körpers über 8 Sekunden: Phase 1 (0–4 s), Phase 2 (4–6 s), Phase 3 (6–8 s).</p>
   </div>
 
   <!-- Q1 -->
@@ -132,18 +271,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
     </div>
   </div>
 
-  <!-- Q2 -->
+  <!-- Q2 text input -->
   <div class="q-card" id="qc2">
-    <div class="q-num">Aufgabe 2</div>
+    <div class="q-num">Aufgabe 2 – Berechnung</div>
     <div class="q-text">Berechne die Beschleunigung in Phase 1 ($t = 0$ bis $4\,\text{s}$). Formel: $a = \Delta v / \Delta t$</div>
-    <input type="number" class="text-input" id="ans2" placeholder="Zahl eingeben" oninput="pickText(2)">
+    <input type="number" class="text-input" id="ans2" placeholder="Zahl eingeben …" oninput="pickText(2)">
     <div class="unit-hint">Einheit: m/s²</div>
   </div>
 
   <!-- Q3 -->
   <div class="q-card" id="qc3">
     <div class="q-num">Aufgabe 3</div>
-    <div class="q-text">Was repräsentiert die <strong>Fläche</strong> unter dem v-t-Graphen (orange schattiert)?</div>
+    <div class="q-text">Was repräsentiert die <strong>Fläche</strong> unter dem v-t-Graphen (blau schattiert)?</div>
     <div class="options" id="opts3">
       <label class="opt"><input type="radio" name="q3" value="0" onchange="pick(3,0)"> Die Beschleunigung</label>
       <label class="opt"><input type="radio" name="q3" value="1" onchange="pick(3,1)"> Den zurückgelegten Weg</label>
@@ -176,59 +315,152 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
     </div>
   </div>
 
-  <!-- Q6 -->
+  <!-- Q6 text input (new) -->
   <div class="q-card" id="qc6">
-    <div class="q-num">Aufgabe 6</div>
-    <div class="q-text">Ein s-t-Diagramm zeigt eine <strong>Kurve</strong> (nicht eine gerade Linie). Was bedeutet das?</div>
-    <div class="options" id="opts6">
-      <label class="opt"><input type="radio" name="q6" value="0" onchange="pick(6,0)"> Der Körper fährt mit konstanter Geschwindigkeit.</label>
-      <label class="opt"><input type="radio" name="q6" value="1" onchange="pick(6,1)"> Der Körper ruht.</label>
-      <label class="opt"><input type="radio" name="q6" value="2" onchange="pick(6,2)"> Der Körper beschleunigt (oder verzögert) – die Geschwindigkeit ändert sich.</label>
-      <label class="opt"><input type="radio" name="q6" value="3" onchange="pick(6,3)"> Der Körper bewegt sich rückwärts.</label>
-    </div>
+    <div class="q-num">Aufgabe 6 – Berechnung</div>
+    <div class="q-text">Berechne den Weg in <strong>Phase 3</strong> ($t = 6$ bis $8\,\text{s}$) als Fläche unter dem Graphen. Die Fläche ist ein Dreieck: $s = \dfrac{1}{2} \cdot \Delta t \cdot v$</div>
+    <input type="number" class="text-input" id="ans6" placeholder="Antwort in m …" oninput="pickText(6)">
+    <div class="unit-hint">Einheit: Meter (m)</div>
   </div>
 
   <!-- Q7 -->
   <div class="q-card" id="qc7">
     <div class="q-num">Aufgabe 7</div>
-    <div class="q-text">Wie lautet die Formel für den zurückgelegten Weg $s$ aus einem v-t-Diagramm bei gleichförmiger Bewegung?</div>
+    <div class="q-text">Ein s-t-Diagramm zeigt eine <strong>Kurve</strong> (nicht eine gerade Linie). Was bedeutet das?</div>
     <div class="options" id="opts7">
-      <label class="opt"><input type="radio" name="q7" value="0" onchange="pick(7,0)"> $s = v + t$</label>
-      <label class="opt"><input type="radio" name="q7" value="1" onchange="pick(7,1)"> $s = v \cdot t$ (Fläche des Rechtecks)</label>
-      <label class="opt"><input type="radio" name="q7" value="2" onchange="pick(7,2)"> $s = v \div t$</label>
-      <label class="opt"><input type="radio" name="q7" value="3" onchange="pick(7,3)"> $s = v^2 \cdot t$</label>
+      <label class="opt"><input type="radio" name="q7" value="0" onchange="pick(7,0)"> Der Körper fährt mit konstanter Geschwindigkeit.</label>
+      <label class="opt"><input type="radio" name="q7" value="1" onchange="pick(7,1)"> Der Körper ruht.</label>
+      <label class="opt"><input type="radio" name="q7" value="2" onchange="pick(7,2)"> Der Körper beschleunigt (oder verzögert) – die Geschwindigkeit ändert sich.</label>
+      <label class="opt"><input type="radio" name="q7" value="3" onchange="pick(7,3)"> Der Körper bewegt sich rückwärts.</label>
     </div>
   </div>
 
   <!-- Q8 -->
   <div class="q-card" id="qc8">
-    <div class="q-num">Aufgabe 8 – Berechnung</div>
+    <div class="q-num">Aufgabe 8</div>
+    <div class="q-text">Wie lautet die Formel für den zurückgelegten Weg $s$ aus einem v-t-Diagramm bei gleichförmiger Bewegung?</div>
+    <div class="options" id="opts8">
+      <label class="opt"><input type="radio" name="q8" value="0" onchange="pick(8,0)"> $s = v + t$</label>
+      <label class="opt"><input type="radio" name="q8" value="1" onchange="pick(8,1)"> $s = v \cdot t$ (Fläche des Rechtecks)</label>
+      <label class="opt"><input type="radio" name="q8" value="2" onchange="pick(8,2)"> $s = v \div t$</label>
+      <label class="opt"><input type="radio" name="q8" value="3" onchange="pick(8,3)"> $s = v^2 \cdot t$</label>
+    </div>
+  </div>
+
+  <!-- Q9 text input -->
+  <div class="q-card" id="qc9">
+    <div class="q-num">Aufgabe 9 – Berechnung</div>
     <div class="q-text">Berechne den Weg in Phase 2 ($v = 10\,\text{m/s}$, $t = 2\,\text{s}$): $s = v \cdot t$</div>
-    <input type="number" class="text-input" id="ans8" placeholder="Antwort in m …" oninput="pickText(8)">
+    <input type="number" class="text-input" id="ans9" placeholder="Antwort in m …" oninput="pickText(9)">
     <div class="unit-hint">Einheit: Meter (m)</div>
+  </div>
+
+  <!-- Diagram 2: s-t with two bodies (questions 10-11) -->
+  <div class="diagram-box">
+    <h3>s-t-Diagramm – für Aufgaben 10–11</h3>
+    <div class="diagrams-row">
+      <svg viewBox="0 0 340 230" width="100%" style="max-width:360px" role="img" aria-label="s-t-Diagramm mit zwei Koerpern A und B">
+        <rect x="50" y="10" width="260" height="180" fill="rgba(99,102,241,0.06)" rx="4"/>
+        <line x1="50" y1="190" x2="322" y2="190" stroke="#a8a8c8" stroke-width="2"/>
+        <line x1="50" y1="190" x2="50" y2="5" stroke="#a8a8c8" stroke-width="2"/>
+        <polygon points="318,185 327,190 318,195" fill="#a8a8c8"/>
+        <polygon points="45,6 50,0 55,6" fill="#a8a8c8"/>
+        <text x="329" y="194" font-size="12" fill="#e8e8f0" font-weight="bold">t/s</text>
+        <text x="14" y="14" font-size="12" fill="#e8e8f0" font-weight="bold">s/m</text>
+        <line x1="50" y1="187" x2="50" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="46" y="207" font-size="11" fill="#a8a8c8">0</text>
+        <line x1="83" y1="187" x2="83" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="79" y="207" font-size="11" fill="#a8a8c8">1</text>
+        <line x1="116" y1="187" x2="116" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="112" y="207" font-size="11" fill="#a8a8c8">2</text>
+        <line x1="149" y1="187" x2="149" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="145" y="207" font-size="11" fill="#a8a8c8">3</text>
+        <line x1="182" y1="187" x2="182" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="178" y="207" font-size="11" fill="#a8a8c8">4</text>
+        <line x1="215" y1="187" x2="215" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="211" y="207" font-size="11" fill="#a8a8c8">5</text>
+        <line x1="248" y1="187" x2="248" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="244" y="207" font-size="11" fill="#a8a8c8">6</text>
+        <line x1="281" y1="187" x2="281" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="277" y="207" font-size="11" fill="#a8a8c8">7</text>
+        <line x1="314" y1="187" x2="314" y2="193" stroke="#a8a8c8" stroke-width="1.5"/><text x="310" y="207" font-size="11" fill="#a8a8c8">8</text>
+        <line x1="47" y1="145" x2="53" y2="145" stroke="#a8a8c8" stroke-width="1.5"/><text x="24" y="149" font-size="11" fill="#a8a8c8">4</text>
+        <line x1="47" y1="100" x2="53" y2="100" stroke="#a8a8c8" stroke-width="1.5"/><text x="24" y="104" font-size="11" fill="#a8a8c8">8</text>
+        <line x1="47" y1="55" x2="53" y2="55" stroke="#a8a8c8" stroke-width="1.5"/><text x="18" y="59" font-size="11" fill="#a8a8c8">12</text>
+        <line x1="47" y1="10" x2="53" y2="10" stroke="#a8a8c8" stroke-width="1.5"/><text x="18" y="14" font-size="11" fill="#a8a8c8">16</text>
+        <!-- Body B: s = 6 m + 1 m/s * t -->
+        <line x1="50" y1="122" x2="314" y2="32" stroke="#34d399" stroke-width="3" stroke-linecap="round"/>
+        <text x="296" y="24" font-size="13" fill="#34d399" font-weight="bold">B</text>
+        <!-- Body A: s = 3 m/s * t -->
+        <line x1="50" y1="190" x2="215" y2="21" stroke="#818cf8" stroke-width="3" stroke-linecap="round"/>
+        <text x="222" y="20" font-size="13" fill="#818cf8" font-weight="bold">A</text>
+        <!-- Marked points on A -->
+        <circle cx="50" cy="190" r="4.5" fill="#c7d2fe"/>
+        <text x="58" y="182" font-size="11" fill="#c7d2fe">(0 s | 0 m)</text>
+        <circle cx="182" cy="55" r="4.5" fill="#c7d2fe"/>
+        <text x="190" y="50" font-size="11" fill="#c7d2fe">(4 s | 12 m)</text>
+        <!-- Intersection -->
+        <circle cx="149" cy="89" r="4" fill="#fbbf24"/>
+      </svg>
+    </div>
+    <p class="diagram-note">Zwei Körper A und B im selben s-t-Diagramm. Auf Graph A sind zwei Punkte markiert, der gelbe Punkt ist der Schnittpunkt beider Graphen.</p>
+  </div>
+
+  <!-- Q10 text input (new) -->
+  <div class="q-card" id="qc10">
+    <div class="q-num">Aufgabe 10 – Berechnung</div>
+    <div class="q-text">Berechne die Geschwindigkeit von Körper A als <strong>Steigung</strong> aus den beiden markierten Punkten $(0\,\text{s} \mid 0\,\text{m})$ und $(4\,\text{s} \mid 12\,\text{m})$: $v = \Delta s / \Delta t$</div>
+    <input type="number" class="text-input" id="ans10" placeholder="Antwort in m/s …" oninput="pickText(10)">
+    <div class="unit-hint">Einheit: m/s</div>
+  </div>
+
+  <!-- Q11 (new) -->
+  <div class="q-card" id="qc11">
+    <div class="q-num">Aufgabe 11</div>
+    <div class="q-text">Was bedeutet der <strong>Schnittpunkt</strong> der beiden Graphen (gelber Punkt bei $t = 3\,\text{s}$)?</div>
+    <div class="options" id="opts11">
+      <label class="opt"><input type="radio" name="q11" value="0" onchange="pick(11,0)"> Beide Körper haben in diesem Moment dieselbe Geschwindigkeit.</label>
+      <label class="opt"><input type="radio" name="q11" value="1" onchange="pick(11,1)"> Körper B überholt Körper A.</label>
+      <label class="opt"><input type="radio" name="q11" value="2" onchange="pick(11,2)"> Beide Körper sind zur gleichen Zeit am selben Ort – A holt B ein.</label>
+      <label class="opt"><input type="radio" name="q11" value="3" onchange="pick(11,3)"> Beide Körper haben bis dahin denselben Weg zurückgelegt.</label>
+    </div>
+  </div>
+
+  <!-- Q12 (new) -->
+  <div class="q-card" id="qc12">
+    <div class="q-num">Aufgabe 12</div>
+    <div class="q-text">Eine Messreihe ergibt folgende Wertetabelle. Welcher Graphtyp passt dazu im s-t-Diagramm?</div>
+    <table class="data-table">
+      <tr><th>t in s</th><td>0</td><td>1</td><td>2</td><td>3</td></tr>
+      <tr><th>s in m</th><td>0</td><td>1</td><td>4</td><td>9</td></tr>
+    </table>
+    <p style="font-size:0.82rem;color:var(--ink-dim);margin:4px 0 12px;text-align:center">Tipp: Prüfe, ob die Wegzuwächse pro Sekunde gleich bleiben oder zunehmen.</p>
+    <div class="options" id="opts12">
+      <label class="opt"><input type="radio" name="q12" value="0" onchange="pick(12,0)"> Eine steigende Gerade – gleichförmige Bewegung</label>
+      <label class="opt"><input type="radio" name="q12" value="1" onchange="pick(12,1)"> Eine waagrechte Linie – der Körper ruht</label>
+      <label class="opt"><input type="radio" name="q12" value="2" onchange="pick(12,2)"> Eine abwärts gebogene Kurve – der Körper wird langsamer</label>
+      <label class="opt"><input type="radio" name="q12" value="3" onchange="pick(12,3)"> Eine aufwärts gebogene Kurve (Parabel) – der Körper beschleunigt</label>
+    </div>
   </div>
 
   <div class="submit-area">
     <button class="btn-submit" id="btnSubmit" onclick="submitTest()" disabled>Test auswerten</button>
-    <p style="font-size:.82rem;color:#94a3b8;margin-top:8px">Beantworte alle 8 Aufgaben.</p>
+    <p class="submit-hint">Beantworte alle 12 Aufgaben, um auszuwerten.</p>
   </div>
 </div>
 
+<!-- Result Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div style="font-size:2.5rem" id="modalIcon">🎉</div>
-    <div class="score-big" id="scoreDisplay">0/8</div>
+    <div class="score-big" id="scoreDisplay">0/12</div>
     <div class="score-label">Punkte erreicht</div>
     <div class="result-badge" id="resultBadge">Bestanden ✓</div>
     <div class="result-text" id="resultText"></div>
+    <div class="recommend-list" id="recommendList"></div>
     <div class="answers-review" id="reviewList"></div>
-    <div style="margin-top:16px"><button class="btn-retry" onclick="retryTest()">🔄 Nochmal versuchen</button></div>
+    <div style="margin-top:20px">
+      <button class="btn-retry" onclick="retryTest()">🔄 Nochmal versuchen</button>
+    </div>
   </div>
 </div>
 
-<div style="text-align:center;padding:8px;font-size:0.7rem;color:#94a3b8;margin-top:8px">Gate-Test C2→C3 · v4</div>
+<div class="footer-version">Gate-Test C2→C3 · v5</div>
 
 <script>
+// SCORM 1.2 API Wrapper
 const SCORM = (() => {
   let api = null, initialized = false;
   function findAPI(win) {
@@ -252,13 +484,16 @@ const SCORM = (() => {
           api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
           api.LMSCommit('');
         }
+        // Restore saved answers from bookmark
         const bookmark = api.LMSGetValue('cmi.core.lesson_location');
         if (bookmark) {
           try {
             const saved = JSON.parse(bookmark);
             if (saved.answers) {
               for (let i = 0; i < saved.answers.length; i++) {
-                if (saved.answers[i] !== null) answers[i] = saved.answers[i];
+                if (saved.answers[i] !== null) {
+                  answers[i] = saved.answers[i];
+                }
               }
               restoreUI();
             }
@@ -270,6 +505,7 @@ const SCORM = (() => {
   function save(score, total, passed) {
     if (!api || !initialized) return;
     try {
+      // Save answers as bookmark
       api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ answers }));
       if (score !== undefined) {
         const pct = Math.round((score / total) * 100);
@@ -298,25 +534,69 @@ const SCORM = (() => {
   return { init, save, setInteraction, finish };
 })();
 
-const CORRECT = [1, null, 1, 1, 2, 2, 1, null];
-const THRESHOLD = 6; const TOTAL = 8;
+// ── Antwort-Pruefung via FNV-1a-Hash ────────────────────────────────────
+// Statt eines Klartext-Loesungsarrays liegt pro Frage nur der Hash von
+// 'q<Aufgabennummer>:<korrekter Wert>:bootcampC2C3' vor (Aufgabennummer
+// 1-basiert). MC-Werte sind die stabilen value-Attribute der Optionen
+// (NICHT die DOM-Position, die wird gemischt). Zahlenantworten werden vor
+// dem Hashen normalisiert (normNum), damit 10 und 10.0 gleich hashen.
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16);
+}
+const SALT = ':bootcampC2C3';
+const HASHES = ['60fa9a96','639b6e2d','73196b40','42f74a8b','81e63551','c5ca7dcb','25e9e707','92cf0397','960afe7b','f44f85ce','8aa14ea','4bcf1058'];
+const NUMERIC = [2, 6, 9, 10]; // question numbers (1-based) with number input
+const THRESHOLD = 9; const TOTAL = 12;
 const answers = new Array(TOTAL).fill(null);
-const textQs = [2, 8];
+
+// Tolerant number normalization: trim, comma to dot, parseFloat round-trip
+function normNum(v) {
+  return String(parseFloat(String(v).replace(',', '.').trim()));
+}
+function isCorrect(i) { // i = 0-based question index
+  if (answers[i] === null) return false;
+  const val = NUMERIC.includes(i + 1) ? normNum(answers[i]) : String(answers[i]);
+  return fnv1a('q' + (i + 1) + ':' + val + SALT) === HASHES[i];
+}
+
+// ── Fisher-Yates-Mischen der MC-Optionen im DOM ─────────────────────────
+// Runs before SCORM.init()/restoreUI(). Option identity lives in the
+// stable input value attribute, so shuffling never breaks restore logic.
+function shuffleOptions() {
+  for (let q = 1; q <= TOTAL; q++) {
+    const box = document.getElementById('opts' + q);
+    if (!box) continue; // number-input questions have no options
+    const opts = Array.from(box.children);
+    for (let j = opts.length - 1; j > 0; j--) {
+      const k = Math.floor(Math.random() * (j + 1));
+      [opts[j], opts[k]] = [opts[k], opts[j]];
+    }
+    opts.forEach(o => box.appendChild(o));
+  }
+}
 
 function pick(q, val) {
   answers[q-1] = val;
-  document.querySelectorAll(`#opts${q} .opt`).forEach((o,i) => o.classList.toggle('selected', i===val));
+  // Match by input value, not by DOM position (options are shuffled)
+  document.querySelectorAll(`#opts${q} .opt`).forEach(o => {
+    o.classList.toggle('selected', Number(o.querySelector('input').value) === val);
+  });
   document.getElementById('qc'+q).classList.add('answered');
   updateProgress();
 }
 function pickText(q) {
   const v = document.getElementById('ans'+q).value.trim();
   answers[q-1] = v === '' ? null : v;
-  document.getElementById('qc'+q).classList.toggle('answered', v !== '');
+  document.getElementById('qc'+q).classList.toggle('answered', v!=='');
   updateProgress();
 }
 function updateProgress() {
-  const done = answers.filter(a => a !== null).length;
+  const done = answers.filter(a=>a!==null).length;
   document.getElementById('progFill').style.width = (done/TOTAL*100)+'%';
   document.getElementById('progInfo').textContent = done+' von '+TOTAL+' beantwortet';
   document.getElementById('btnSubmit').disabled = done < TOTAL;
@@ -324,14 +604,15 @@ function updateProgress() {
 function restoreUI() {
   for (let i = 0; i < TOTAL; i++) {
     if (answers[i] !== null) {
-      if (textQs.includes(i+1)) {
+      if (NUMERIC.includes(i + 1)) {
         document.getElementById('ans'+(i+1)).value = answers[i];
         document.getElementById('qc'+(i+1)).classList.add('answered');
       } else {
-        const opts = document.querySelectorAll(`#opts${i+1} .opt`);
-        if (opts[answers[i]]) {
-          opts[answers[i]].querySelector('input').checked = true;
-          opts[answers[i]].classList.add('selected');
+        // Find option by its stable input value (DOM order is shuffled)
+        const inp = document.querySelector(`#opts${i+1} input[value="${answers[i]}"]`);
+        if (inp) {
+          inp.checked = true;
+          inp.closest('.opt').classList.add('selected');
         }
         document.getElementById('qc'+(i+1)).classList.add('answered');
       }
@@ -339,57 +620,86 @@ function restoreUI() {
   }
   updateProgress();
 }
+// Question -> Track C2 module mapping (real module names from TrackC2)
+const MODULES = [
+  {id:'C2.3', name:'s-t ↔ v-t umwandeln'},       // Q1  slope meaning in v-t
+  {id:'C2.3', name:'s-t ↔ v-t umwandeln'},       // Q2  acceleration as slope (numeric)
+  {id:'C2.3', name:'s-t ↔ v-t umwandeln'},       // Q3  area under v-t meaning
+  {id:'C2.2', name:'Beschleunigung erkennen'},   // Q4  identify motion type from graph
+  {id:'C2.2', name:'Beschleunigung erkennen'},   // Q5  identify deceleration phase
+  {id:'C2.3', name:'s-t ↔ v-t umwandeln'},       // Q6  triangle area = distance (numeric)
+  {id:'C2.2', name:'Beschleunigung erkennen'},   // Q7  curve in s-t = acceleration
+  {id:'C2.3', name:'s-t ↔ v-t umwandeln'},       // Q8  rectangle area formula
+  {id:'C2.3', name:'s-t ↔ v-t umwandeln'},       // Q9  distance from v-t (numeric)
+  {id:'C2.1', name:'Mehrere Bewegungen'},        // Q10 velocity as slope from two points (numeric)
+  {id:'C2.1', name:'Mehrere Bewegungen'},        // Q11 interpret intersection point
+  {id:'C2.4', name:'Diagramm zeichnen'}          // Q12 data table -> graph type
+];
+function joinQs(qs) {
+  if (qs.length === 1) return 'Aufgabe ' + qs[0];
+  return 'Aufgabe ' + qs.slice(0, -1).join(', ') + ' und ' + qs[qs.length - 1];
+}
 function submitTest() {
   let score = 0;
-  const LABELS = ['Steigung im v-t-Diagramm','Beschleunigung berechnen','Fläche unter v-t-Graph','Bewegung Phase 2 beschreiben','Abbremsphase identifizieren','Kurve im s-t-Diagramm','Formel für Weg','Weg Phase 2 berechnen'];
   const results = [];
-  for (let i = 0; i < TOTAL; i++) {
-    let ok;
-    if (i === 1) {
-      const v = String(answers[i]).replace(',','.').trim();
-      ok = v === '2.5' || v === '2,5';
-    } else if (i === 7) {
-      const v = String(answers[i]).replace(',','.').trim();
-      ok = v === '20' || v === '20.0';
-    } else {
-      ok = answers[i] === CORRECT[i];
-    }
-    if (ok) score++;
-    results.push({ok, label: LABELS[i]});
+  const LABELS = ['Steigung im v-t-Diagramm','Beschleunigung berechnen ($a=\\Delta v/\\Delta t$)','Fläche unter v-t-Graph','Bewegung Phase 2 beschreiben','Abbremsphase identifizieren','Weg Phase 3 berechnen (Dreiecksfläche)','Kurve im s-t-Diagramm','Formel für Weg ($s=v\\cdot t$)','Weg Phase 2 berechnen','Steigung berechnen ($v=\\Delta s/\\Delta t$)','Schnittpunkt im s-t-Diagramm deuten','Wertetabelle: Graphtyp bestimmen'];
+  for(let i=0;i<TOTAL;i++){
+    const ok = isCorrect(i);
+    if(ok) score++;
+    results.push({ok, label:LABELS[i]});
   }
   const passed = score >= THRESHOLD;
 
+  // SCORM interaction tracking (correct pattern = answer hash, not plaintext)
   results.forEach((r, i) => {
-    SCORM.setInteraction(i, `gate-c2c3-q${i+1}`, 'choice',
-      String(answers[i]), String(CORRECT[i]), r.ok ? 'correct' : 'wrong');
+    SCORM.setInteraction(i, `gate-c2c3-q${i+1}`,
+      NUMERIC.includes(i + 1) ? 'numeric' : 'choice',
+      String(answers[i]), HASHES[i], r.ok ? 'correct' : 'wrong');
   });
   SCORM.save(score, TOTAL, passed);
 
   document.getElementById('scoreDisplay').textContent = score+'/'+TOTAL;
-  document.getElementById('modalIcon').textContent = passed ? '🎉' : '💪';
-  document.getElementById('resultBadge').textContent = passed ? 'Bestanden ✓' : 'Noch nicht bestanden';
-  document.getElementById('resultBadge').className = 'result-badge '+(passed ? 'pass' : 'fail');
-  document.getElementById('resultText').textContent = passed
-    ? 'Hervorragend! Du kannst v-t-Diagramme analysieren und Bewegungsphasen erkennen. Weiter zu Level 3!'
-    : 'Du hast '+score+' von '+THRESHOLD+' benötigten Punkten. Übe nochmal die Flächen- und Steigungsinterpretation in Level 2!';
+  document.getElementById('modalIcon').textContent = passed?'🎉':'💪';
+  document.getElementById('resultBadge').textContent = passed?'Bestanden ✓':'Noch nicht bestanden';
+  document.getElementById('resultBadge').className = 'result-badge '+(passed?'pass':'fail');
+  const recBox = document.getElementById('recommendList');
+  if (passed) {
+    document.getElementById('resultText').textContent = 'Hervorragend! Du kannst Diagramme analysieren, Steigungen und Flächen berechnen und Bewegungsphasen erkennen. Du kannst jetzt mit Level 3 starten.';
+    recBox.innerHTML = '';
+  } else {
+    document.getElementById('resultText').textContent = 'Du hast '+score+' von '+THRESHOLD+' benötigten Punkten erreicht. Wiederhole gezielt diese Module aus Level 2, dann schaffst du es:';
+    // Group failed questions by module, keep module order C2.1 .. C2.4
+    const byModule = {};
+    results.forEach((r, i) => {
+      if (!r.ok) {
+        const m = MODULES[i];
+        if (!byModule[m.id]) byModule[m.id] = { name: m.name, qs: [] };
+        byModule[m.id].qs.push(i + 1);
+      }
+    });
+    recBox.innerHTML = Object.keys(byModule).sort().map(id =>
+      `<div class="recommend-item">📘 <span class="mod-name">Modul ${id} (${byModule[id].name})</span> <span class="mod-qs">für ${joinQs(byModule[id].qs)}</span></div>`
+    ).join('');
+  }
   const rl = document.getElementById('reviewList');
-  rl.innerHTML = results.map(r => `<div class="review-item ${r.ok?'correct':'wrong'}">${r.ok?'✅':'❌'} ${r.label}</div>`).join('');
+  rl.innerHTML = results.map(r=>`<div class="review-item ${r.ok?'correct':'wrong'}">${r.ok?'✅':'❌'} ${r.label}</div>`).join('');
   document.getElementById('modal').classList.add('show');
   MathJax.typesetPromise([rl]);
 }
 function retryTest() {
   answers.fill(null);
-  document.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
-  textQs.forEach(q => { const el = document.getElementById('ans'+q); if (el) el.value = ''; });
-  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
-  document.querySelectorAll('.q-card').forEach(c => c.classList.remove('answered'));
-  document.getElementById('progFill').style.width = '0%';
-  document.getElementById('progInfo').textContent = '0 von '+TOTAL+' beantwortet';
-  document.getElementById('btnSubmit').disabled = true;
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+  NUMERIC.forEach(q => { document.getElementById('ans'+q).value=''; });
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('.q-card').forEach(c=>c.classList.remove('answered'));
+  document.getElementById('progFill').style.width='0%';
+  document.getElementById('progInfo').textContent='0 von '+TOTAL+' beantwortet';
+  document.getElementById('btnSubmit').disabled=true;
   document.getElementById('modal').classList.remove('show');
   window.scrollTo(0,0);
 }
 document.addEventListener('DOMContentLoaded', () => {
+  shuffleOptions(); // must run before SCORM.init() restores the bookmark
   MathJax.startup.promise.then(() => MathJax.typesetPromise());
   SCORM.init();
 });

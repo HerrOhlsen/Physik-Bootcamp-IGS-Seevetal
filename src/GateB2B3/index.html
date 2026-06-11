@@ -6,61 +6,189 @@
 <script>MathJax={tex:{inlineMath:[['$','$']]},startup:{typeset:false}};</script>
 <script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
 <style>
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap');
+
+/* ══════════════════════════════════════════
+   TOKENS (v3-Design, identisch zu den Track-Modulen)
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #6668a0;
+
+  --accent: #6366f1;
+  --accent-bright: #818cf8;
+  --accent-glow: rgba(99, 102, 241, 0.35);
+  --accent-deep: #4f46e5;
+  --accent-subtle: rgba(99, 102, 241, 0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+
+  --border: rgba(129, 140, 248, 0.15);
+  --border-strong: rgba(129, 140, 248, 0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-full: 100px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+/* -- iOS-Kompatibilitaet ------------------------------------------------- */
+/* font-size 16px verhindert Auto-Zoom beim Tippen auf iPhone */
 input, textarea, select { font-size: 16px; }
+/* dvh-Fallback: Safari-Adressleiste nicht in Viewport einrechnen */
 html { height: 100%; }
 body { min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
-button, [onclick], .tab-btn, .exercise, .drag-item, .drop-zone { touch-action: manipulation; }
-.tab-content, .scrollable-area, .modal-body { -webkit-overflow-scrolling: touch; overflow-y: auto; }
-.modal-overlay, .blur-bg { -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); }
-@media (hover: none) and (pointer: coarse) {
-  .opt:hover { filter: none; transform: none; }
+/* Touch-Action fuer alle klickbaren Elemente */
+button, [onclick], .opt {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
 }
+/* Momentum-Scrolling fuer iOS */
+.modal-body { -webkit-overflow-scrolling: touch; overflow-y: auto; }
+/* backdrop-filter mit webkit-Praefix */
+.modal-overlay, .blur-bg {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+/* -- Ende iOS-Kompatibilitaet -------------------------------------------- */
+/* Touch-Geraete: Hover-States nicht kleben lassen */
+@media (hover: none) and (pointer: coarse) {
+  .opt:hover, .btn-submit:hover, .btn-retry:hover {
+    filter: none;
+    transform: none;
+  }
+}
+
 *{box-sizing:border-box;margin:0;padding:0}
-body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh;min-height:100dvh;}
-.header{background:linear-gradient(135deg,#166534,#16a34a);color:#fff;padding:20px max(16px,calc(50% - 364px))}
+body{
+  font-family:var(--font);font-size:1rem;line-height:1.6;
+  color:var(--ink);background:var(--bg-deep);
+  min-height:100vh;min-height:100dvh;overflow-x:hidden;
+}
+/* Dezentes Punktraster wie auf den Modulseiten */
+body::before{
+  content:'';position:fixed;inset:0;
+  background-image:radial-gradient(circle at 1px 1px, rgba(99,102,241,0.05) 1px, transparent 0);
+  background-size:32px 32px;pointer-events:none;z-index:0;
+}
+.header{
+  position:relative;z-index:1;
+  background:var(--bg-glass-heavy);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border-bottom:1px solid var(--border);
+  padding:28px max(16px,calc(50% - 364px)) 24px;
+}
 .header-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
-.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700;letter-spacing:.5px}
-.track-badge{background:rgba(255,255,255,.2);color:#fff}
-.gate-badge{background:#fff;color:#166534}
-.header h1{font-size:1.4rem;font-weight:700;margin-top:8px}
-.header p{font-size:.9rem;opacity:.9;margin-top:4px}
-.threshold{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 14px;font-size:.85rem;margin-top:10px}
-.container{max-width:760px;margin:0 auto;padding:24px 16px}
-.q-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #e2e8f0;transition:border-color .2s}
-.q-card.answered{border-left-color:#16a34a}
-.q-num{font-size:.8rem;font-weight:700;color:#15803d;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
-.q-text{font-size:1rem;line-height:1.6;margin-bottom:14px}
+.badge{display:inline-block;padding:4px 14px;border-radius:var(--r-full);font-size:0.7rem;font-weight:700;letter-spacing:0.12em;text-transform:uppercase}
+.track-badge{background:rgba(79,70,229,0.3);border:1px solid var(--accent);color:var(--accent-bright)}
+.gate-badge{background:var(--accent);color:#fff;border:1px solid var(--accent)}
+.header h1{
+  font-size:clamp(1.5rem,4.5vw,2rem);font-weight:800;letter-spacing:-0.02em;line-height:1.15;margin-top:14px;
+  background:linear-gradient(135deg,#ffffff 0%,var(--accent-bright) 60%,#c7d2fe 100%);
+  -webkit-background-clip:text;-webkit-text-fill-color:transparent;background-clip:text;
+}
+.header p{font-size:0.9rem;color:var(--ink-muted);margin-top:6px}
+.threshold{
+  display:inline-block;background:var(--accent-subtle);border:1px solid var(--border-strong);
+  border-radius:var(--r-md);padding:7px 16px;font-size:0.85rem;color:var(--ink-muted);margin-top:14px;
+}
+.threshold strong{color:var(--accent-bright)}
+.container{position:relative;z-index:1;max-width:760px;margin:0 auto;padding:24px 16px}
+.q-card{
+  background:var(--bg-glass);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border:1px solid var(--border);border-left:3px solid var(--border);
+  border-radius:var(--r-lg);padding:22px;margin-bottom:16px;
+  box-shadow:var(--shadow-sm);transition:border-color .25s;
+}
+.q-card.answered{border-left-color:var(--accent)}
+.q-num{font-family:var(--mono);font-size:0.68rem;font-weight:700;color:var(--accent-bright);text-transform:uppercase;letter-spacing:0.15em;margin-bottom:10px}
+.q-text{font-size:1rem;line-height:1.65;margin-bottom:14px;color:var(--ink)}
 .options{display:flex;flex-direction:column;gap:8px}
-.opt{display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;transition:all .15s;font-size:.95rem}
-.opt:hover{background:#f0fdf4;border-color:#86efac}
-.opt input[type=radio]{accent-color:#15803d;width:16px;height:16px;flex-shrink:0}
-.opt.selected{background:#f0fdf4;border-color:#16a34a}
-.text-input{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:.95rem;font-family:inherit;outline:none;transition:border-color .2s}
-.text-input:focus{border-color:#16a34a;box-shadow:0 0 0 3px rgba(22,163,74,.1)}
-.unit-hint{font-size:.82rem;color:#64748b;margin-top:6px}
+.opt{
+  display:flex;align-items:center;gap:10px;padding:11px 14px;
+  border-radius:var(--r-md);border:1px solid var(--border);
+  background:rgba(255,255,255,0.02);
+  cursor:pointer;transition:all .15s;font-size:0.95rem;color:var(--ink);
+}
+.opt:hover{background:var(--accent-subtle);border-color:var(--border-strong)}
+.opt input[type=radio]{accent-color:var(--accent);width:16px;height:16px;flex-shrink:0}
+.opt.selected{background:var(--accent-subtle);border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset}
+.text-input{
+  width:100%;border:1px solid var(--border);border-radius:var(--r-md);
+  padding:11px 14px;font-size:0.95rem;font-family:var(--font);
+  background:var(--bg-surface);color:var(--ink);
+  outline:none;transition:border-color .2s, box-shadow .2s;
+}
+.text-input::placeholder{color:var(--ink-dim)}
+.text-input:focus{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-glow)}
+.unit-hint{font-size:0.8rem;color:var(--ink-dim);margin-top:8px;font-family:var(--mono)}
 .submit-area{text-align:center;padding:16px 0 32px}
-.btn-submit{background:#15803d;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(21,128,61,.3)}
-.btn-submit:hover{background:#166534;transform:translateY(-1px)}
-.btn-submit:disabled{background:#94a3b8;cursor:not-allowed;transform:none;box-shadow:none}
-.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;margin:16px 0 24px;overflow:hidden}
-.progress-fill{height:100%;background:#22c55e;border-radius:3px;transition:width .3s}
-.progress-info{font-size:.85rem;color:#64748b;text-align:right;margin-top:-20px;margin-bottom:20px}
-.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:16px}
+.btn-submit{
+  background:linear-gradient(135deg,var(--accent-deep),var(--accent));color:#fff;
+  border:none;border-radius:var(--r-md);padding:14px 40px;
+  font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;
+  transition:all .2s;box-shadow:var(--shadow), var(--glow);
+}
+.btn-submit:hover{transform:translateY(-1px);filter:brightness(1.1)}
+.btn-submit:disabled{background:var(--bg-elevated);color:var(--ink-dim);cursor:not-allowed;transform:none;box-shadow:none;filter:none}
+.submit-hint{font-size:0.8rem;color:var(--ink-dim);margin-top:10px}
+.progress-bar{height:6px;background:rgba(255,255,255,0.06);border-radius:var(--r-full);margin:8px 0 6px;overflow:hidden}
+.progress-fill{height:100%;background:linear-gradient(90deg,var(--accent-deep),var(--accent-bright),#c7d2fe);border-radius:var(--r-full);transition:width .3s}
+.progress-info{font-family:var(--mono);font-size:0.75rem;color:var(--ink-muted);text-align:right;margin-bottom:20px}
+/* Modal */
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(5,5,15,0.7);z-index:100;align-items:center;justify-content:center;padding:16px}
 .modal-overlay.show{display:flex}
-.modal{background:#fff;border-radius:16px;padding:32px;max-width:480px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.15);animation:popIn .3s ease;max-height:90vh;max-height:90dvh;overflow-y:auto}
+.modal{
+  background:var(--bg-card);border:1px solid var(--border-strong);
+  border-radius:var(--r-lg);padding:32px;max-width:520px;width:100%;
+  max-height:88vh;max-height:88dvh;overflow-y:auto;-webkit-overflow-scrolling:touch;
+  text-align:center;box-shadow:var(--shadow-lg);animation:popIn .3s ease;
+}
 @keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
-.score-big{font-size:3rem;font-weight:800;margin:12px 0 4px}
-.score-label{font-size:.9rem;color:#64748b;margin-bottom:16px}
-.result-badge{display:inline-block;padding:8px 24px;border-radius:24px;font-size:1rem;font-weight:700;margin-bottom:16px}
-.pass{background:#dcfce7;color:#166534}
-.fail{background:#fee2e2;color:#991b1b}
-.result-text{font-size:.95rem;color:#475569;line-height:1.6;margin-bottom:20px}
-.btn-retry{background:#f1f5f9;color:#475569;border:none;border-radius:8px;padding:10px 24px;font-size:.95rem;font-weight:600;cursor:pointer}
-.btn-retry:hover{background:#e2e8f0}
-.answers-review{margin-top:16px;text-align:left}
-.review-item{padding:8px 12px;margin-bottom:6px;border-radius:8px;font-size:.9rem;display:flex;align-items:flex-start;gap:8px}
-.review-item.correct{background:#f0fdf4;border-left:3px solid #22c55e}
-.review-item.wrong{background:#fef2f2;border-left:3px solid #ef4444}
+.score-big{font-family:var(--mono);font-size:3rem;font-weight:700;margin:12px 0 4px;color:#fff}
+.score-label{font-size:0.85rem;color:var(--ink-dim);margin-bottom:16px}
+.result-badge{display:inline-block;padding:8px 24px;border-radius:var(--r-full);font-size:1rem;font-weight:700;margin-bottom:16px;border:1px solid transparent}
+.pass{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+.fail{background:var(--err-bg);color:var(--err);border-color:var(--err-border)}
+.result-text{font-size:0.95rem;color:var(--ink-muted);line-height:1.6;margin-bottom:8px;text-align:left}
+.recommend-list{text-align:left;margin:10px 0 12px}
+.recommend-item{
+  padding:9px 12px;margin-bottom:6px;border-radius:var(--r-sm);font-size:0.88rem;
+  background:var(--accent-subtle);border-left:3px solid var(--accent);color:var(--ink);
+}
+.recommend-item .mod-name{font-weight:700;color:var(--accent-bright)}
+.recommend-item .mod-qs{color:var(--ink-muted)}
+.btn-retry{
+  background:var(--bg-elevated);color:var(--ink-muted);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:10px 24px;font-family:var(--font);
+  font-size:0.95rem;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.btn-retry:hover{border-color:var(--accent);color:var(--accent-bright)}
+.answers-review{margin-top:20px;text-align:left}
+.review-item{padding:8px 12px;margin-bottom:6px;border-radius:var(--r-sm);font-size:0.88rem;display:flex;align-items:flex-start;gap:8px;color:var(--ink)}
+.review-item.correct{background:var(--ok-bg);border-left:3px solid var(--ok)}
+.review-item.wrong{background:var(--err-bg);border-left:3px solid var(--err)}
+.footer-version{text-align:center;padding:8px;font-size:0.7rem;color:var(--ink-dim);font-family:var(--mono);margin-top:8px;position:relative;z-index:1}
 </style>
 </head>
 <body>
@@ -71,18 +199,18 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
   </div>
   <h1>Gate-Test: Level 2 → Level 3</h1>
   <p>Mehrstufige Berechnungen &amp; Einheiten-Analyse</p>
-  <div class="threshold">🎯 Ziel: mindestens <strong>8 von 10 Punkten</strong> (80 %)</div>
+  <div class="threshold">🎯 Ziel: mindestens <strong>9 von 12 Punkten</strong> (75 %)</div>
 </div>
 
 <div class="container">
   <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
-  <div class="progress-info" id="progInfo">0 von 10 beantwortet</div>
+  <div class="progress-info" id="progInfo">0 von 12 beantwortet</div>
 
-  <!-- Q1 -->
+  <!-- Q1 number input -->
   <div class="q-card" id="qc1">
-    <div class="q-num">Aufgabe 1</div>
-    <div class="q-text">Ein Körper der Masse $m = 2\,\text{kg}$ wird mit $a = 5\,\text{m/s}^2$ beschleunigt. Berechne die Kraft $F$.</div>
-    <input type="number" class="text-input" id="ans1" placeholder="Antwort …" oninput="pickText(1)">
+    <div class="q-num">Aufgabe 1 – Berechnung</div>
+    <div class="q-text">Ein Körper der Masse $m = 2\,\text{kg}$ wird mit $a = 5\,\text{m/s}^2$ beschleunigt. Berechne die Kraft $F = m \cdot a$.</div>
+    <input type="number" class="text-input" id="ans1" placeholder="Antwort eingeben …" oninput="pickText(1)">
     <div class="unit-hint">Einheit: Newton (N)</div>
   </div>
 
@@ -98,11 +226,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
     </div>
   </div>
 
-  <!-- Q3 -->
+  <!-- Q3 number input -->
   <div class="q-card" id="qc3">
-    <div class="q-num">Aufgabe 3</div>
+    <div class="q-num">Aufgabe 3 – Berechnung</div>
     <div class="q-text">Berechne die kinetische Energie: $m = 1000\,\text{kg}$, $v = 20\,\text{m/s}$. Formel: $E_{kin} = \frac{1}{2}mv^2$</div>
-    <input type="number" class="text-input" id="ans3" placeholder="Antwort in J …" oninput="pickText(3)">
+    <input type="number" class="text-input" id="ans3" placeholder="Antwort eingeben …" oninput="pickText(3)">
     <div class="unit-hint">Einheit: Joule (J)</div>
   </div>
 
@@ -118,19 +246,19 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
     </div>
   </div>
 
-  <!-- Q5 -->
+  <!-- Q5 number input -->
   <div class="q-card" id="qc5">
-    <div class="q-num">Aufgabe 5</div>
+    <div class="q-num">Aufgabe 5 – Berechnung</div>
     <div class="q-text">$3500\,\text{m} = \,?\,\text{km}$</div>
-    <input type="number" class="text-input" id="ans5" placeholder="Antwort in km …" oninput="pickText(5)">
+    <input type="number" class="text-input" id="ans5" placeholder="Antwort eingeben …" oninput="pickText(5)">
     <div class="unit-hint">Einheit: Kilometer (km)</div>
   </div>
 
-  <!-- Q6 -->
+  <!-- Q6 number input -->
   <div class="q-card" id="qc6">
-    <div class="q-num">Aufgabe 6</div>
+    <div class="q-num">Aufgabe 6 – Berechnung</div>
     <div class="q-text">Eine Lampe hat die Leistung $P = 100\,\text{W}$. Sie läuft $t = 3600\,\text{s}$. Berechne die verrichtete Arbeit $W = P \cdot t$.</div>
-    <input type="number" class="text-input" id="ans6" placeholder="Antwort in J …" oninput="pickText(6)">
+    <input type="number" class="text-input" id="ans6" placeholder="Antwort eingeben …" oninput="pickText(6)">
     <div class="unit-hint">Einheit: Joule (J)</div>
   </div>
 
@@ -158,11 +286,11 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
     </div>
   </div>
 
-  <!-- Q9 -->
+  <!-- Q9 number input -->
   <div class="q-card" id="qc9">
-    <div class="q-num">Aufgabe 9</div>
+    <div class="q-num">Aufgabe 9 – Berechnung</div>
     <div class="q-text">Hubarbeit: $W = m \cdot g \cdot h$. Berechne $W$: $m = 5\,\text{kg}$, $g = 10\,\text{m/s}^2$, $h = 3\,\text{m}$.</div>
-    <input type="number" class="text-input" id="ans9" placeholder="Antwort in J …" oninput="pickText(9)">
+    <input type="number" class="text-input" id="ans9" placeholder="Antwort eingeben …" oninput="pickText(9)">
     <div class="unit-hint">Einheit: Joule (J)</div>
   </div>
 
@@ -178,27 +306,52 @@ body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293
     </div>
   </div>
 
+  <!-- Q11 number input -->
+  <div class="q-card" id="qc11">
+    <div class="q-num">Aufgabe 11 – Berechnung</div>
+    <div class="q-text">Eine Zugmaschine zieht einen Schlitten mit der konstanten Kraft $F = 40\,\text{N}$ über die Strecke $s = 2\,\text{km}$. Rechne die Strecke zuerst in Meter um und berechne dann die Arbeit $W = F \cdot s$.</div>
+    <input type="number" class="text-input" id="ans11" placeholder="Antwort eingeben …" oninput="pickText(11)">
+    <div class="unit-hint">Einheit: Joule (J)</div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-card" id="qc12">
+    <div class="q-num">Aufgabe 12</div>
+    <div class="q-text">Ein Wasserkocher verrichtet in $t = 3\,\text{Minuten}$ die Arbeit $W = 540\,000\,\text{J}$. Welche Leistung $P = W/t$ hat er?</div>
+    <div class="options" id="opts12">
+      <label class="opt"><input type="radio" name="q12" value="0" onchange="pick(12,0)"> $180\,000\,\text{W}$</label>
+      <label class="opt"><input type="radio" name="q12" value="1" onchange="pick(12,1)"> $3000\,\text{W}$</label>
+      <label class="opt"><input type="radio" name="q12" value="2" onchange="pick(12,2)"> $9000\,\text{W}$</label>
+      <label class="opt"><input type="radio" name="q12" value="3" onchange="pick(12,3)"> $3\,\text{W}$</label>
+    </div>
+  </div>
+
   <div class="submit-area">
     <button class="btn-submit" id="btnSubmit" onclick="submitTest()" disabled>Test auswerten</button>
-    <p style="font-size:.82rem;color:#94a3b8;margin-top:8px">Beantworte alle 10 Aufgaben, um auszuwerten.</p>
+    <p class="submit-hint">Beantworte alle 12 Aufgaben, um auszuwerten.</p>
   </div>
 </div>
 
+<!-- Result Modal -->
 <div class="modal-overlay" id="modal">
   <div class="modal">
     <div style="font-size:2.5rem" id="modalIcon">🎉</div>
-    <div class="score-big" id="scoreDisplay">0/10</div>
+    <div class="score-big" id="scoreDisplay">0/12</div>
     <div class="score-label">Punkte erreicht</div>
     <div class="result-badge" id="resultBadge">Bestanden ✓</div>
     <div class="result-text" id="resultText"></div>
+    <div class="recommend-list" id="recommendList"></div>
     <div class="answers-review" id="reviewList"></div>
-    <div style="margin-top:16px"><button class="btn-retry" onclick="retryTest()">🔄 Nochmal versuchen</button></div>
+    <div style="margin-top:20px">
+      <button class="btn-retry" onclick="retryTest()">🔄 Nochmal versuchen</button>
+    </div>
   </div>
 </div>
 
-<div style="text-align:center;padding:8px;font-size:0.7rem;color:#94a3b8;margin-top:8px">Gate-Test B2→B3 · v4</div>
+<div class="footer-version">Gate-Test B2→B3 · v5</div>
 
 <script>
+// SCORM 1.2 API Wrapper
 const SCORM = (() => {
   let api = null, initialized = false;
   function findAPI(win) {
@@ -222,13 +375,17 @@ const SCORM = (() => {
           api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
           api.LMSCommit('');
         }
+        // Restore saved answers from bookmark
         const bookmark = api.LMSGetValue('cmi.core.lesson_location');
         if (bookmark) {
           try {
             const saved = JSON.parse(bookmark);
             if (saved.answers) {
+              // Restore answers array and re-render
               for (let i = 0; i < saved.answers.length; i++) {
-                if (saved.answers[i] !== null) answers[i] = saved.answers[i];
+                if (saved.answers[i] !== null) {
+                  answers[i] = saved.answers[i];
+                }
               }
               restoreUI();
             }
@@ -240,6 +397,7 @@ const SCORM = (() => {
   function save(score, total, passed) {
     if (!api || !initialized) return;
     try {
+      // Save answers as bookmark
       api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ answers }));
       if (score !== undefined) {
         const pct = Math.round((score / total) * 100);
@@ -268,25 +426,69 @@ const SCORM = (() => {
   return { init, save, setInteraction, finish };
 })();
 
-const CORRECT = [null, 1, null, 2, null, null, 1, 1, null, 1];
-const THRESHOLD = 8; const TOTAL = 10;
+// ── Antwort-Pruefung via FNV-1a-Hash ────────────────────────────────────
+// Statt eines Klartext-Loesungsarrays liegt pro Frage nur der Hash von
+// 'q<Aufgabennummer>:<korrekter Wert>:bootcampB2B3' vor (Aufgabennummer
+// 1-basiert). MC-Werte sind die stabilen value-Attribute der Optionen
+// (NICHT die DOM-Position, die wird gemischt). Zahlenantworten werden vor
+// dem Hashen normalisiert (normNum), damit 100 und 100.0 gleich hashen.
+function fnv1a(str) {
+  let h = 0x811c9dc5;
+  for (let i = 0; i < str.length; i++) {
+    h ^= str.charCodeAt(i);
+    h = Math.imul(h, 0x01000193);
+  }
+  return (h >>> 0).toString(16);
+}
+const SALT = ':bootcampB2B3';
+const HASHES = ['d2c8d7b6','f63a50e5','67a8af79','2333485c','1857d5ef','f2c4223b','48570548','46b776e3','65b61921','b0b20184','b2182928','67ee99d2'];
+const NUMERIC = [1, 3, 5, 6, 9, 11]; // question numbers (1-based) with number input
+const THRESHOLD = 9; const TOTAL = 12;
 const answers = new Array(TOTAL).fill(null);
-const textQs = [1, 3, 5, 6, 9];
+
+// Tolerant number normalization: trim, comma to dot, parseFloat round-trip
+function normNum(v) {
+  return String(parseFloat(String(v).replace(',', '.').trim()));
+}
+function isCorrect(i) { // i = 0-based question index
+  if (answers[i] === null) return false;
+  const val = NUMERIC.includes(i + 1) ? normNum(answers[i]) : String(answers[i]);
+  return fnv1a('q' + (i + 1) + ':' + val + SALT) === HASHES[i];
+}
+
+// ── Fisher-Yates-Mischen der MC-Optionen im DOM ─────────────────────────
+// Runs before SCORM.init()/restoreUI(). Option identity lives in the
+// stable input value attribute, so shuffling never breaks restore logic.
+function shuffleOptions() {
+  for (let q = 1; q <= TOTAL; q++) {
+    const box = document.getElementById('opts' + q);
+    if (!box) continue; // number-input questions have no options
+    const opts = Array.from(box.children);
+    for (let j = opts.length - 1; j > 0; j--) {
+      const k = Math.floor(Math.random() * (j + 1));
+      [opts[j], opts[k]] = [opts[k], opts[j]];
+    }
+    opts.forEach(o => box.appendChild(o));
+  }
+}
 
 function pick(q, val) {
   answers[q-1] = val;
-  document.querySelectorAll(`#opts${q} .opt`).forEach((o,i) => o.classList.toggle('selected', i===val));
+  // Match by input value, not by DOM position (options are shuffled)
+  document.querySelectorAll(`#opts${q} .opt`).forEach(o => {
+    o.classList.toggle('selected', Number(o.querySelector('input').value) === val);
+  });
   document.getElementById('qc'+q).classList.add('answered');
   updateProgress();
 }
 function pickText(q) {
   const v = document.getElementById('ans'+q).value.trim();
   answers[q-1] = v === '' ? null : v;
-  document.getElementById('qc'+q).classList.toggle('answered', v !== '');
+  document.getElementById('qc'+q).classList.toggle('answered', v!=='');
   updateProgress();
 }
 function updateProgress() {
-  const done = answers.filter(a => a !== null).length;
+  const done = answers.filter(a=>a!==null).length;
   document.getElementById('progFill').style.width = (done/TOTAL*100)+'%';
   document.getElementById('progInfo').textContent = done+' von '+TOTAL+' beantwortet';
   document.getElementById('btnSubmit').disabled = done < TOTAL;
@@ -294,14 +496,15 @@ function updateProgress() {
 function restoreUI() {
   for (let i = 0; i < TOTAL; i++) {
     if (answers[i] !== null) {
-      if (textQs.includes(i+1)) {
+      if (NUMERIC.includes(i + 1)) {
         document.getElementById('ans'+(i+1)).value = answers[i];
         document.getElementById('qc'+(i+1)).classList.add('answered');
       } else {
-        const opts = document.querySelectorAll(`#opts${i+1} .opt`);
-        if (opts[answers[i]]) {
-          opts[answers[i]].querySelector('input').checked = true;
-          opts[answers[i]].classList.add('selected');
+        // Find option by its stable input value (DOM order is shuffled)
+        const inp = document.querySelector(`#opts${i+1} input[value="${answers[i]}"]`);
+        if (inp) {
+          inp.checked = true;
+          inp.closest('.opt').classList.add('selected');
         }
         document.getElementById('qc'+(i+1)).classList.add('answered');
       }
@@ -309,59 +512,86 @@ function restoreUI() {
   }
   updateProgress();
 }
-function checkText(q, val) {
-  const n = parseFloat(String(val).replace(',','.').trim());
-  if (q === 1) return n === 10;
-  if (q === 3) return n === 200000;
-  if (q === 5) return n === 3.5;
-  if (q === 6) return n === 360000;
-  if (q === 9) return n === 150;
-  return false;
+// Question -> Track B2 module mapping (real module names from TrackB2)
+const MODULES = [
+  {id:'B2.1', name:'Mehrstufige Berechnung'},  // Q1  F=ma berechnen
+  {id:'B2.3', name:'Einheiten-Analyse'},       // Q2  Einheit v
+  {id:'B2.1', name:'Mehrstufige Berechnung'},  // Q3  E_kin berechnen
+  {id:'B2.3', name:'Einheiten-Analyse'},       // Q4  Einheit a
+  {id:'B2.1', name:'Mehrstufige Berechnung'},  // Q5  m -> km umrechnen
+  {id:'B2.1', name:'Mehrstufige Berechnung'},  // Q6  W = P*t
+  {id:'B2.3', name:'Einheiten-Analyse'},       // Q7  Einheit P
+  {id:'B2.1', name:'Mehrstufige Berechnung'},  // Q8  km/h -> m/s
+  {id:'B2.1', name:'Mehrstufige Berechnung'},  // Q9  Hubarbeit
+  {id:'B2.2', name:'Typische Rechenfehler'},   // Q10 Einheitenfehler erkennen
+  {id:'B2.4', name:'Übungsrunde'},             // Q11 W = F*s mit km-Weg
+  {id:'B2.4', name:'Übungsrunde'}              // Q12 P = W/t mit Minuten
+];
+function joinQs(qs) {
+  if (qs.length === 1) return 'Aufgabe ' + qs[0];
+  return 'Aufgabe ' + qs.slice(0, -1).join(', ') + ' und ' + qs[qs.length - 1];
 }
 function submitTest() {
   let score = 0;
-  const LABELS = ['$F=ma$ berechnen','Einheit Geschwindigkeit','$E_{kin}$ berechnen','Einheit Beschleunigung','3500 m → km','Arbeit berechnen','Einheit Leistung','54 km/h → m/s','Hubarbeit berechnen','Einheitenfehler erkennen'];
   const results = [];
-  for (let i = 0; i < TOTAL; i++) {
-    let ok;
-    if (textQs.includes(i+1)) { ok = checkText(i+1, answers[i]); }
-    else { ok = answers[i] === CORRECT[i]; }
-    if (ok) score++;
-    results.push({ok, label: LABELS[i]});
+  const LABELS = ['$F=ma$ berechnen','Einheit Geschwindigkeit','$E_{kin}$ berechnen','Einheit Beschleunigung','3500 m → km','Arbeit berechnen ($W=P\\cdot t$)','Einheit Leistung','54 km/h → m/s','Hubarbeit berechnen ($W=mgh$)','Einheitenfehler erkennen','Arbeit mit km-Weg ($W=F\\cdot s$)','Leistung mit Minuten ($P=W/t$)'];
+  for(let i=0;i<TOTAL;i++){
+    const ok = isCorrect(i);
+    if(ok) score++;
+    results.push({ok, label:LABELS[i]});
   }
   const passed = score >= THRESHOLD;
 
+  // SCORM interaction tracking (correct pattern = answer hash, not plaintext)
   results.forEach((r, i) => {
-    SCORM.setInteraction(i, `gate-b2b3-q${i+1}`, 'choice',
-      String(answers[i]), String(CORRECT[i]), r.ok ? 'correct' : 'wrong');
+    SCORM.setInteraction(i, `gate-b2b3-q${i+1}`,
+      NUMERIC.includes(i + 1) ? 'numeric' : 'choice',
+      String(answers[i]), HASHES[i], r.ok ? 'correct' : 'wrong');
   });
   SCORM.save(score, TOTAL, passed);
 
   document.getElementById('scoreDisplay').textContent = score+'/'+TOTAL;
-  document.getElementById('modalIcon').textContent = passed ? '🎉' : '💪';
-  document.getElementById('resultBadge').textContent = passed ? 'Bestanden ✓' : 'Noch nicht bestanden';
-  document.getElementById('resultBadge').className = 'result-badge '+(passed ? 'pass' : 'fail');
-  document.getElementById('resultText').textContent = passed
-    ? 'Ausgezeichnet! Du kannst sicher mit Einheiten rechnen und Fehler erkennen. Ab zu Level 3!'
-    : 'Du hast '+score+' von '+THRESHOLD+' benötigten Punkten. Übe nochmal mehrstufige Berechnungen in Level 2!';
+  document.getElementById('modalIcon').textContent = passed?'🎉':'💪';
+  document.getElementById('resultBadge').textContent = passed?'Bestanden ✓':'Noch nicht bestanden';
+  document.getElementById('resultBadge').className = 'result-badge '+(passed?'pass':'fail');
+  const recBox = document.getElementById('recommendList');
+  if (passed) {
+    document.getElementById('resultText').textContent = 'Ausgezeichnet! Du rechnest sicher mit Einheiten, meisterst mehrstufige Berechnungen und erkennst Fehler. Du kannst jetzt mit Level 3 starten.';
+    recBox.innerHTML = '';
+  } else {
+    document.getElementById('resultText').textContent = 'Du hast '+score+' von '+THRESHOLD+' benötigten Punkten erreicht. Wiederhole gezielt diese Module aus Level 2, dann schaffst du es:';
+    // Group failed questions by module, keep module order B2.1 .. B2.4
+    const byModule = {};
+    results.forEach((r, i) => {
+      if (!r.ok) {
+        const m = MODULES[i];
+        if (!byModule[m.id]) byModule[m.id] = { name: m.name, qs: [] };
+        byModule[m.id].qs.push(i + 1);
+      }
+    });
+    recBox.innerHTML = Object.keys(byModule).sort().map(id =>
+      `<div class="recommend-item">📘 <span class="mod-name">Modul ${id} (${byModule[id].name})</span> <span class="mod-qs">für ${joinQs(byModule[id].qs)}</span></div>`
+    ).join('');
+  }
   const rl = document.getElementById('reviewList');
-  rl.innerHTML = results.map(r => `<div class="review-item ${r.ok?'correct':'wrong'}">${r.ok?'✅':'❌'} ${r.label}</div>`).join('');
+  rl.innerHTML = results.map(r=>`<div class="review-item ${r.ok?'correct':'wrong'}">${r.ok?'✅':'❌'} ${r.label}</div>`).join('');
   document.getElementById('modal').classList.add('show');
   MathJax.typesetPromise([rl]);
 }
 function retryTest() {
   answers.fill(null);
-  document.querySelectorAll('input[type=radio]').forEach(r => r.checked = false);
-  textQs.forEach(q => { const el = document.getElementById('ans'+q); if (el) el.value = ''; });
-  document.querySelectorAll('.opt').forEach(o => o.classList.remove('selected'));
-  document.querySelectorAll('.q-card').forEach(c => c.classList.remove('answered'));
-  document.getElementById('progFill').style.width = '0%';
-  document.getElementById('progInfo').textContent = '0 von '+TOTAL+' beantwortet';
-  document.getElementById('btnSubmit').disabled = true;
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+  NUMERIC.forEach(q => { document.getElementById('ans'+q).value=''; });
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('.q-card').forEach(c=>c.classList.remove('answered'));
+  document.getElementById('progFill').style.width='0%';
+  document.getElementById('progInfo').textContent='0 von '+TOTAL+' beantwortet';
+  document.getElementById('btnSubmit').disabled=true;
   document.getElementById('modal').classList.remove('show');
   window.scrollTo(0,0);
 }
 document.addEventListener('DOMContentLoaded', () => {
+  shuffleOptions(); // must run before SCORM.init() restores the bookmark
   MathJax.startup.promise.then(() => MathJax.typesetPromise());
   SCORM.init();
 });
