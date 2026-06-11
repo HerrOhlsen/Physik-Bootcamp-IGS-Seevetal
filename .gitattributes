@@ -1,0 +1,6 @@
+# Line endings must be identical on every machine (Windows, macOS, CI),
+# otherwise build.mjs would produce different zip bytes per platform.
+* text=auto eol=lf
+*.zip binary
+*.png binary
+*.jpg binary
