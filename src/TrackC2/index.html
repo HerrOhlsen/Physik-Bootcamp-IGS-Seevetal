@@ -1,0 +1,2094 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Physik Bootcamp — Track C2: Diagramme</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #6668a0;
+
+  --accent: #ea580c;
+  --accent-bright: #fb923c;
+  --accent-glow: rgba(234, 88, 12, 0.35);
+  --accent-deep: #c2410c;
+  --accent-subtle: rgba(234, 88, 12, 0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-glow: rgba(52, 211, 153, 0.25);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(251, 146, 60, 0.15);
+  --border-strong: rgba(251, 146, 60, 0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-full: 100px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+input, textarea, select { font-size: 16px; }
+button, [onclick] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ══════════════════════════════════════════
+   ANIMATED BACKGROUND CANVAS
+   ══════════════════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+#bg-canvas.dimmed { opacity: 0.15; }
+#bg-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREEN SYSTEM
+   ══════════════════════════════════════════ */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.screen.active {
+  display: block;
+  animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   LANDING PAGE
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+}
+.landing-header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(194, 65, 12, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: var(--r-full);
+  margin-bottom: 24px;
+}
+.landing-title {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-bright) 50%, #fdba74 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+.landing-sub {
+  color: var(--ink-muted);
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+.landing-meta {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.l-meta {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+.l-meta .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* Overall progress */
+.overall-progress {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+.op-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.op-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.op-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), #fdba74);
+  border-radius: var(--r-full);
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.op-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Module cards grid */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 920px;
+}
+.mod-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.mod-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--r-lg);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+.mod-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--glow);
+}
+.mod-card:hover::before { opacity: 1; }
+.mod-card.completed { border-color: var(--ok-border); }
+.mod-card.completed::after {
+  content: '\2713';
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0c0c1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.mc-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.mc-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.mc-desc {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.mc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mc-time {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+}
+.mc-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--accent-subtle);
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+.mc-status.done {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: var(--ok-border);
+}
+.mod-card:nth-child(1) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+.mod-card:nth-child(2) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+.mod-card:nth-child(3) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+.mod-card:nth-child(4) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.8s both; }
+
+/* Footer */
+.landing-footer {
+  margin-top: 48px;
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 1s both;
+}
+
+/* ══════════════════════════════════════════
+   MODULE PAGE LAYOUT
+   ══════════════════════════════════════════ */
+.module-page { background: var(--bg-deep); position: relative; }
+.module-page::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(234,88,12,0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Top navbar */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+}
+.top-nav-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+}
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.nav-title {
+  font-size: 0.85rem; font-weight: 600; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nav-progress {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-progress-track {
+  width: 80px; height: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.nav-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  border-radius: var(--r-full);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-progress-text {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Module content */
+.mod-content {
+  position: relative; z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px 100px;
+}
+
+/* ══════════════════════════════════════════
+   MODULE COMPONENTS
+   ══════════════════════════════════════════ */
+.hero {
+  padding: 52px 0 36px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  margin-bottom: 18px;
+  border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  font-weight: 900; line-height: 1.1; letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero-sub {
+  color: var(--ink-muted); font-size: 1rem;
+  max-width: 480px; margin: 0 auto 20px;
+}
+.hero-meta {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+}
+.meta-chip {
+  font-size: 0.78rem; color: var(--ink-muted); font-weight: 500;
+}
+.meta-chip .val {
+  color: var(--accent-bright); font-weight: 700; font-family: var(--mono);
+}
+
+/* Glass cards */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+/* Chapter sections */
+.chapter { margin-top: 40px; }
+.chapter-label { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.chapter-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  border: 2px solid var(--accent);
+  color: var(--accent-bright);
+  font-family: var(--mono); font-size: 0.8rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.chapter-title {
+  font-size: 1.3rem; font-weight: 800; color: #fff;
+}
+
+/* Exercise cards */
+.exercise-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.exercise-card.solved { border-color: var(--ok-border); }
+.exercise-card.wrong-state { border-color: var(--err-border); }
+.ex-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.ex-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.ex-title { font-weight: 600; font-size: 0.9rem; color: var(--ink); }
+.ex-tag {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  color: var(--accent); background: var(--accent-subtle);
+  padding: 2px 8px; border-radius: var(--r-full);
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.ex-body { padding: 20px; }
+.ex-question { color: var(--ink); margin-bottom: 16px; line-height: 1.6; }
+
+/* Answer inputs */
+.answer-row {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.answer-prefix {
+  font-weight: 600; font-size: 1.1rem; color: var(--accent-bright);
+}
+.answer-input {
+  flex: 1; min-width: 160px;
+  padding: 10px 14px;
+  background: var(--bg-deep);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--mono); font-size: 1rem;
+  outline: none; transition: all 0.2s;
+}
+.answer-input::placeholder { color: var(--ink-dim); }
+.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.answer-input.correct { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.answer-input.incorrect { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+.answer-unit { font-size: 0.8rem; color: var(--ink-dim); }
+
+/* Buttons */
+.btn-check {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  background: var(--accent-deep);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-check:hover { background: var(--accent); transform: translateY(-1px); }
+.btn-hint {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 8px 14px;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.8rem;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-hint:hover { border-color: var(--warn); color: var(--warn); }
+
+/* Hint & Feedback */
+.hint-box {
+  display: none; margin-top: 12px; padding: 12px 16px;
+  background: var(--warn-bg);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: var(--r-md);
+  font-size: 0.85rem; color: var(--warn);
+}
+.hint-box.open { display: block; }
+.fb-block {
+  margin-top: 12px; padding: 10px 14px;
+  border-radius: var(--r-md);
+  font-size: 0.85rem; display: none;
+}
+.fb-block.correct {
+  display: block;
+  background: var(--ok-bg); color: var(--ok);
+  border: 1px solid var(--ok-border);
+}
+.fb-block.incorrect {
+  display: block;
+  background: var(--err-bg); color: var(--err);
+  border: 1px solid var(--err-border);
+}
+
+/* Option pills (MC) */
+.opt-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.opt-pill {
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+  color: var(--ink); cursor: pointer; transition: all 0.2s;
+}
+.opt-pill:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.opt-pill.selected { border-color: var(--accent); background: var(--accent-deep); color: #fff; }
+
+/* Continue & Result buttons */
+.btn-result {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; max-width: 360px;
+  margin: 32px auto 0;
+  padding: 16px 28px;
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  border: none; border-radius: var(--r-lg);
+  color: #fff;
+  font-family: var(--font); font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-result:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(234, 88, 12, 0.4);
+}
+
+/* Table */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.si-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.si-table th, .si-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.si-table th {
+  color: var(--accent-bright); font-weight: 700;
+  font-family: var(--mono); font-size: 0.7rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* Callout */
+.callout-v2 {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 16px 20px; border-radius: var(--r-md); margin: 16px 0;
+}
+.callout-v2.info {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+.callout-v2.info .body { color: #7dd3fc; }
+.callout-v2.info .title { color: #38bdf8; font-weight: 700; margin-bottom: 4px; }
+.callout-v2.warning {
+  background: var(--warn-bg);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+.callout-v2.warning .body { color: var(--warn); }
+.callout-v2.warning .title { color: #fcd34d; font-weight: 700; margin-bottom: 4px; }
+.callout-v2.success {
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-border);
+}
+.callout-v2.success .body { color: var(--ok); }
+.callout-v2.success .title { color: var(--ok); font-weight: 700; margin-bottom: 4px; }
+.callout-v2 .icon { font-size: 1.2rem; flex-shrink: 0; }
+
+/* Diagram box */
+.diagram-box {
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  margin: 20px 0;
+  text-align: center;
+}
+.diagram-box svg { max-width: 100%; height: auto; }
+.diagram-caption {
+  text-align: center;
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  margin-top: 10px;
+  font-style: italic;
+}
+.diagram-title {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--accent);
+  text-align: center;
+  margin-bottom: 14px;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+/* Legend */
+.legend {
+  display: flex; flex-wrap: wrap; gap: 16px;
+  justify-content: center; margin: 14px 0;
+}
+.legend-item {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.85rem; font-weight: 600; color: var(--ink-muted);
+}
+.legend-line { width: 28px; height: 3px; border-radius: 2px; }
+
+/* Extra section */
+.extra-section {
+  margin-top: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+.extra-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; cursor: pointer;
+  font-size: 0.92rem; font-weight: 600;
+  color: var(--ink-muted);
+  list-style: none; user-select: none;
+}
+.extra-toggle::-webkit-details-marker { display: none; }
+.extra-section[open] .extra-toggle {
+  color: var(--ink); background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.extra-icon {
+  font-size: 1.1rem; font-weight: 700; color: var(--accent);
+  transition: transform 0.2s; display: inline-block; width: 18px; text-align: center;
+}
+.extra-section[open] .extra-icon { transform: rotate(45deg); }
+.extra-count {
+  font-size: 0.78rem; font-weight: 400;
+  color: var(--ink-dim); margin-left: auto;
+}
+.extra-intro {
+  padding: 12px 20px 4px; font-size: 0.85rem;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.extra-card { border-left: 3px solid #555; opacity: 0.9; }
+.extra-card .ex-num { background: #555; }
+.extra-tag {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+.extra-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--ink-muted);
+}
+.extra-btn:hover { background: #444; color: var(--ink); }
+
+/* Graph choices (C2.4) */
+.graph-choices {
+  display: flex; flex-wrap: wrap; gap: 12px; margin-bottom: 16px;
+}
+.graph-choice {
+  background: var(--bg-card); border: 2px solid var(--border);
+  border-radius: var(--r-md); padding: 12px; cursor: pointer;
+  transition: all 0.2s; text-align: center; flex: 1; min-width: 130px;
+}
+.graph-choice:hover { border-color: var(--accent); }
+.graph-choice.selected-ok { border-color: var(--ok); background: var(--ok-bg); }
+.graph-choice.selected-err { border-color: var(--err); background: var(--err-bg); }
+.graph-label {
+  font-size: 0.75rem; font-weight: 600; color: var(--ink-muted); margin-top: 6px;
+}
+
+/* Data table (C2.4) */
+.data-table-wrap { overflow-x: auto; margin: 12px 0; }
+.data-table {
+  width: 100%; border-collapse: collapse; font-size: 0.85rem;
+}
+.data-table th, .data-table td {
+  padding: 8px 14px; border: 1px solid var(--border);
+  text-align: center;
+}
+.data-table th {
+  background: var(--bg-card); color: var(--accent-bright);
+  font-weight: 700; font-family: var(--mono); font-size: 0.75rem;
+}
+.data-table td { color: var(--ink-muted); }
+
+/* Compare grid (C2.2) */
+.compare-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0;
+}
+@media (max-width: 600px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 16px; text-align: center;
+}
+.compare-card.highlight-ok { border-color: rgba(52,211,153,0.3); }
+.compare-card.highlight-warn { border-color: rgba(251,191,36,0.3); }
+.compare-label { font-weight: 700; font-size: 0.9rem; margin-top: 8px; }
+.compare-desc { font-size: 0.78rem; color: var(--ink-dim); margin-top: 4px; }
+
+/* Dual diagram (C2.3) */
+.dual-diagram { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+@media (max-width: 640px) { .dual-diagram { grid-template-columns: 1fr; } }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .hero { padding: 40px 0 28px; }
+  .hero h1 { font-size: 1.8rem; }
+  .glass { padding: 16px; }
+  .answer-row { flex-direction: column; align-items: stretch; }
+  .answer-input { min-width: 0; }
+  .graph-choices { flex-direction: column; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     ANIMATED BACKGROUND CANVAS
+     ══════════════════════════════════════════ -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 0: LANDING PAGE
+     ══════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">TRACK C2</div>
+      <h1 class="landing-title">Diagramme<br>lesen</h1>
+      <p class="landing-sub">Steigung, Fläche und Diagrammtypen vergleichen</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">4</span> Module</span>
+        <span class="l-meta"><span class="val">20</span> Aufgaben</span>
+        <span class="l-meta"><span class="val">~80 min</span> Dauer</span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track"><div class="op-fill" id="opFill"></div></div>
+        <span class="op-label" id="opLabel">0 / 4 Module</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card" onclick="openModule(0)" id="card-0">
+        <div class="mc-num">C2.1</div>
+        <div class="mc-title">Mehrere Bewegungen</div>
+        <div class="mc-desc">Körper vergleichen, Schnittpunkte deuten, Geschwindigkeiten ablesen</div>
+        <div class="mc-footer">
+          <span class="mc-time">20 min</span>
+          <span class="mc-status" id="status-0">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(1)" id="card-1">
+        <div class="mc-num">C2.2</div>
+        <div class="mc-title">Beschleunigung erkennen</div>
+        <div class="mc-desc">Gerade vs. Kurve — Graphenformen im s-t-Diagramm identifizieren</div>
+        <div class="mc-footer">
+          <span class="mc-time">20 min</span>
+          <span class="mc-status" id="status-1">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(2)" id="card-2">
+        <div class="mc-num">C2.3</div>
+        <div class="mc-title">s-t ↔ v-t umwandeln</div>
+        <div class="mc-desc">Steigung ablesen, Fläche berechnen — zwischen Diagrammtypen wechseln</div>
+        <div class="mc-footer">
+          <span class="mc-time">20 min</span>
+          <span class="mc-status" id="status-2">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(3)" id="card-3">
+        <div class="mc-num">C2.4</div>
+        <div class="mc-title">Diagramm zeichnen</div>
+        <div class="mc-desc">Messwerte interpretieren und den richtigen Graphen auswählen</div>
+        <div class="mc-footer">
+          <span class="mc-time">25 min</span>
+          <span class="mc-status" id="status-3">Starten</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-footer">Track C2 &middot; v4</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1: MODULE C2.1 - Mehrere Bewegungen
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-0">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">C2.1 &mdash; Mehrere Bewegungen im Diagramm</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div>
+          <span class="nav-progress-text" id="prog-text-0">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">C2.1</div>
+        <h1>Mehrere Bewegungen<br>im Diagramm</h1>
+        <p class="hero-sub">Körper vergleichen, Schnittpunkte deuten, Geschwindigkeiten ablesen</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 2</span> Standard</div>
+          <div class="meta-chip"><span class="val">20 min</span> Dauer</div>
+        </div>
+      </section>
+
+      <!-- Chapter 1: Erklärung -->
+      <section class="chapter" id="m0-ch1">
+        <div class="chapter-label">
+          <span class="chapter-num">01</span>
+          <h2 class="chapter-title">Mehrere Körper in einem Diagramm</h2>
+        </div>
+        <div class="glass">
+          <p>Wenn mehrere Körper gleichzeitig untersucht werden, zeichnet man ihre Bewegungen in <strong>dasselbe Diagramm</strong>. So kann man sie direkt vergleichen.</p>
+        </div>
+        <div class="callout-v2 success">
+          <span class="icon">&#128273;</span>
+          <div class="body">
+            <div class="title">Grundregel</div>
+            Je <strong>steiler</strong> die Gerade im s-t-Diagramm, desto <strong>größer</strong> die Geschwindigkeit. Ein ruhender Körper zeigt eine <strong>waagrechte Linie</strong>.
+          </div>
+        </div>
+
+        <!-- Hauptdiagramm -->
+        <div class="diagram-box">
+          <div class="diagram-title">s-t-Diagramm: Körper P, Q und R</div>
+          <svg viewBox="0 0 440 260" width="440" height="260">
+            <line x1="65" y1="215" x2="65" y2="30" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="120" y1="215" x2="120" y2="30" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="175" y1="215" x2="175" y2="30" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="230" y1="215" x2="230" y2="30" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="285" y1="215" x2="285" y2="30" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="340" y1="215" x2="340" y2="30" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="58" y1="215" x2="348" y2="215" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="58" y1="180" x2="348" y2="180" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="58" y1="145" x2="348" y2="145" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="58" y1="110" x2="348" y2="110" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="58" y1="75" x2="348" y2="75" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="58" y1="40" x2="348" y2="40" stroke="rgba(255,255,255,0.08)" stroke-width="1"/>
+            <line x1="65" y1="215" x2="355" y2="215" stroke="#a8a8c8" stroke-width="2" marker-end="url(#arrM0)"/>
+            <line x1="65" y1="225" x2="65" y2="20" stroke="#a8a8c8" stroke-width="2" marker-end="url(#arrM0)"/>
+            <defs><marker id="arrM0" markerWidth="6" markerHeight="6" refX="3" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6 Z" fill="#a8a8c8"/></marker></defs>
+            <text x="358" y="219" font-size="12" fill="#a8a8c8" font-family="'IBM Plex Mono',monospace">t / s</text>
+            <text x="42" y="17" font-size="12" fill="#a8a8c8" font-family="'IBM Plex Mono',monospace">s / m</text>
+            <text x="61" y="229" font-size="11" fill="#7777a0" text-anchor="middle">0</text>
+            <text x="120" y="229" font-size="11" fill="#7777a0" text-anchor="middle">1</text>
+            <text x="175" y="229" font-size="11" fill="#7777a0" text-anchor="middle">2</text>
+            <text x="230" y="229" font-size="11" fill="#7777a0" text-anchor="middle">3</text>
+            <text x="285" y="229" font-size="11" fill="#7777a0" text-anchor="middle">4</text>
+            <text x="340" y="229" font-size="11" fill="#7777a0" text-anchor="middle">5</text>
+            <text x="57" y="219" font-size="11" fill="#7777a0" text-anchor="end">0</text>
+            <text x="57" y="184" font-size="11" fill="#7777a0" text-anchor="end">5</text>
+            <text x="57" y="149" font-size="11" fill="#7777a0" text-anchor="end">10</text>
+            <text x="57" y="114" font-size="11" fill="#7777a0" text-anchor="end">15</text>
+            <text x="57" y="79" font-size="11" fill="#7777a0" text-anchor="end">20</text>
+            <text x="57" y="44" font-size="11" fill="#7777a0" text-anchor="end">25</text>
+            <!-- P: v=5 m/s -->
+            <line x1="65" y1="215" x2="340" y2="40" stroke="#fbbf24" stroke-width="2.5"/>
+            <text x="344" y="38" font-size="13" font-weight="700" fill="#fbbf24">P</text>
+            <!-- Q: v=1 m/s -->
+            <line x1="65" y1="215" x2="340" y2="180" stroke="#60a5fa" stroke-width="2.5"/>
+            <text x="344" y="178" font-size="13" font-weight="700" fill="#60a5fa">Q</text>
+            <!-- R: ruht bei s=20m -->
+            <line x1="65" y1="75" x2="340" y2="75" stroke="#34d399" stroke-width="2.5"/>
+            <text x="344" y="73" font-size="13" font-weight="700" fill="#34d399">R</text>
+            <!-- Schnittpunkt P und R: t=4, s=20 -->
+            <circle cx="285" cy="75" r="6" fill="none" stroke="#f87171" stroke-width="2"/>
+          </svg>
+          <p class="diagram-caption">P (gelb): $v = 5\,\text{m/s}$ | Q (blau): $v = 1\,\text{m/s}$ | R (grün): ruht bei $s = 20\,\text{m}$</p>
+        </div>
+
+        <div class="callout-v2 warning">
+          <span class="icon">&#9888;&#65039;</span>
+          <div class="body">
+            <div class="title">Schnittpunkt</div>
+            Wenn sich zwei Graphen schneiden, befinden sich beide Körper zur gleichen Zeit am gleichen Ort — das bedeutet nicht unbedingt eine Kollision!
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter 2: Exercises -->
+      <section class="chapter" id="m0-ch2" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">02</span>
+          <h2 class="chapter-title">Übungsaufgaben</h2>
+        </div>
+
+        <!-- Ex 1: MC Wer ist schneller? -->
+        <div class="exercise-card" id="m0-ex1">
+          <div class="ex-header">
+            <span class="ex-num">1</span>
+            <span class="ex-title">Wer ist am schnellsten?</span>
+            <span class="ex-tag">Ablesen</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Welcher Körper bewegt sich im Diagramm am schnellsten?</p>
+            <div class="opt-pills" id="m0-og1">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a1','P')">Körper P — steilste Gerade</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a1','Q')">Körper Q — flachere Gerade</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a1','R')">Körper R — liegt am höchsten</button>
+            </div>
+            <input type="hidden" id="m0-a1" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(0,1,'m0-a1','m0-fb1','P')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h1">Schau auf die Steigung der Geraden: Je steiler, desto schneller.</div>
+            <div class="fb-block" id="m0-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2: MC Schnittpunkt deuten -->
+        <div class="exercise-card" id="m0-ex2">
+          <div class="ex-header">
+            <span class="ex-num">2</span>
+            <span class="ex-title">Schnittpunkt deuten</span>
+            <span class="ex-tag">Verstehen</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Die Graphen von P und R schneiden sich bei $t = 4\,\text{s}$. Was bedeutet dieser Schnittpunkt?</p>
+            <div class="opt-pills" id="m0-og2">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a2','kollision')">P und R kollidieren</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a2','gleich')">P und R sind am gleichen Ort ($s = 20\,\text{m}$)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a2','bewegt')">R beginnt sich zu bewegen</button>
+            </div>
+            <input type="hidden" id="m0-a2" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(0,2,'m0-a2','m0-fb2','gleich')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h2">Ein Schnittpunkt im s-t-Diagramm bedeutet: Beide Körper haben zur gleichen Zeit den gleichen Wert auf der s-Achse.</div>
+            <div class="fb-block" id="m0-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3: Position berechnen -->
+        <div class="exercise-card" id="m0-ex3">
+          <div class="ex-header">
+            <span class="ex-num">3</span>
+            <span class="ex-title">Position berechnen</span>
+            <span class="ex-tag">Berechnen</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Körper P bewegt sich mit $v = 5\,\frac{\text{m}}{\text{s}}$ und startet bei $s = 0$. Welchen Weg hat P nach $t = 3\,\text{s}$ zurückgelegt?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$s_P$ =</span>
+              <input class="answer-input" id="m0-a3" placeholder="Zahl eingeben">
+              <span class="answer-unit">m</span>
+              <button class="btn-check" onclick="checkInput(0,3,'m0-a3','m0-fb3','15|15.0|15,0')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h3">Nutze $s = v \cdot t = 5 \cdot 3$.</div>
+            <div class="fb-block" id="m0-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4: Geschwindigkeit von Q -->
+        <div class="exercise-card" id="m0-ex4">
+          <div class="ex-header">
+            <span class="ex-num">4</span>
+            <span class="ex-title">Geschwindigkeit berechnen</span>
+            <span class="ex-tag">Berechnen</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Berechne die Geschwindigkeit $v_Q$ von Körper Q. Ablesen: Bei $t = 5\,\text{s}$ hat Q den Weg $s = 5\,\text{m}$ zurückgelegt.</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$v_Q$ =</span>
+              <input class="answer-input" id="m0-a4" placeholder="Zahl eingeben">
+              <span class="answer-unit">m/s</span>
+              <button class="btn-check" onclick="checkInput(0,4,'m0-a4','m0-fb4','1|1.0|1,0')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h4">$v = \frac{\Delta s}{\Delta t} = \frac{5\,\text{m}}{5\,\text{s}}$</div>
+            <div class="fb-block" id="m0-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5: Positionen vergleichen -->
+        <div class="exercise-card" id="m0-ex5">
+          <div class="ex-header">
+            <span class="ex-num">5</span>
+            <span class="ex-title">Positionen vergleichen</span>
+            <span class="ex-tag">Anwenden</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Bei $t = 3\,\text{s}$: Wer hat den größten Abstand vom Startpunkt ($s = 0$)?</p>
+            <div class="opt-pills" id="m0-og5">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','Q')">Körper Q</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','P')">Körper P</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','R')">Körper R ($s = 20\,\text{m}$)</button>
+            </div>
+            <input type="hidden" id="m0-a5" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(0,5,'m0-a5','m0-fb5','R')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h5">P: $5 \cdot 3 = 15\,\text{m}$ | Q: $1 \cdot 3 = 3\,\text{m}$ | R: ruht bei $20\,\text{m}$</div>
+            <div class="fb-block" id="m0-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(0)">Ergebnis anzeigen</button>
+      </section>
+
+      <!-- Extra exercises -->
+      <details class="extra-section" style="margin-top:32px;">
+        <summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? — Zusätzliche Übungen<span class="extra-count">(3 weitere)</span></summary>
+        <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong>.</p></div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Schnittpunkt berechnen</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Körper P: $s = 2 \cdot t$. Körper Q: $s = 6 \cdot t - 8$. Bei welchem $t$ treffen sie sich?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$t$ =</span>
+              <input class="answer-input" id="m0-eA1" placeholder="Zahl eingeben">
+              <span class="answer-unit">s</span>
+              <button class="btn-check extra-btn" onclick="checkExtra('m0-eA1','m0-eFb1','2|2.0|2,0','&#10003; Richtig! $2t = 6t - 8 \Rightarrow t = 2\,\text{s}$.','&#10007; Setze gleich: $2t = 6t - 8$. Löse nach $t$.')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m0-eFb1"></div>
+          </div>
+        </div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Steilere Gerade</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Was bedeutet eine steilere Gerade im s-t-Diagramm?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m0-eA2','v')">Größere Geschwindigkeit</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-eA2','a')">Größere Beschleunigung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-eA2','s')">Kleinerer Weg</button>
+            </div>
+            <input type="hidden" id="m0-eA2" value="">
+            <button class="btn-check extra-btn" onclick="checkExtra('m0-eA2','m0-eFb2','v','&#10003; Richtig! Steilere Gerade = größere Steigung = größere Geschwindigkeit.','&#10007; Im s-t-Diagramm ist die Steigung = Geschwindigkeit.')">Prüfen</button>
+            <div class="fb-block" id="m0-eFb2"></div>
+          </div>
+        </div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+3</span><span class="ex-title">Überholen deuten</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Zwei Körper starten am selben Ort. Einer ist schneller. Was bedeutet ein Schnittpunkt nach $t = 0$?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m0-eA3','start')">Sie treffen sich am Startpunkt</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-eA3','einholen')">Der Schnellere hat den Langsameren eingeholt</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-eA3','halt')">Sie halten beide an</button>
+            </div>
+            <input type="hidden" id="m0-eA3" value="">
+            <button class="btn-check extra-btn" onclick="checkExtra('m0-eA3','m0-eFb3','einholen','&#10003; Richtig! Der Schnellere hat die gleiche Position wieder erreicht und zieht vorbei.','&#10007; Ein Schnittpunkt bedeutet gleiche Position — der Schnellere hat eingeholt.')">Prüfen</button>
+            <div class="fb-block" id="m0-eFb3"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2: MODULE C2.2 - Beschleunigung erkennen
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-1">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">C2.2 &mdash; Beschleunigung erkennen</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div>
+          <span class="nav-progress-text" id="prog-text-1">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">C2.2</div>
+        <h1>Beschleunigung<br>erkennen</h1>
+        <p class="hero-sub">Gerade vs. Kurve — Graphenformen im s-t-Diagramm identifizieren</p>
+      </section>
+
+      <section class="chapter" id="m1-ch1">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Vier typische Graphenformen</h2></div>
+        <div class="glass">
+          <p>Im s-t-Diagramm reicht ein Blick auf die <strong>Form</strong> des Graphen, um die Bewegungsart zu erkennen:</p>
+          <ul style="margin-top:12px; padding-left:1.2em; color:var(--ink-muted);">
+            <li><strong style="color:#34d399">Gerade</strong> → gleichförmige Bewegung, $a = 0$, Steigung bleibt gleich</li>
+            <li><strong style="color:#d97706">Aufwärts gebogene Kurve</strong> → Beschleunigung, $a > 0$, Steigung wird größer</li>
+            <li><strong style="color:#c084fc">Abwärts gebogene Kurve</strong> → Verzögerung, $a < 0$, Steigung wird kleiner</li>
+            <li><strong style="color:var(--ink-muted)">Waagrechte Linie</strong> → Ruhezustand, $v = 0$</li>
+          </ul>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Kurzregel</div>
+            Zeichne an zwei Stellen ein Steigungsdreieck. Wenn $\Delta s$ bei gleichem $\Delta t$ <em>zunimmt</em>, liegt Beschleunigung vor.
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="m1-ch2" style="margin-top:40px;">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+
+        <!-- Ex 1: Gerade identifizieren -->
+        <div class="exercise-card" id="m1-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Graphenform: Gerade</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Was beschreibt eine <strong>gerade, schräge Linie</strong> im s-t-Diagramm?</p>
+            <div class="opt-pills" id="m1-og1">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','beschl')">Der Körper beschleunigt</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','gleichf')">Gleichförmige Bewegung ($v = \text{const}$, $a = 0$)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','still')">Der Körper steht still</button>
+            </div>
+            <input type="hidden" id="m1-a1" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(1,1,'m1-a1','m1-fb1','gleichf')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h1">Eine gerade Linie hat überall die gleiche Steigung. Was bedeutet das für die Geschwindigkeit?</div>
+            <div class="fb-block" id="m1-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2: Parabel identifizieren -->
+        <div class="exercise-card" id="m1-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Graphenform: Parabel</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Welche Bewegungsart steckt hinter einer <strong>aufwärts gekrümmten Kurve</strong> im s-t-Diagramm?</p>
+            <div class="opt-pills" id="m1-og2">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','gleichf')">Gleichförmige Bewegung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','verz')">Verzögerte Bewegung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','beschl')">Beschleunigte Bewegung ($a > 0$)</button>
+            </div>
+            <input type="hidden" id="m1-a2" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(1,2,'m1-a2','m1-fb2','beschl')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h2">Die Kurve wird immer steiler — die Steigung (= Geschwindigkeit) nimmt zu.</div>
+            <div class="fb-block" id="m1-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3: Vergleich X und Y -->
+        <div class="exercise-card" id="m1-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Vergleich: X und Y</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Körper X zeigt eine <strong>gerade Linie</strong>, Körper Y eine <strong>aufwärts gebogene Kurve</strong>. Welche Aussage ist richtig?</p>
+            <div class="opt-pills" id="m1-og3">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','xgleich')">X gleichförmig; Y beschleunigt</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','xbeschl')">X beschleunigt; Y gleichförmig</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','beide')">Beide stehen still</button>
+            </div>
+            <input type="hidden" id="m1-a3" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(1,3,'m1-a3','m1-fb3','xgleich')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h3">Gerade = gleichförmig. Kurve (Parabel) = beschleunigt.</div>
+            <div class="fb-block" id="m1-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4: Durchschnittsgeschwindigkeit -->
+        <div class="exercise-card" id="m1-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Durchschnittsgeschwindigkeit</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Im Parabel-Diagramm gilt $s = t^2$. Berechne die Durchschnittsgeschwindigkeit von $t = 3\,\text{s}$ bis $t = 4\,\text{s}$: ($s(3) = 9\,\text{m}$, $s(4) = 16\,\text{m}$)</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$\bar{v}$ =</span>
+              <input class="answer-input" id="m1-a4" placeholder="Zahl eingeben">
+              <span class="answer-unit">m/s</span>
+              <button class="btn-check" onclick="checkInput(1,4,'m1-a4','m1-fb4','7|7.0|7,0')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h4">$v = \frac{\Delta s}{\Delta t} = \frac{16-9}{4-3} = \frac{7}{1}$</div>
+            <div class="fb-block" id="m1-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5: Verzögerung erkennen -->
+        <div class="exercise-card" id="m1-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Verzögerung erkennen</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein s-t-Graph ist anfangs steil und wird mit der Zeit <strong>flacher</strong>. Was gilt für die Geschwindigkeit?</p>
+            <div class="opt-pills" id="m1-og5">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','gleich')">Bleibt gleich — gleichförmig</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','zu')">Nimmt zu — Beschleunigung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','ab')">Nimmt ab — Verzögerung ($a < 0$)</button>
+            </div>
+            <input type="hidden" id="m1-a5" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(1,5,'m1-a5','m1-fb5','ab')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h5">Die Steigung zeigt die Geschwindigkeit. Wird der Graph flacher, wird die Steigung kleiner.</div>
+            <div class="fb-block" id="m1-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(1)">Ergebnis anzeigen</button>
+      </section>
+
+      <details class="extra-section" style="margin-top:32px;">
+        <summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? — Zusätzliche Übungen<span class="extra-count">(4 weitere)</span></summary>
+        <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong>.</p></div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Graphenform zuordnen</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Gerade mit positiver Steigung im s-t-Diagramm beschreibt welche Bewegungsart?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m1-eA1','gleichf')">Gleichförmige Bewegung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-eA1','beschl')">Beschleunigte Bewegung</button>
+            </div>
+            <input type="hidden" id="m1-eA1" value="">
+            <button class="btn-check extra-btn" onclick="checkExtra('m1-eA1','m1-eFb1','gleichf','&#10003; Richtig! Gerade = gleichförmige Bewegung.','&#10007; Gerade = konstante Steigung = gleichförmige Bewegung.')">Prüfen</button>
+            <div class="fb-block" id="m1-eFb1"></div>
+          </div>
+        </div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">s-t Parabel → v-t?</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein s-t-Diagramm zeigt eine Parabel. Wie sieht das v-t-Diagramm aus?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m1-eA2','parabel')">Parabel</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-eA2','gerade')">Gerade, steigend</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-eA2','waagr')">Waagrechte Linie</button>
+            </div>
+            <input type="hidden" id="m1-eA2" value="">
+            <button class="btn-check extra-btn" onclick="checkExtra('m1-eA2','m1-eFb2','gerade','&#10003; Richtig! Konstante Beschleunigung = lineare v-t-Gerade (steigend).','&#10007; Parabel im s-t → linear steigende Gerade im v-t.')">Prüfen</button>
+            <div class="fb-block" id="m1-eFb2"></div>
+          </div>
+        </div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+3</span><span class="ex-title">Krümmungsrichtung</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Im s-t-Diagramm biegt eine Kurve sich nach unten. Was bedeutet das?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m1-eA3','beschl')">Beschleunigung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-eA3','bremst')">Bremst ab</button>
+            </div>
+            <input type="hidden" id="m1-eA3" value="">
+            <button class="btn-check extra-btn" onclick="checkExtra('m1-eA3','m1-eFb3','bremst','&#10003; Richtig! Verzögerung: die Steigung (also v) wird kleiner.','&#10007; Nach unten biegen = Steigung wird kleiner = Verzögerung.')">Prüfen</button>
+            <div class="fb-block" id="m1-eFb3"></div>
+          </div>
+        </div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+4</span><span class="ex-title">Durchschnittsgeschwindigkeit</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Gegenstand legt in den ersten 4 s den Weg $s = 36\,\text{m}$ zurück. Berechne die Durchschnittsgeschwindigkeit.</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$\bar{v}$ =</span>
+              <input class="answer-input" id="m1-eA4" placeholder="Zahl eingeben">
+              <span class="answer-unit">m/s</span>
+              <button class="btn-check extra-btn" onclick="checkExtra('m1-eA4','m1-eFb4','9|9.0|9,0','&#10003; Richtig! $\bar{v} = 36/4 = 9\,\text{m/s}$.','&#10007; $\bar{v} = \frac{36\,\text{m}}{4\,\text{s}} = 9\,\text{m/s}$.')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m1-eFb4"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3: MODULE C2.3 - s-t ↔ v-t umwandeln
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-2">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">C2.3 &mdash; s-t &#8596; v-t umwandeln</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-2"></div></div>
+          <span class="nav-progress-text" id="prog-text-2">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">C2.3</div>
+        <h1>s-t &#8596; v-t<br>umwandeln</h1>
+        <p class="hero-sub">Steigung ablesen, Fläche berechnen — zwischen Diagrammtypen wechseln</p>
+      </section>
+
+      <section class="chapter" id="m2-ch1">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Der Zusammenhang</h2></div>
+        <div class="glass">
+          <p><strong>s-t → v-t:</strong> Steigung im s-t-Diagramm ablesen = Wert im v-t-Diagramm eintragen.</p>
+          <p style="margin-top:8px;"><strong>v-t → s-t:</strong> Fläche unter dem v-t-Graphen berechnen = Zuwachs von $s$.</p>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Zusammenfassung</div>
+            <strong>s-t zu v-t:</strong> Steigung ablesen = Wert im v-t eintragen<br>
+            <strong>v-t zu s-t:</strong> Fläche berechnen = Zuwachs von $s$
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="m2-ch2" style="margin-top:40px;">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+
+        <!-- Ex 1: Gleichbleibende Steigung -->
+        <div class="exercise-card" id="m2-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Gleichbleibende Steigung</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Körper bewegt sich im s-t-Diagramm mit einer <strong>gleichbleibenden Steigung</strong> (Gerade). Wie sieht sein v-t-Diagramm aus?</p>
+            <div class="opt-pills" id="m2-og1">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','A')">Waagrechte Linie bei konst. $v$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','B')">Steigende Linie (wachsendes $v$)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','C')">Linie auf t-Achse ($v = 0$)</button>
+            </div>
+            <input type="hidden" id="m2-a1" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(2,1,'m2-a1','m2-fb1','A')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h1">Konstante Steigung = konstante Geschwindigkeit = waagrechte Linie im v-t.</div>
+            <div class="fb-block" id="m2-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2: Parabel im s-t -->
+        <div class="exercise-card" id="m2-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Parabel im s-t</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Das s-t-Diagramm zeigt eine <strong>gleichmäßig aufwärts gebogene Kurve</strong> (Parabel). Was erscheint im v-t-Diagramm?</p>
+            <div class="opt-pills" id="m2-og2">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a2','A')">Waagrechte Linie</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a2','B')">Linear steigende Gerade</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a2','C')">Parabel im v-t</button>
+            </div>
+            <input type="hidden" id="m2-a2" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(2,2,'m2-a2','m2-fb2','B')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h2">Die Steigung der Parabel wächst gleichmäßig → v steigt linear.</div>
+            <div class="fb-block" id="m2-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3: Steigung berechnen -->
+        <div class="exercise-card" id="m2-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Steigung berechnen</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Körper bewegt sich von $t = 0$ bis $t = 2\,\text{s}$ von $s = 0$ auf $s = 10\,\text{m}$. Berechne die Geschwindigkeit.</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$v$ =</span>
+              <input class="answer-input" id="m2-a3" placeholder="Zahl eingeben">
+              <span class="answer-unit">m/s</span>
+              <button class="btn-check" onclick="checkInput(2,3,'m2-a3','m2-fb3','5|5.0|5,0')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h3">$v = \frac{\Delta s}{\Delta t} = \frac{10\,\text{m}}{2\,\text{s}}$</div>
+            <div class="fb-block" id="m2-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4: v-t zu s-t -->
+        <div class="exercise-card" id="m2-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">v-t zu s-t</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">v-t-Diagramm: Für $t = 0$ bis $2\,\text{s}$ gilt $v = 6\,\frac{\text{m}}{\text{s}}$, danach $v = 0$. Wie sieht das s-t-Diagramm aus?</p>
+            <div class="opt-pills" id="m2-og4">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','A')">Gerade hoch, dann absteigend</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','B')">Gerade hoch, dann waagrecht</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','C')">Parabel hoch, dann waagrecht</button>
+            </div>
+            <input type="hidden" id="m2-a4" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(2,4,'m2-a4','m2-fb4','B')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h4">$v = 6$ für 2 s: $s$ steigt linear auf $12\,\text{m}$. Dann $v = 0$: $s$ bleibt konstant.</div>
+            <div class="fb-block" id="m2-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5: Weg berechnen -->
+        <div class="exercise-card" id="m2-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Weg aus v-t berechnen</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Körper fährt 3 Sekunden mit $v = 8\,\frac{\text{m}}{\text{s}}$, dann steht er still. Gesamtweg?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$s$ =</span>
+              <input class="answer-input" id="m2-a5" placeholder="Zahl eingeben">
+              <span class="answer-unit">m</span>
+              <button class="btn-check" onclick="checkInput(2,5,'m2-a5','m2-fb5','24|24.0|24,0')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h5">$s = v \cdot t = 8 \cdot 3$. Im zweiten Abschnitt ($v = 0$) kommt kein Weg dazu.</div>
+            <div class="fb-block" id="m2-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(2)">Ergebnis anzeigen</button>
+      </section>
+
+      <details class="extra-section" style="margin-top:32px;">
+        <summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? — Zusätzliche Übungen<span class="extra-count">(3 weitere)</span></summary>
+        <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong>.</p></div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">s-t zu v-t: Drei Abschnitte</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">s-t-Diagramm: Abschnitt 1 ($t = 0$ bis $3\,\text{s}$): Gerade, Steigung $4\,\text{m/s}$. Welchen Wert hat $v$ in Abschnitt 1?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$v$ =</span>
+              <input class="answer-input" id="m2-eA1" placeholder="Zahl eingeben">
+              <span class="answer-unit">m/s</span>
+              <button class="btn-check extra-btn" onclick="checkExtra('m2-eA1','m2-eFb1','4|4.0|4,0','&#10003; Richtig! Die Steigung der s-t-Geraden gibt direkt die Geschwindigkeit an.','&#10007; Steigung im s-t = Geschwindigkeit $v$.')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m2-eFb1"></div>
+          </div>
+        </div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">v-t → Gesamtweg</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">v-t-Diagramm: $v = 6\,\text{m/s}$ (konstant) für $5\,\text{s}$, dann $v = 0$. Gesamtstrecke?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$s$ =</span>
+              <input class="answer-input" id="m2-eA2" placeholder="Zahl eingeben">
+              <span class="answer-unit">m</span>
+              <button class="btn-check extra-btn" onclick="checkExtra('m2-eA2','m2-eFb2','30|30.0|30,0','&#10003; Richtig! $s = 6 \cdot 5 = 30\,\text{m}$.','&#10007; $s = v \cdot t = 6 \cdot 5 = 30\,\text{m}$.')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m2-eFb2"></div>
+          </div>
+        </div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+3</span><span class="ex-title">Realkontext: Zug mit Halt</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Zug fährt $10\,\text{s}$ mit $v = 20\,\text{m/s}$, hält $5\,\text{s}$, fährt dann $5\,\text{s}$ mit $v = 10\,\text{m/s}$. Gesamtweg?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$s$ =</span>
+              <input class="answer-input" id="m2-eA3" placeholder="Zahl eingeben">
+              <span class="answer-unit">m</span>
+              <button class="btn-check extra-btn" onclick="checkExtra('m2-eA3','m2-eFb3','250|250.0|250,0','&#10003; Richtig! $200 + 0 + 50 = 250\,\text{m}$.','&#10007; $s = 20 \cdot 10 + 0 + 10 \cdot 5 = 250\,\text{m}$.')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m2-eFb3"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 4: MODULE C2.4 - Diagramm zeichnen
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-3">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">C2.4 &mdash; Diagramm zeichnen</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-3"></div></div>
+          <span class="nav-progress-text" id="prog-text-3">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">C2.4</div>
+        <h1>Diagramm zeichnen:<br>Daten → Graph</h1>
+        <p class="hero-sub">Messwerte interpretieren, den richtigen Graphen auswählen und Daten verbinden</p>
+      </section>
+
+      <section class="chapter" id="m3-ch1">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Von der Tabelle zum Diagramm</h2></div>
+        <div class="glass">
+          <p>Eine Wertetabelle enthält Messpunkte $(t, s)$ oder $(t, v)$. Deine Aufgabe: Den passenden Graphen finden.</p>
+          <ol style="margin-top:12px; padding-left:1.2em; color:var(--ink-muted);">
+            <li>Tabelle lesen: Welche Größen? Welche Einheiten?</li>
+            <li>Differenzen prüfen: Wächst $s$ gleichmäßig oder immer schneller?</li>
+            <li>Graphentyp bestimmen: Gerade (konstantes $\Delta s$) oder Parabel (wachsendes $\Delta s$)?</li>
+          </ol>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Schnelltest</div>
+            <strong>Differenzen gleich</strong> → Gerade (gleichförmige Bewegung)<br>
+            <strong>Differenzen nehmen zu</strong> → Parabel (beschleunigte Bewegung)
+          </div>
+        </div>
+      </section>
+
+      <section class="chapter" id="m3-ch2" style="margin-top:40px;">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+
+        <!-- Ex 1: Tabelle → Graphtyp -->
+        <div class="exercise-card" id="m3-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Tabelle → Graphtyp</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Welchen Graphtyp erwartest du?</p>
+            <div class="data-table-wrap">
+              <table class="data-table" style="max-width:480px">
+                <thead><tr><th>$t$ / s</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th><th>5</th></tr></thead>
+                <tbody><tr><td>$s$ / m</td><td>0</td><td>4</td><td>8</td><td>12</td><td>16</td><td>20</td></tr></tbody>
+              </table>
+            </div>
+            <div class="opt-pills" id="m3-og1">
+              <button class="opt-pill" onclick="selOpt(this,'m3-a1','gerade')">Gerade (gleichförmig, $v = 4\,\frac{\text{m}}{\text{s}}$)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a1','parabel')">Parabel (beschleunigt)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a1','waagr')">Waagrechte Linie (ruht)</button>
+            </div>
+            <input type="hidden" id="m3-a1" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(3,1,'m3-a1','m3-fb1','gerade')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h1">Differenzen: $8-4=4$, $12-8=4$, $16-12=4$ — alle gleich!</div>
+            <div class="fb-block" id="m3-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2: Graph zur Tabelle -->
+        <div class="exercise-card" id="m3-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Graph zur Tabelle auswählen</span><span class="ex-tag">Visuell</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Welcher Graph passt zu dieser Tabelle?</p>
+            <div class="data-table-wrap">
+              <table class="data-table" style="max-width:480px">
+                <thead><tr><th>$t$ / s</th><th>0</th><th>1</th><th>2</th><th>3</th><th>4</th></tr></thead>
+                <tbody><tr><td>$s$ / m</td><td>0</td><td>2</td><td>8</td><td>18</td><td>32</td></tr></tbody>
+              </table>
+            </div>
+            <div class="opt-pills" id="m3-og2">
+              <button class="opt-pill" onclick="selOpt(this,'m3-a2','gerade')">Gerade Linie</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a2','parabel')">Aufwärtskurve (Parabel)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a2','fallend')">Erst waagrecht, dann fallend</button>
+            </div>
+            <input type="hidden" id="m3-a2" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(3,2,'m3-a2','m3-fb2','parabel')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h2">Differenzen: 2, 6, 10, 14 — wachsend → Beschleunigung → Parabel.</div>
+            <div class="fb-block" id="m3-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3: Wert berechnen -->
+        <div class="exercise-card" id="m3-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Wert aus Formel</span><span class="ex-tag">Berechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Messreihe ergibt $s = 2 \cdot t^2$ (mit $s$ in m, $t$ in s). Welchen Wert hat $s$ bei $t = 5\,\text{s}$?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$s$ =</span>
+              <input class="answer-input" id="m3-a3" placeholder="Zahl eingeben">
+              <span class="answer-unit">m</span>
+              <button class="btn-check" onclick="checkInput(3,3,'m3-a3','m3-fb3','50|50.0|50,0')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h3">$s = 2 \cdot 5^2 = 2 \cdot 25 = ?$</div>
+            <div class="fb-block" id="m3-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4: v-t-Graph zuordnen -->
+        <div class="exercise-card" id="m3-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">v-t-Diagramm zuordnen</span><span class="ex-tag">Visuell</span></div>
+          <div class="ex-body">
+            <p class="ex-question">$v$ bleibt 3 s konstant bei $6\,\frac{\text{m}}{\text{s}}$, dann sinkt $v$ auf $0$ in 2 weiteren Sekunden. Welcher v-t-Graph passt?</p>
+            <div class="opt-pills" id="m3-og4">
+              <button class="opt-pill" onclick="selOpt(this,'m3-a4','A')">Waagrecht, dann abfallend</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a4','B')">Steigend, dann waagrecht</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a4','C')">Durchgehend fallend</button>
+            </div>
+            <input type="hidden" id="m3-a4" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(3,4,'m3-a4','m3-fb4','A')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h4">Erst $v = \text{const}$ → waagrecht. Dann sinkt $v$ → absteigende Gerade.</div>
+            <div class="fb-block" id="m3-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5: Differenzen prüfen -->
+        <div class="exercise-card" id="m3-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Differenzen prüfen</span><span class="ex-tag">Analyse</span></div>
+          <div class="ex-body">
+            <p class="ex-question">$s$-Werte bei $\Delta t = 1\,\text{s}$: $0$, $3$, $12$, $27$, $48\,\text{m}$. Gleichförmig oder beschleunigt?</p>
+            <div class="opt-pills" id="m3-og5">
+              <button class="opt-pill" onclick="selOpt(this,'m3-a5','gleichf')">Gleichförmig — Differenzen gleich</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a5','beschl')">Beschleunigt — Differenzen wachsen (3, 9, 15, 21)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a5','ruht')">Der Körper ruht</button>
+            </div>
+            <input type="hidden" id="m3-a5" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(3,5,'m3-a5','m3-fb5','beschl')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h5">Differenzen: $3-0=3$, $12-3=9$, $27-12=15$, $48-27=21$ — wachsen um je 6.</div>
+            <div class="fb-block" id="m3-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(3)">Ergebnis anzeigen</button>
+      </section>
+
+      <details class="extra-section" style="margin-top:32px;">
+        <summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? — Zusätzliche Übungen<span class="extra-count">(3 weitere)</span></summary>
+        <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong>.</p></div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Achsenbeschriftung</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Du erstellst ein s-t-Diagramm. Wie beschriftest du die x-Achse (Zeit)?</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m3-eA1" placeholder="Beschriftung eingeben">
+              <button class="btn-check extra-btn" onclick="checkExtra('m3-eA1','m3-eFb1','t in s|tins','&#10003; Richtig! „t in s" — Größensymbol, dann Einheit.','&#10007; Korrekt: „t in s".')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m3-eFb1"></div>
+          </div>
+        </div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Bewegungsart aus Differenzen</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">$\Delta s$-Werte: $+10$, $+7$, $+4$, $+1\,\text{m}$. Gleichförmig, beschleunigt oder abbremsend?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m3-eA2','gleichf')">Gleichförmig</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-eA2','beschl')">Beschleunigt</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-eA2','bremst')">Abbremsend</button>
+            </div>
+            <input type="hidden" id="m3-eA2" value="">
+            <button class="btn-check extra-btn" onclick="checkExtra('m3-eA2','m3-eFb2','bremst','&#10003; Richtig! $\Delta s$ sinkt → die Bewegung wird langsamer.','&#10007; $\Delta s$ sinkt: 10, 7, 4, 1 → abbremsend.')">Prüfen</button>
+            <div class="fb-block" id="m3-eFb2"></div>
+          </div>
+        </div>
+        <div class="exercise-card extra-card">
+          <div class="ex-header"><span class="ex-num">+3</span><span class="ex-title">Formel aus Tabelle</span><span class="ex-tag extra-tag">Zusatz</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Tabelle: $t$ (s) = 0, 1, 2, 3 | $s$ (m) = 0, 3, 12, 27. Welche Formel passt?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m3-eA3','3t')">$s = 3t$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-eA3','3t2')">$s = 3t^2$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-eA3','3t1')">$s = 3t + 1$</button>
+            </div>
+            <input type="hidden" id="m3-eA3" value="">
+            <button class="btn-check extra-btn" onclick="checkExtra('m3-eA3','m3-eFb3','3t2','&#10003; Richtig! Bei $t=2$: $3 \cdot 4 = 12$ ✓ | Bei $t=3$: $3 \cdot 9 = 27$ ✓','&#10007; Setze $t = 2$ ein: $3 \cdot 2^2 = 12$ ✓')">Prüfen</button>
+            <div class="fb-block" id="m3-eFb3"></div>
+          </div>
+        </div>
+      </details>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════ -->
+<script>
+/* ────────────────────────────────────────────
+   STATE
+   ──────────────────────────────────────────── */
+const MODULE_EX_COUNTS = [5, 5, 5, 5];
+let moduleStates = [false, false, false, false];
+let exerciseStates = {};
+
+/* ────────────────────────────────────────────
+   SCORM 1.2 API
+   ──────────────────────────────────────────── */
+const SCORM = (() => {
+  let api = null, initialized = false;
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) win = win.parent;
+      else if (win.opener) win = win.opener;
+      else break;
+    }
+    return win ? win.API : null;
+  }
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.moduleStates) moduleStates = saved.moduleStates;
+            if (saved.exerciseStates) exerciseStates = saved.exerciseStates;
+          } catch(e) {}
+        }
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
+        }
+      }
+    } catch(e) { console.log('SCORM init:', e); }
+  }
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ moduleStates, exerciseStates }));
+      let total = 0, solved = 0;
+      for (const key in exerciseStates) { total++; if (exerciseStates[key]) solved++; }
+      const score = total > 0 ? Math.round((solved / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+      if (moduleStates.every(s => s)) api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      api.LMSCommit('');
+    } catch(e) { console.log('SCORM save:', e); }
+  }
+  function finish() {
+    if (!api || !initialized) return;
+    try { save(); api.LMSFinish(''); } catch(e) {}
+  }
+  return { init, save, finish };
+})();
+
+/* ────────────────────────────────────────────
+   SCREEN NAVIGATION
+   ──────────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(id);
+  if (s) s.classList.add('active');
+  window.scrollTo(0, 0);
+  const canvas = document.getElementById('bg-canvas');
+  if (id === 'screen-landing') {
+    canvas.classList.remove('dimmed', 'hidden');
+  } else {
+    canvas.classList.add('hidden');
+  }
+}
+
+function openModule(idx) {
+  showScreen('screen-mod-' + idx);
+  restoreModuleState(idx);
+  setTimeout(() => MathJax?.typesetPromise?.(), 100);
+}
+
+function goLanding() {
+  showScreen('screen-landing');
+  updateLanding();
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   EXERCISE SYSTEM
+   ──────────────────────────────────────────── */
+function normalize(v) {
+  return v.trim().replace(/\s+/g, '').toLowerCase()
+    .replace(/,/g, '.').replace(/\u00d7/g, '*').replace(/\u00b7/g, '*').replace(/\u00f7/g, '/').replace(/\u22c5/g, '*');
+}
+
+function selOpt(btn, hiddenId, val) {
+  btn.closest('.opt-pills').querySelectorAll('.opt-pill').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById(hiddenId).value = val;
+}
+
+function checkMC(mod, ex, inputId, fbId, correctVal) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = document.getElementById(inputId).value;
+  if (!val) return;
+  const fb = document.getElementById(fbId);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+  if (val === correctVal) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Nicht ganz — versuche es nochmal.';
+    card.classList.add('wrong-state');
+  }
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function checkInput(mod, ex, inputId, fbId, patterns) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = normalize(document.getElementById(inputId).value);
+  if (!val) return;
+  const accepted = patterns.split('|').map(normalize);
+  const correct = accepted.some(p => val === p);
+  const fb = document.getElementById(fbId);
+  const inp = document.getElementById(inputId);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+
+  if (correct) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    inp.className = 'answer-input correct';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Noch nicht ganz — schau dir den Tipp an.';
+    inp.className = 'answer-input incorrect';
+    card.classList.add('wrong-state');
+  }
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function checkExtra(inputId, fbId, patterns, okMsg, wrongMsg) {
+  const inp = document.getElementById(inputId);
+  const fb = document.getElementById(fbId);
+  if (!inp || !fb) return;
+  const val = normalize(inp.value);
+  const ok = patterns.split('|').some(p => normalize(p) === val);
+  if (ok) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = okMsg || '&#10003; Richtig!';
+    if (inp.type !== 'hidden') inp.className = 'answer-input correct';
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = wrongMsg || '&#10007; Noch nicht ganz.';
+    if (inp.type !== 'hidden') inp.className = 'answer-input incorrect';
+  }
+  MathJax?.typesetPromise?.([fb]);
+}
+
+function toggleHint(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ────────────────────────────────────────────
+   PROGRESS TRACKING
+   ──────────────────────────────────────────── */
+function updateModuleProgress(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const pct = (solved / total) * 100;
+  const fill = document.getElementById('prog-fill-' + mod);
+  const text = document.getElementById('prog-text-' + mod);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = solved + ' / ' + total;
+
+  if (solved === total) {
+    moduleStates[mod] = true;
+  }
+}
+
+function updateLanding() {
+  const completedCount = moduleStates.filter(Boolean).length;
+  const opFill = document.getElementById('opFill');
+  const opLabel = document.getElementById('opLabel');
+  if (opFill) opFill.style.width = (completedCount / 4 * 100) + '%';
+  if (opLabel) opLabel.textContent = completedCount + ' / 4 Module';
+
+  for (let i = 0; i < 4; i++) {
+    const card = document.getElementById('card-' + i);
+    const status = document.getElementById('status-' + i);
+    if (moduleStates[i]) {
+      card.classList.add('completed');
+      status.textContent = 'Erledigt';
+      status.classList.add('done');
+    } else {
+      card.classList.remove('completed');
+      let started = false;
+      for (let e = 1; e <= MODULE_EX_COUNTS[i]; e++) {
+        if (exerciseStates[i + '-' + e]) { started = true; break; }
+      }
+      status.textContent = started ? 'Angefangen' : 'Starten';
+      status.classList.remove('done');
+    }
+  }
+}
+
+function restoreModuleState(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) {
+      const card = document.getElementById('m' + mod + '-ex' + i);
+      const fb = document.getElementById('m' + mod + '-fb' + i);
+      if (card) card.classList.add('solved');
+      if (fb) {
+        fb.className = 'fb-block correct';
+        fb.innerHTML = '&#10003; Richtig!';
+      }
+    }
+  }
+  updateModuleProgress(mod);
+}
+
+function showResult(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const modNames = ['C2.1', 'C2.2', 'C2.3', 'C2.4'];
+  let msg;
+  if (solved === total) {
+    msg = 'Modul ' + modNames[mod] + ' abgeschlossen! Alle ' + total + ' Aufgaben richtig.';
+    moduleStates[mod] = true;
+  } else if (solved === 0) {
+    msg = 'Noch keine Aufgabe gelöst. Versuche es!';
+  } else {
+    msg = solved + ' von ' + total + ' Aufgaben richtig. Weiter so!';
+  }
+  alert(msg);
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   ANIMATED BACKGROUND (WebGL plasma shader)
+   ──────────────────────────────────────────── */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const gl = canvas.getContext('webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+  const fs = `
+precision mediump float;
+uniform vec2 iRes;
+uniform float iTime;
+void main(){
+  vec2 uv=gl_FragCoord.xy/iRes.xy;
+  float aspect=iRes.x/iRes.y;
+  vec2 p=(uv*2.0-1.0)*vec2(aspect,1.0);
+  float t=iTime*0.5;
+  float v=sin(p.x*4.0+t)+sin(p.y*4.0+t*0.7)+sin((p.x+p.y)*3.0+t*0.5)+sin(length(p)*5.0-t*1.5);
+  v=(v+4.0)*0.125;
+  vec3 deep=vec3(0.08,0.02,0.00);
+  vec3 mid=vec3(0.50,0.15,0.02);
+  vec3 hot=vec3(0.92,0.40,0.05);
+  vec3 col=mix(deep,mid,smoothstep(0.0,0.5,v));
+  col=mix(col,hot,smoothstep(0.5,1.0,v));
+  col*=0.5;
+  gl_FragColor=vec4(col,1.0);
+}`;
+  function compileShader(src, type) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compileShader(vs, gl.VERTEX_SHADER));
+  gl.attachShader(prog, compileShader(fs, gl.FRAGMENT_SHADER));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  const pLoc = gl.getAttribLocation(prog, 'p');
+  gl.enableVertexAttribArray(pLoc);
+  gl.vertexAttribPointer(pLoc, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'iTime');
+  const uRes = gl.getUniformLocation(prog, 'iRes');
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  function draw(t) {
+    gl.uniform1f(uTime, t * 0.001);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+
+/* ────────────────────────────────────────────
+   INIT
+   ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  SCORM.init();
+  updateLanding();
+});
+window.addEventListener('beforeunload', () => {
+  SCORM.finish();
+});
+</script>
+</body>
+</html>

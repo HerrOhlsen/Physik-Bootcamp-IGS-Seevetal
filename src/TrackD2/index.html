@@ -1,0 +1,2436 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Physik Bootcamp — Track D2: Fachsprache</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #6668a0;
+
+  --accent: #9333ea;
+  --accent-bright: #c084fc;
+  --accent-glow: rgba(147, 51, 234, 0.35);
+  --accent-deep: #7e22ce;
+  --accent-subtle: rgba(147, 51, 234, 0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-glow: rgba(52, 211, 153, 0.25);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(192, 132, 252, 0.15);
+  --border-strong: rgba(192, 132, 252, 0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-full: 100px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+input, textarea, select { font-size: 16px; }
+button, [onclick] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ══════════════════════════════════════════
+   ANIMATED BACKGROUND CANVAS
+   ══════════════════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+#bg-canvas.dimmed { opacity: 0.15; }
+#bg-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREEN SYSTEM
+   ══════════════════════════════════════════ */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.screen.active {
+  display: block;
+  animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   LANDING PAGE
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+}
+.landing-header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(126, 34, 206, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: var(--r-full);
+  margin-bottom: 24px;
+}
+.landing-title {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-bright) 50%, #e9d5ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+.landing-sub {
+  color: var(--ink-muted);
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+.landing-meta {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.l-meta {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+.l-meta .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* Overall progress */
+.overall-progress {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+.op-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.op-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.op-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), #e9d5ff);
+  border-radius: var(--r-full);
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.op-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Module cards grid */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 920px;
+}
+.mod-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.mod-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--r-lg);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+.mod-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--glow);
+}
+.mod-card:hover::before { opacity: 1; }
+.mod-card.completed { border-color: var(--ok-border); }
+.mod-card.completed::after {
+  content: '\2713';
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0c0c1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.mc-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.mc-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.mc-desc {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.mc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mc-time {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+}
+.mc-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--accent-subtle);
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+.mc-status.done {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: var(--ok-border);
+}
+.mod-card:nth-child(1) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+.mod-card:nth-child(2) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+.mod-card:nth-child(3) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+
+/* Footer */
+.landing-footer {
+  margin-top: 48px;
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 1s both;
+}
+
+/* ══════════════════════════════════════════
+   MODULE PAGE LAYOUT
+   ══════════════════════════════════════════ */
+.module-page { background: var(--bg-deep); position: relative; }
+.module-page::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(147,51,234,0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Top navbar */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+}
+.top-nav-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+}
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.nav-title {
+  font-size: 0.85rem; font-weight: 600; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nav-progress {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-progress-track {
+  width: 80px; height: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.nav-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  border-radius: var(--r-full);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-progress-text {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Module content */
+.mod-content {
+  position: relative; z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px 100px;
+}
+
+/* ══════════════════════════════════════════
+   MODULE COMPONENTS
+   ══════════════════════════════════════════ */
+.hero {
+  padding: 52px 0 36px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  margin-bottom: 18px;
+  border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  font-weight: 900; line-height: 1.1; letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero-sub {
+  color: var(--ink-muted); font-size: 1rem;
+  max-width: 480px; margin: 0 auto 20px;
+}
+.hero-meta {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+}
+.meta-chip {
+  font-size: 0.78rem; color: var(--ink-muted); font-weight: 500;
+}
+.meta-chip .val {
+  color: var(--accent-bright); font-weight: 700; font-family: var(--mono);
+}
+
+/* Glass cards */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.glass p { color: var(--ink); }
+.glass p + p { margin-top: 10px; }
+
+/* Chapter sections */
+.chapter { margin-top: 40px; }
+.chapter.locked { display: none; }
+.chapter.unlocking {
+  display: block;
+  animation: chapterUnlock 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes chapterUnlock {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.chapter-label { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.chapter-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  border: 2px solid var(--accent);
+  color: var(--accent-bright);
+  font-family: var(--mono); font-size: 0.8rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.chapter-title {
+  font-size: 1.3rem; font-weight: 800; color: #fff;
+}
+
+/* Exercise cards */
+.exercise-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.exercise-card.solved { border-color: var(--ok-border); }
+.exercise-card.wrong-state { border-color: var(--err-border); }
+.ex-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.ex-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.ex-title { font-weight: 600; font-size: 0.9rem; color: var(--ink); }
+.ex-tag {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  color: var(--accent); background: var(--accent-subtle);
+  padding: 2px 8px; border-radius: var(--r-full);
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.ex-body { padding: 20px; }
+.ex-question { color: var(--ink); margin-bottom: 16px; line-height: 1.6; }
+
+/* Answer inputs */
+.answer-row {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.answer-input {
+  flex: 1; min-width: 160px;
+  padding: 10px 14px;
+  background: var(--bg-deep);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--mono); font-size: 1rem;
+  outline: none; transition: all 0.2s;
+}
+.answer-input::placeholder { color: var(--ink-dim); }
+.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.answer-input.correct { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.answer-input.incorrect { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+
+/* Buttons */
+.btn-check {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  background: var(--accent-deep);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-check:hover { background: var(--accent); transform: translateY(-1px); }
+.btn-hint {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 8px 14px;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.8rem;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-hint:hover { border-color: var(--warn); color: var(--warn); }
+
+/* Hint & Feedback */
+.hint-box {
+  display: none; margin-top: 12px; padding: 12px 16px;
+  background: var(--warn-bg);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: var(--r-md);
+  font-size: 0.85rem; color: var(--warn);
+}
+.hint-box.open { display: block; }
+.fb-block {
+  margin-top: 12px; padding: 10px 14px;
+  border-radius: var(--r-md);
+  font-size: 0.85rem; display: none;
+}
+.fb-block.correct {
+  display: block;
+  background: var(--ok-bg); color: var(--ok);
+  border: 1px solid var(--ok-border);
+}
+.fb-block.incorrect {
+  display: block;
+  background: var(--err-bg); color: var(--err);
+  border: 1px solid var(--err-border);
+}
+
+/* Option pills (MC) */
+.opt-pills { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.opt-pill {
+  padding: 12px 20px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  font-size: 0.9rem;
+  color: var(--ink); cursor: pointer; transition: all 0.2s;
+  text-align: left; line-height: 1.5;
+}
+.opt-pill:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.opt-pill.selected { border-color: var(--accent); background: var(--accent-deep); color: #fff; }
+.opt-pill.locked { cursor: default; pointer-events: none; }
+.opt-pill.correct-answer { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.opt-pill.wrong-answer { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+
+/* Continue & Result buttons */
+.btn-continue {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; max-width: 320px;
+  margin: 28px auto 0;
+  padding: 14px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  color: var(--accent-bright);
+  font-family: var(--font); font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; transition: all 0.25s;
+}
+.btn-continue:hover {
+  background: var(--accent-deep); border-color: var(--accent); color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.3);
+}
+.btn-result {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; max-width: 360px;
+  margin: 32px auto 0;
+  padding: 16px 28px;
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  border: none; border-radius: var(--r-lg);
+  color: #fff;
+  font-family: var(--font); font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-result:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(147, 51, 234, 0.4);
+}
+
+/* Table */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.si-table {
+  width: 100%; border-collapse: collapse;
+  font-size: 0.85rem;
+}
+.si-table th, .si-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  text-align: left;
+}
+.si-table th {
+  color: var(--accent-bright); font-weight: 700;
+  font-family: var(--mono); font-size: 0.7rem;
+  letter-spacing: 0.08em; text-transform: uppercase;
+}
+
+/* Callout */
+.callout-v2 {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 16px 20px; border-radius: var(--r-md); margin: 16px 0;
+}
+.callout-v2.info {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+.callout-v2.info .body { color: #7dd3fc; }
+.callout-v2.info .title { color: #38bdf8; font-weight: 700; margin-bottom: 4px; }
+.callout-v2 .icon { font-size: 1.2rem; flex-shrink: 0; }
+
+/* Category pills */
+.cat-bar {
+  display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 20px;
+}
+.cat-pill {
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border-strong);
+  background: var(--bg-card);
+  color: var(--ink-muted);
+  font-size: 0.82rem; font-weight: 600;
+  cursor: pointer; transition: all 0.2s;
+}
+.cat-pill:hover { border-color: var(--accent); color: var(--accent-bright); }
+.cat-pill.active {
+  background: var(--accent-deep);
+  border-color: var(--accent);
+  color: #fff;
+}
+
+/* Begriffe grid */
+.begriffe-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 12px;
+}
+.begriff-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  transition: all 0.3s;
+}
+.begriff-card:hover {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+  transform: translateY(-2px);
+}
+.bc-cat {
+  font-family: var(--mono);
+  font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.12em;
+  color: var(--accent); margin-bottom: 6px;
+}
+.bc-term { font-size: 1.05rem; font-weight: 800; color: #fff; margin-bottom: 4px; }
+.bc-symbol {
+  font-family: var(--mono); font-size: 0.85rem;
+  color: var(--accent-bright);
+  background: rgba(147, 51, 234, 0.12);
+  padding: 2px 10px; border-radius: var(--r-sm);
+  display: inline-block; margin-bottom: 8px;
+  border: 1px solid var(--border);
+}
+.bc-def { font-size: 0.85rem; color: var(--ink-muted); line-height: 1.55; margin-bottom: 6px; }
+.bc-einheit { font-size: 0.75rem; color: var(--ink-dim); }
+.bc-einheit span {
+  font-family: var(--mono);
+  background: var(--bg-deep);
+  padding: 1px 8px; border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  color: var(--accent-bright);
+}
+
+/* Compare cards */
+.compare-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px 24px;
+  margin-bottom: 16px;
+}
+.compare-card h4 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 14px; }
+.compare-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.compare-row:last-child { border-bottom: none; }
+.compare-label {
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 700; color: #fff;
+  background: var(--accent-deep); padding: 3px 10px; border-radius: var(--r-sm);
+  min-width: 100px; text-align: center; flex-shrink: 0; margin-top: 2px;
+}
+.compare-text { font-size: 0.88rem; color: var(--ink-muted); line-height: 1.5; }
+
+/* Framework card */
+.framework-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden; margin-bottom: 20px;
+}
+.fw-header {
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  color: #fff; padding: 14px 20px; font-weight: 700; font-size: 0.95rem;
+}
+.fw-step {
+  display: flex; gap: 14px; padding: 14px 20px;
+  border-bottom: 1px solid var(--border); align-items: flex-start;
+}
+.fw-step:last-child { border-bottom: none; }
+.fw-num {
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.85rem; flex-shrink: 0; margin-top: 2px;
+}
+.fw-content h4 { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.fw-content p { font-size: 0.85rem; color: var(--ink-muted); line-height: 1.5; margin-bottom: 4px; }
+.fw-example {
+  font-size: 0.82rem; color: var(--accent-bright);
+  background: rgba(147, 51, 234, 0.1); padding: 4px 12px; border-radius: var(--r-sm);
+  display: inline-block; margin-top: 4px; font-style: italic;
+  border: 1px solid var(--border);
+}
+
+/* Compare grid */
+.compare-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-bottom: 16px; }
+@media (max-width: 540px) { .compare-grid { grid-template-columns: 1fr; } }
+.cg-bad {
+  background: var(--err-bg); border: 1px solid rgba(248, 113, 113, 0.3);
+  border-radius: var(--r-lg); padding: 16px;
+}
+.cg-good {
+  background: var(--ok-bg); border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: var(--r-lg); padding: 16px;
+}
+.cg-label { font-family: var(--mono); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.cg-bad .cg-label { color: var(--err); }
+.cg-good .cg-label { color: var(--ok); }
+.cg-text { font-size: 0.88rem; line-height: 1.55; color: var(--ink); }
+
+/* Muster card */
+.muster-card {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); padding: 20px 24px; margin-bottom: 16px;
+}
+.muster-card h4 { font-size: 1rem; font-weight: 700; color: #fff; margin-bottom: 14px; }
+.muster-row {
+  display: flex; gap: 10px; align-items: flex-start;
+  padding: 8px 0; border-bottom: 1px solid var(--border);
+}
+.muster-row:last-child { border-bottom: none; }
+.muster-label {
+  font-family: var(--mono); font-size: 0.7rem; font-weight: 700; color: #fff;
+  background: var(--accent-deep); padding: 3px 10px; border-radius: var(--r-sm);
+  min-width: 95px; text-align: center; flex-shrink: 0; margin-top: 2px;
+}
+.muster-text { font-size: 0.88rem; color: var(--ink-muted); line-height: 1.5; }
+.muster-fill {
+  color: var(--accent-bright); font-weight: 700;
+  background: rgba(147, 51, 234, 0.15); padding: 0 5px; border-radius: 3px;
+}
+
+/* Analysis cards */
+.analysis-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden; margin-bottom: 20px;
+}
+.ac-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; border-bottom: 1px solid var(--border);
+  background: var(--bg-card); font-weight: 700; font-size: 0.95rem; color: #fff;
+}
+.ac-question {
+  padding: 16px 20px; border-bottom: 1px solid var(--border);
+  font-size: 0.92rem; color: var(--ink); line-height: 1.6;
+}
+.ac-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 0; }
+@media (max-width: 560px) { .ac-cols { grid-template-columns: 1fr; } }
+.ac-bad { padding: 16px 20px; background: var(--err-bg); border-right: 1px solid var(--border); }
+.ac-good { padding: 16px 20px; background: var(--ok-bg); }
+.ac-col-label {
+  font-family: var(--mono); font-size: 0.65rem; font-weight: 700;
+  text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px;
+}
+.ac-bad .ac-col-label { color: var(--err); }
+.ac-good .ac-col-label { color: var(--ok); }
+.ac-text { font-size: 0.88rem; line-height: 1.55; color: var(--ink); }
+.ac-comment {
+  padding: 14px 20px; font-size: 0.85rem; color: var(--warn);
+  line-height: 1.55; border-top: 1px solid var(--border);
+  background: var(--warn-bg);
+}
+.ac-comment strong { color: var(--warn); }
+
+/* Rubric */
+.rubric-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: hidden; margin-bottom: 20px;
+}
+.rubric-header {
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  color: #fff; padding: 14px 20px; font-weight: 700; font-size: 0.95rem;
+}
+.rubric-row {
+  display: grid; grid-template-columns: auto 1fr auto;
+  gap: 12px; padding: 12px 20px;
+  border-bottom: 1px solid var(--border); align-items: center;
+}
+.rubric-row:last-child { border-bottom: none; }
+.rubric-criterion { font-size: 0.88rem; font-weight: 600; color: #fff; }
+.rubric-desc { font-size: 0.82rem; color: var(--ink-muted); }
+.rubric-pts {
+  font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+  color: var(--accent-bright); background: rgba(147, 51, 234, 0.15);
+  padding: 3px 10px; border-radius: var(--r-sm); white-space: nowrap;
+  border: 1px solid var(--border);
+}
+
+/* Tip box */
+.tip-box {
+  background: var(--ok-bg); border: 1px solid rgba(52, 211, 153, 0.3);
+  border-radius: var(--r-lg); padding: 16px 20px; font-size: 0.88rem; color: var(--ok);
+  margin-bottom: 20px;
+}
+.tip-box strong { color: var(--ok); }
+
+/* Extra section */
+.extra-section {
+  margin-top: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+.extra-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; cursor: pointer;
+  font-size: 0.92rem; font-weight: 600;
+  color: var(--ink-muted);
+  list-style: none; user-select: none;
+}
+.extra-toggle::-webkit-details-marker { display: none; }
+.extra-section[open] .extra-toggle {
+  color: var(--ink); background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.extra-icon {
+  font-size: 1.1rem; font-weight: 700; color: var(--accent);
+  transition: transform 0.2s; display: inline-block; width: 18px; text-align: center;
+}
+.extra-section[open] .extra-icon { transform: rotate(45deg); }
+.extra-count {
+  font-size: 0.78rem; font-weight: 400;
+  color: var(--ink-dim); margin-left: auto;
+}
+.extra-intro {
+  padding: 12px 20px 4px; font-size: 0.85rem;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.extra-card { border-left: 3px solid var(--accent-deep); opacity: 0.95; }
+.extra-card .ex-num { background: var(--accent-deep); }
+.extra-tag {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+.extra-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--ink-muted);
+}
+.extra-btn:hover { background: var(--accent-deep); color: var(--ink); }
+.solution-box {
+  margin-top: 12px; padding: 14px 16px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--r-sm); font-size: 0.88rem; color: var(--ink-muted);
+}
+.solution-title {
+  font-weight: 700; color: var(--accent-bright); margin-bottom: 8px;
+  font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em;
+}
+.extra-rubric { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.extra-rubric-title { font-size: 0.78rem; color: var(--ink-dim); margin-bottom: 6px; }
+.extra-rubric label {
+  display: flex; align-items: center; gap: 8px;
+  font-size: 0.83rem; color: var(--ink-muted); margin-bottom: 4px; cursor: pointer;
+}
+.answer-textarea {
+  width: 100%; min-height: 80px; padding: 10px 14px;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--r-sm); color: var(--ink);
+  font-family: var(--font); font-size: 0.9rem; resize: vertical; margin-top: 10px;
+}
+.answer-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* KI feedback */
+.loading .spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--accent-bright);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+  margin-right: 8px; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Divider */
+.sep {
+  border: none; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+  margin: 28px 0;
+}
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .hero { padding: 40px 0 28px; }
+  .hero h1 { font-size: 1.8rem; }
+  .glass { padding: 16px; }
+  .answer-row { flex-direction: column; align-items: stretch; }
+  .answer-input { min-width: 0; }
+  .begriffe-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     ANIMATED BACKGROUND CANVAS
+     ══════════════════════════════════════════ -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 0: LANDING PAGE
+     ══════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">TRACK D2</div>
+      <h1 class="landing-title">Fachsprache</h1>
+      <p class="landing-sub">Präzision, Argumentation und Klausurantworten</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">3</span> Module</span>
+        <span class="l-meta"><span class="val">15</span> Aufgaben</span>
+        <span class="l-meta"><span class="val">~80 min</span> Dauer</span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track"><div class="op-fill" id="opFill"></div></div>
+        <span class="op-label" id="opLabel">0 / 3 Module</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card" onclick="openModule(0)" id="card-0">
+        <div class="mc-num">D2.1</div>
+        <div class="mc-title">Erweiterte Begriffe</div>
+        <div class="mc-desc">30 fortgeschrittene Mechanik-Begriffe: Kinematik, Dynamik, Energie, Schwingungen</div>
+        <div class="mc-footer">
+          <span class="mc-time">25 min</span>
+          <span class="mc-status" id="status-0">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(1)" id="card-1">
+        <div class="mc-num">D2.2</div>
+        <div class="mc-title">Argumentation in Physik</div>
+        <div class="mc-desc">Das 4-Schritt-Schema: These, Begründung, Formel, Ergebnis</div>
+        <div class="mc-footer">
+          <span class="mc-time">25 min</span>
+          <span class="mc-status" id="status-1">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(2)" id="card-2">
+        <div class="mc-num">D2.3</div>
+        <div class="mc-title">Klausurantworten schreiben</div>
+        <div class="mc-desc">Musterlösungen analysieren, Fehler erkennen, besser formulieren</div>
+        <div class="mc-footer">
+          <span class="mc-time">30 min</span>
+          <span class="mc-status" id="status-2">Starten</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-footer">Track D2 &middot; v4</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1: MODULE D2.1 - Erweiterte Begriffe
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-0">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">D2.1 &mdash; Erweiterte Begriffe</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div>
+          <span class="nav-progress-text" id="prog-text-0">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">D2.1</div>
+        <h1>30 Erweiterte<br>Begriffe</h1>
+        <p class="hero-sub">Kinematik, Dynamik, Energie, Arbeit & Leistung, Schwingungen — dein Fachvokabular der Mechanik</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 2</span> Aufbau</div>
+          <div class="meta-chip"><span class="val">25 min</span> Dauer</div>
+        </div>
+      </section>
+
+      <!-- Chapter 1: Glossar -->
+      <section class="chapter" id="m0-ch1">
+        <div class="chapter-label">
+          <span class="chapter-num">01</span>
+          <h2 class="chapter-title">Begriffe-Glossar</h2>
+        </div>
+        <div class="glass">
+          <p>Wähle eine Kategorie und lerne die Begriffe. Jede Karte zeigt Name, Symbol, Definition und Einheit.</p>
+        </div>
+
+        <div class="cat-bar" id="catBar">
+          <button class="cat-pill active" onclick="filterCat('alle',this)">Alle (30)</button>
+          <button class="cat-pill" onclick="filterCat('kinetik',this)">Kinematik</button>
+          <button class="cat-pill" onclick="filterCat('dynamik',this)">Dynamik</button>
+          <button class="cat-pill" onclick="filterCat('energie',this)">Energie</button>
+          <button class="cat-pill" onclick="filterCat('arbeit',this)">Arbeit & Leistung</button>
+          <button class="cat-pill" onclick="filterCat('schwingung',this)">Schwingung</button>
+        </div>
+
+        <div class="begriffe-grid" id="begriffeGrid"></div>
+      </section>
+
+      <!-- Chapter 2: Vergleich -->
+      <section class="chapter" id="m0-ch2" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">02</span>
+          <h2 class="chapter-title">Begriffe im Vergleich</h2>
+        </div>
+        <div class="glass">
+          <p>Diese Begriffspaare werden oft verwechselt. Lerne die Unterschiede!</p>
+        </div>
+
+        <div class="compare-card">
+          <h4>Impuls vs. Kraft</h4>
+          <div class="compare-row">
+            <span class="compare-label">Impuls $p$</span>
+            <span class="compare-text">$p = m \cdot v$ &middot; Einheit: kg&middot;m/s &middot; Zustandsgröße: beschreibt den Bewegungszustand</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-label">Kraft $F$</span>
+            <span class="compare-text">$F = m \cdot a$ &middot; Einheit: N = kg&middot;m/s&sup2; &middot; Ursache der Bewegungsänderung</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-label">Zusammenhang</span>
+            <span class="compare-text">$F = \Delta p / \Delta t$ — Kraft ist die zeitliche Änderung des Impulses</span>
+          </div>
+        </div>
+
+        <div class="compare-card">
+          <h4>Kinetische vs. Potenzielle Energie</h4>
+          <div class="compare-row">
+            <span class="compare-label">$E_{kin}$</span>
+            <span class="compare-text">$\frac{1}{2}mv^2$ &middot; Bewegungsenergie &middot; nimmt zu, wenn der Körper schneller wird</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-label">$E_{pot}$</span>
+            <span class="compare-text">$m \cdot g \cdot h$ &middot; Lageenergie &middot; nimmt zu, wenn der Körper höher steigt</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-label">Erhaltung</span>
+            <span class="compare-text">Ohne Reibung: $E_{kin} + E_{pot} = \text{const}$ (Energieerhaltung)</span>
+          </div>
+        </div>
+
+        <div class="compare-card">
+          <h4>Frequenz vs. Periodendauer</h4>
+          <div class="compare-row">
+            <span class="compare-label">Frequenz $f$</span>
+            <span class="compare-text">Anzahl der Schwingungen pro Sekunde &middot; Einheit: Hz &middot; Beispiel: 50 Hz</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-label">Periode $T$</span>
+            <span class="compare-text">Zeit für eine vollständige Schwingung &middot; Einheit: s &middot; Beispiel: T = 0,02 s bei 50 Hz</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-label">Formel</span>
+            <span class="compare-text">$T = \dfrac{1}{f}$ &middot; bei 50 Hz: $T = \dfrac{1}{50} = 0{,}02 \text{ s}$</span>
+          </div>
+        </div>
+
+        <div class="compare-card">
+          <h4>Wirkungsgrad</h4>
+          <div class="compare-row">
+            <span class="compare-label">Definition</span>
+            <span class="compare-text">$\eta = \dfrac{E_{nutz}}{E_{zu}}$ oder $\eta = \dfrac{P_{nutz}}{P_{zu}}$</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-label">Wertebereich</span>
+            <span class="compare-text">$0 < \eta \leq 1$ (bzw. 0–100 %) — niemals größer als 1!</span>
+          </div>
+          <div class="compare-row">
+            <span class="compare-label">Reibung</span>
+            <span class="compare-text">Je mehr Reibung, desto kleiner der Wirkungsgrad (mehr Energie geht als Wärme verloren)</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter 3: Exercises -->
+      <section class="chapter" id="m0-ch3" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">03</span>
+          <h2 class="chapter-title">Übungsaufgaben</h2>
+        </div>
+
+        <!-- Ex 1: MC -->
+        <div class="exercise-card" id="m0-ex1">
+          <div class="ex-header">
+            <span class="ex-num">1</span>
+            <span class="ex-title">Begriff zuordnen</span>
+            <span class="ex-tag">Wissen</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Welche Größe beschreibt die <strong>gespeicherte Energie aufgrund der Position</strong> eines Körpers?</p>
+            <div class="opt-pills" id="m0-og1">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a1','a')">Kinetische Energie $E_{kin}$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a1','b')">Potenzielle Energie $E_{pot}$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a1','c')">Leistung $P$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a1','d')">Impuls $p$</button>
+            </div>
+            <input type="hidden" id="m0-a1" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(0,1,'m0-a1','m0-fb1','b')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m0-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2: Input -->
+        <div class="exercise-card" id="m0-ex2">
+          <div class="ex-header">
+            <span class="ex-num">2</span>
+            <span class="ex-title">Formel & Einheit</span>
+            <span class="ex-tag">Zuordnung</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Der <strong>Wirkungsgrad</strong> $\eta$ hat die Einheit ___.</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m0-a2" placeholder="Einheit eingeben...">
+              <button class="btn-check" onclick="checkInput(0,2,'m0-a2','m0-fb2','keine einheit|dimensionslos|1|keiner|keine')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h2">Der Wirkungsgrad ist ein Verhältnis (Nutzenergie/zugeführte Energie). Er hat daher <strong>keine Einheit</strong> — er ist dimensionslos.</div>
+            <div class="fb-block" id="m0-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3: MC -->
+        <div class="exercise-card" id="m0-ex3">
+          <div class="ex-header">
+            <span class="ex-num">3</span>
+            <span class="ex-title">Definition</span>
+            <span class="ex-tag">Wissen</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Was beschreibt der Begriff <strong>Impuls</strong>? Wähle die richtige Definition.</p>
+            <div class="opt-pills" id="m0-og3">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a3','a')">Die Kraft, mit der ein Körper auf eine Oberfläche drückt</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a3','b')">Das Produkt aus Masse und Geschwindigkeit: $p = m \cdot v$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a3','c')">Die Energie eines sich bewegenden Körpers</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a3','d')">Die Änderung der Kraft über die Zeit</button>
+            </div>
+            <input type="hidden" id="m0-a3" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(0,3,'m0-a3','m0-fb3','b')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m0-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4: Input -->
+        <div class="exercise-card" id="m0-ex4">
+          <div class="ex-header">
+            <span class="ex-num">4</span>
+            <span class="ex-title">Einheit bestimmen</span>
+            <span class="ex-tag">Zuordnung</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">In welcher Einheit wird der <strong>Impuls</strong> angegeben?</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m0-a4" placeholder="Einheit eingeben...">
+              <button class="btn-check" onclick="checkInput(0,4,'m0-a4','m0-fb4','kg·m/s|kg*m/s|kgm/s|kg m/s|ns')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h4">$p = m \cdot v$ — Einheit = $[\text{kg}] \cdot [\text{m/s}] = \text{kg·m/s}$</div>
+            <div class="fb-block" id="m0-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5: MC -->
+        <div class="exercise-card" id="m0-ex5">
+          <div class="ex-header">
+            <span class="ex-num">5</span>
+            <span class="ex-title">Begriffspaar unterscheiden</span>
+            <span class="ex-tag">Verständnis</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Was ist der Unterschied zwischen <strong>Frequenz</strong> und <strong>Periodendauer</strong>?</p>
+            <div class="opt-pills" id="m0-og5">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','a')">Es ist dasselbe, nur mit anderen Vorzeichen.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','b')">Frequenz ist in Hz, Periodendauer in m/s.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','c')">Frequenz = Schwingungen pro Sekunde; Periodendauer = Zeit für eine Schwingung. Es gilt $T = 1/f$.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','d')">Frequenz gilt nur für Wellen, Periodendauer nur für Pendel.</button>
+            </div>
+            <input type="hidden" id="m0-a5" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(0,5,'m0-a5','m0-fb5','c')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m0-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(0)">Ergebnis anzeigen</button>
+
+        <!-- Extra exercises -->
+        <details class="extra-section" style="margin-top:32px;">
+          <summary class="extra-toggle">
+            <span class="extra-icon">+</span>
+            Noch nicht sicher? — Zusätzliche Übungen
+            <span class="extra-count">(2 weitere)</span>
+          </summary>
+          <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong>.</p></div>
+
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Impuls berechnen</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Der Impuls eines Körpers mit $m = 4\,\text{kg}$ und $v = 3\,\text{m/s}$ beträgt $p = $ _____ kg&middot;m/s.</p>
+              <div class="answer-row">
+                <input class="answer-input" id="m0-eA1" placeholder="Zahl eingeben">
+                <button class="btn-check extra-btn" onclick="checkExtra('m0-eA1','m0-eFb1','12|12.0|12,0','&#10003; Richtig! $p = 4 \\cdot 3 = 12\\,\\text{kg·m/s}$.','&#10007; $p = m \\cdot v = 4 \\cdot 3 = 12\\,\\text{kg·m/s}$.')">Prüfen</button>
+                <button class="btn-hint" onclick="toggleHint('m0-eH1')">&#128161; Tipp</button>
+              </div>
+              <div class="hint-box" id="m0-eH1">$p = m \cdot v = 4\,\text{kg} \cdot 3\,\text{m/s}$. Multipliziere die beiden Zahlen.</div>
+              <div class="fb-block" id="m0-eFb1"></div>
+            </div>
+          </div>
+
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Wirkungsgrad</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Eine Maschine nimmt $P_{zu} = 100\,\text{W}$ auf und gibt $P_{nutz} = 80\,\text{W}$ ab. Ergänze: Der Wirkungsgrad beträgt $\eta = $ _____.</p>
+              <div class="answer-row">
+                <input class="answer-input" id="m0-eA2" placeholder="Dezimalzahl oder Prozent">
+                <button class="btn-check extra-btn" onclick="checkExtra('m0-eA2','m0-eFb2','0,8|0.8|80%|80prozent','&#10003; Richtig! $\\eta = 80/100 = 0{,}8 = 80\\%$.','&#10007; $\\eta = P_{nutz} / P_{zu} = 80/100 = 0{,}8$.')">Prüfen</button>
+                <button class="btn-hint" onclick="toggleHint('m0-eH2')">&#128161; Tipp</button>
+              </div>
+              <div class="hint-box" id="m0-eH2">$\eta = P_{nutz} / P_{zu} = 80\,\text{W} / 100\,\text{W}$. Das Ergebnis ist dimensionslos.</div>
+              <div class="fb-block" id="m0-eFb2"></div>
+            </div>
+          </div>
+        </details>
+
+        <!-- KI exercise -->
+        <div class="exercise-card" style="margin-top:20px;">
+          <div class="ex-header">
+            <span class="ex-num" style="background:var(--accent-bright); color:#0c0c1d;">KI</span>
+            <span class="ex-title">Fachsprache anwenden</span>
+            <span class="ex-tag" style="background:var(--accent-bright);color:#fff">KI-Feedback</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Erkläre den Energieerhaltungssatz am Beispiel eines Balls, der eine Rampe hinunterrollt. Verwende die Begriffe potenzielle Energie, kinetische Energie und Energieumwandlung.</p>
+            <textarea id="ki-text-0" rows="5" style="width:100%;padding:12px;border:2px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.06);color:#e2e8f0;font-family:inherit;font-size:16px;resize:vertical;min-height:120px" placeholder="Schreibe hier deine Antwort..."></textarea>
+            <button class="btn-check" style="margin-top:8px" onclick="getKIFeedback('ki-text-0','ki-fb-0',KI_PROMPTS[0])">KI-Feedback holen</button>
+            <div id="ki-fb-0" style="margin-top:12px"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2: MODULE D2.2 - Argumentation
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-1">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">D2.2 &mdash; Argumentation in Physik</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div>
+          <span class="nav-progress-text" id="prog-text-1">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">D2.2</div>
+        <h1>Argumentation<br>in Physik</h1>
+        <p class="hero-sub">These &middot; Begründung &middot; Formel &middot; Ergebnis — das 4-Schritt-Schema für Klausurantworten</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 2</span> Aufbau</div>
+          <div class="meta-chip"><span class="val">25 min</span> Dauer</div>
+        </div>
+      </section>
+
+      <!-- Chapter 1: Schema -->
+      <section class="chapter" id="m1-ch1">
+        <div class="chapter-label">
+          <span class="chapter-num">01</span>
+          <h2 class="chapter-title">Das 4-Schritt-Argumentationsschema</h2>
+        </div>
+
+        <div class="framework-card">
+          <div class="fw-header">Das Schema im Überblick</div>
+          <div class="fw-step">
+            <div class="fw-num">1</div>
+            <div class="fw-content">
+              <h4>These / Aussage</h4>
+              <p>Was passiert? Formuliere deine Behauptung als vollständigen Satz.</p>
+              <span class="fw-example">&#8222;Das Auto beschleunigt, weil eine Nettokraft wirkt.&#8220;</span>
+            </div>
+          </div>
+          <div class="fw-step">
+            <div class="fw-num">2</div>
+            <div class="fw-content">
+              <h4>Begründung (Physikalisches Gesetz)</h4>
+              <p>Warum passiert es? Nenne das Gesetz oder Prinzip dahinter.</p>
+              <span class="fw-example">&#8222;Nach dem 2. Newtonschen Gesetz gilt: Wirkt eine Kraft auf einen Körper, so ändert er seinen Bewegungszustand.&#8220;</span>
+            </div>
+          </div>
+          <div class="fw-step">
+            <div class="fw-num">3</div>
+            <div class="fw-content">
+              <h4>Formel (mit Einheiten)</h4>
+              <p>Welche Formel beschreibt den Zusammenhang? Setze die Werte ein.</p>
+              <span class="fw-example">&#8222;$F = m \cdot a = 1000 \text{ kg} \cdot 2 \text{ m/s}^2 = 2000 \text{ N}$&#8220;</span>
+            </div>
+          </div>
+          <div class="fw-step">
+            <div class="fw-num">4</div>
+            <div class="fw-content">
+              <h4>Ergebnis mit Einheit &amp; Aussage</h4>
+              <p>Was ist das Ergebnis? Gib Einheit an und beantworte die Frage vollständig.</p>
+              <span class="fw-example">&#8222;Die wirkende Kraft beträgt $F = 2000 \text{ N}$.&#8220;</span>
+            </div>
+          </div>
+        </div>
+
+        <hr class="sep">
+
+        <div class="compare-grid">
+          <div class="cg-bad">
+            <div class="cg-label">Schlechte Antwort</div>
+            <div class="cg-text">&#8222;Das Auto beschleunigt wegen der Kraft. Ich habe $F = m \cdot a$ benutzt und bekam 2000.&#8220;</div>
+          </div>
+          <div class="cg-good">
+            <div class="cg-label">Gute Antwort</div>
+            <div class="cg-text">&#8222;Das Auto erfährt eine Kraft von $F = m \cdot a = 1000 \text{ kg} \cdot 2 \text{ m/s}^2 = 2000 \text{ N}$. Die Kraft bewirkt die Beschleunigung nach dem 2. Newtonschen Gesetz.&#8220;</div>
+          </div>
+        </div>
+
+        <div class="compare-grid">
+          <div class="cg-bad">
+            <div class="cg-label">Fehlendes Ergebnis</div>
+            <div class="cg-text">&#8222;Ich setze in die Formel ein: $E_{kin} = \frac{1}{2} \cdot 2 \cdot 9 = 9$.&#8220;</div>
+          </div>
+          <div class="cg-good">
+            <div class="cg-label">Vollständiges Ergebnis</div>
+            <div class="cg-text">&#8222;Die kinetische Energie beträgt: $E_{kin} = \frac{1}{2} \cdot 2 \text{ kg} \cdot (3 \text{ m/s})^2 = 9 \text{ J}$.&#8220;</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter 2: Satzmuster -->
+      <section class="chapter" id="m1-ch2" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">02</span>
+          <h2 class="chapter-title">Satzmuster für Klausuren</h2>
+        </div>
+        <div class="glass">
+          <p>Diese Muster helfen dir, vollständige physikalische Argumentationen zu schreiben. Ersetze die <span class="muster-fill">[Platzhalter]</span> durch eigene Inhalte.</p>
+        </div>
+
+        <div class="muster-card">
+          <h4>Muster 1 — Kraft und Bewegungsänderung</h4>
+          <div class="muster-row"><span class="muster-label">These</span><span class="muster-text">&#8222;<span class="muster-fill">[Körper]</span> ändert seine Geschwindigkeit, weil eine Nettokraft wirkt.&#8220;</span></div>
+          <div class="muster-row"><span class="muster-label">Begründung</span><span class="muster-text">&#8222;Laut 2. Newtonsches Gesetz gilt: $F = m \cdot a$ — jede Kraft bewirkt eine Beschleunigung.&#8220;</span></div>
+          <div class="muster-row"><span class="muster-label">Formel</span><span class="muster-text">&#8222;$a = \frac{F}{m} = \frac{\text{[Wert]}}{\text{[Wert]}} = \text{[Ergebnis]} \text{ m/s}^2$&#8220;</span></div>
+          <div class="muster-row"><span class="muster-label">Ergebnis</span><span class="muster-text">&#8222;Die Beschleunigung beträgt <span class="muster-fill">[Wert]</span> m/s&#178; in Richtung der Kraft.&#8220;</span></div>
+        </div>
+
+        <div class="muster-card">
+          <h4>Muster 2 — Energieumwandlung</h4>
+          <div class="muster-row"><span class="muster-label">These</span><span class="muster-text">&#8222;Beim <span class="muster-fill">[Vorgang]</span> wird <span class="muster-fill">[Energieform 1]</span> in <span class="muster-fill">[Energieform 2]</span> umgewandelt.&#8220;</span></div>
+          <div class="muster-row"><span class="muster-label">Begründung</span><span class="muster-text">&#8222;Der Energieerhaltungssatz besagt: Energie kann weder erzeugt noch vernichtet werden.&#8220;</span></div>
+          <div class="muster-row"><span class="muster-label">Formel</span><span class="muster-text">&#8222;$E_{pot} = m \cdot g \cdot h = \text{[Wert]} \text{ J}$&#8220; bzw. &#8222;$E_{kin} = \frac{1}{2}mv^2 = \text{[Wert]} \text{ J}$&#8220;</span></div>
+          <div class="muster-row"><span class="muster-label">Ergebnis</span><span class="muster-text">&#8222;Die <span class="muster-fill">[Energieform]</span> beträgt <span class="muster-fill">[Wert]</span> J.&#8220;</span></div>
+        </div>
+
+        <div class="muster-card">
+          <h4>Muster 3 — Diagramm beschreiben</h4>
+          <div class="muster-row"><span class="muster-label">These</span><span class="muster-text">&#8222;Der Körper führt eine <span class="muster-fill">[Art der Bewegung]</span> durch.&#8220;</span></div>
+          <div class="muster-row"><span class="muster-label">Begründung</span><span class="muster-text">&#8222;Dies erkennt man im <span class="muster-fill">[Diagrammtyp]</span> an der <span class="muster-fill">[Linienform]</span>.&#8220;</span></div>
+          <div class="muster-row"><span class="muster-label">Formel</span><span class="muster-text">&#8222;Die Steigung beträgt: $v = \frac{\Delta s}{\Delta t} = \text{[Wert]} \text{ m/s}$&#8220;</span></div>
+          <div class="muster-row"><span class="muster-label">Ergebnis</span><span class="muster-text">&#8222;Der Körper bewegt sich mit konstant <span class="muster-fill">[Wert]</span> m/s.&#8220;</span></div>
+        </div>
+      </section>
+
+      <!-- Chapter 3: Exercises -->
+      <section class="chapter" id="m1-ch3" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">03</span>
+          <h2 class="chapter-title">Übungsaufgaben</h2>
+        </div>
+
+        <!-- Ex 1: MC -->
+        <div class="exercise-card" id="m1-ex1">
+          <div class="ex-header">
+            <span class="ex-num">1</span>
+            <span class="ex-title">Schritt identifizieren</span>
+            <span class="ex-tag">Wissen</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Welcher Schritt des Argumentationsschemas ist das? <em>&#8222;$F = m \cdot a = 3 \text{ kg} \cdot 4 \text{ m/s}^2 = 12 \text{ N}$&#8220;</em></p>
+            <div class="opt-pills" id="m1-og1">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','a')">These</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','b')">Begründung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','c')">Formel mit Einheit</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','d')">Ergebnis als Aussage</button>
+            </div>
+            <input type="hidden" id="m1-a1" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(1,1,'m1-a1','m1-fb1','c')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m1-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2: MC -->
+        <div class="exercise-card" id="m1-ex2">
+          <div class="ex-header">
+            <span class="ex-num">2</span>
+            <span class="ex-title">Fehlenden Schritt ergänzen</span>
+            <span class="ex-tag">Analyse</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Klausurantwort enthält: <em>These + Formel + Ergebnis</em>. Welcher Schritt fehlt?</p>
+            <div class="opt-pills" id="m1-og2">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','a')">Die Formel</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','b')">Die Begründung (physikalisches Gesetz / Prinzip)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','c')">Das Ergebnis</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','d')">Die These</button>
+            </div>
+            <input type="hidden" id="m1-a2" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(1,2,'m1-a2','m1-fb2','b')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m1-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3: MC -->
+        <div class="exercise-card" id="m1-ex3">
+          <div class="ex-header">
+            <span class="ex-num">3</span>
+            <span class="ex-title">Gutes Ergebnis erkennen</span>
+            <span class="ex-tag">Anwenden</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Welche Aussage ist das korrekte <strong>Ergebnis</strong> für: &#8222;Berechne die Geschwindigkeit eines Körpers mit $E_{kin} = 50 \text{ J}$ und $m = 2 \text{ kg}$.&#8220;</p>
+            <div class="opt-pills" id="m1-og3">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','a')">&#8222;$v = 50/2 = 25$&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','b')">&#8222;Die Geschwindigkeit beträgt $v = \sqrt{2 \cdot 50 / 2} = \sqrt{50} \approx 7{,}07 \text{ m/s}$.&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','c')">&#8222;Ich habe $E_{kin} = \frac{1}{2}mv^2$ benutzt und bekam 7.&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','d')">&#8222;Sehr schnell.&#8220;</button>
+            </div>
+            <input type="hidden" id="m1-a3" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(1,3,'m1-a3','m1-fb3','b')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m1-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4: Input -->
+        <div class="exercise-card" id="m1-ex4">
+          <div class="ex-header">
+            <span class="ex-num">4</span>
+            <span class="ex-title">Welches Gesetz?</span>
+            <span class="ex-tag">Transfer</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Körper fällt herunter und wird dabei schneller. Welches Gesetz begründet das?</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m1-a4" placeholder="Gesetz / Prinzip...">
+              <button class="btn-check" onclick="checkInput(1,4,'m1-a4','m1-fb4','gravitation|schwerkraft|erdbeschleunigung|2. newton|zweites newton|newton 2|fallgesetze|gravitations')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h4">Die Gewichtskraft (Schwerkraft / Gravitation) wirkt ständig auf den Körper und beschleunigt ihn nach unten. Das 2. Newtonsche Gesetz erklärt, dass eine Nettokraft eine Beschleunigung bewirkt.</div>
+            <div class="fb-block" id="m1-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5: MC -->
+        <div class="exercise-card" id="m1-ex5">
+          <div class="ex-header">
+            <span class="ex-num">5</span>
+            <span class="ex-title">Schema-Reihenfolge</span>
+            <span class="ex-tag">Wissen</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">In welcher Reihenfolge sollten diese Elemente in einer Klausurantwort erscheinen?</p>
+            <div class="opt-pills" id="m1-og5">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','a')">Formel &#8594; Ergebnis &#8594; Begründung &#8594; These</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','b')">These &#8594; Begründung &#8594; Formel &#8594; Ergebnis</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','c')">Ergebnis &#8594; Formel &#8594; These &#8594; Begründung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','d')">Begründung &#8594; These &#8594; Ergebnis &#8594; Formel</button>
+            </div>
+            <input type="hidden" id="m1-a5" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(1,5,'m1-a5','m1-fb5','b')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m1-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(1)">Ergebnis anzeigen</button>
+
+        <!-- Extra exercises -->
+        <details class="extra-section" style="margin-top:32px;">
+          <summary class="extra-toggle">
+            <span class="extra-icon">+</span>
+            Noch nicht sicher? — Zusätzliche Übungen
+            <span class="extra-count">(2 weitere)</span>
+          </summary>
+          <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong>.</p></div>
+
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Lückensatz: These formulieren</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Ergänze die These: &#8222;Ein Körper mit größerer Masse hat eine ________ Gewichtskraft.&#8220;</p>
+              <div class="answer-row">
+                <input class="answer-input" id="m1-eA1" placeholder="Adjektiv eingeben">
+                <button class="btn-check extra-btn" onclick="checkExtra('m1-eA1','m1-eFb1','größere|einegrößere|einehöhere|höhere','&#10003; Richtig!','&#10007; $F_G = m \\cdot g$ — wenn $m$ größer wird, wird $F_G$ ebenfalls größer.')">Prüfen</button>
+                <button class="btn-hint" onclick="toggleHint('m1-eH1')">&#128161; Tipp</button>
+              </div>
+              <div class="hint-box" id="m1-eH1">$F_G = m \cdot g$ — wenn $m$ größer wird und $g$ konstant bleibt, was passiert dann mit $F_G$?</div>
+              <div class="fb-block" id="m1-eFb1"></div>
+            </div>
+          </div>
+
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Selbstcheck: 4-Schritt-Schema anwenden</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Wende das 4-Schritt-Schema auf folgende Aufgabe an:<br>
+              <em>&#8222;Ein Körper der Masse $m = 5\,\text{kg}$ wird mit $a = 4\,\text{m/s}^2$ beschleunigt. Welche Kraft wirkt?&#8220;</em><br><br>
+              Schreibe alle vier Schritte (These &#8594; Begründung &#8594; Formel+Rechnung &#8594; Ergebnis als Satz).</p>
+              <textarea class="answer-textarea" id="m1-eTA2" rows="5" placeholder="1. These: ...&#10;2. Begründung (Gesetz): ...&#10;3. Formel + Rechnung: ...&#10;4. Ergebnis als Satz: ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m1-eSol2')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m1-eSol2" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p><strong>1. These:</strong> Auf den Körper wirkt eine Kraft ungleich null.<br>
+                <strong>2. Begründung:</strong> Nach dem 2. Newtonschen Gesetz gilt $F = m \cdot a$.<br>
+                <strong>3. Rechnung:</strong> $F = 5\,\text{kg} \cdot 4\,\text{m/s}^2 = 20\,\text{N}$<br>
+                <strong>4. Ergebnis:</strong> Die auf den Körper wirkende Kraft beträgt $F = 20\,\text{N}$.</p>
+                <div class="extra-rubric">
+                  <div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> These vorhanden (vollständiger Satz)</label>
+                  <label><input type="checkbox"> Gesetz korrekt benannt (2. Newton)</label>
+                  <label><input type="checkbox"> Einheiten korrekt (kg, m/s², N)</label>
+                  <label><input type="checkbox"> Abschluss-Satz mit Zahlenwert</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- KI exercise -->
+        <div class="exercise-card" style="margin-top:20px;">
+          <div class="ex-header">
+            <span class="ex-num" style="background:var(--accent-bright); color:#0c0c1d;">KI</span>
+            <span class="ex-title">Fachsprache anwenden</span>
+            <span class="ex-tag" style="background:var(--accent-bright);color:#fff">KI-Feedback</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Argumentiere nach dem Schema These-Begründung-Formel-Ergebnis: Warum ist der Bremsweg bei doppelter Geschwindigkeit viermal so lang?</p>
+            <textarea id="ki-text-1" rows="5" style="width:100%;padding:12px;border:2px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.06);color:#e2e8f0;font-family:inherit;font-size:16px;resize:vertical;min-height:120px" placeholder="Schreibe hier deine Antwort..."></textarea>
+            <button class="btn-check" style="margin-top:8px" onclick="getKIFeedback('ki-text-1','ki-fb-1',KI_PROMPTS[1])">KI-Feedback holen</button>
+            <div id="ki-fb-1" style="margin-top:12px"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3: MODULE D2.3 - Klausurantworten
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-2">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">D2.3 &mdash; Klausurantworten schreiben</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-2"></div></div>
+          <span class="nav-progress-text" id="prog-text-2">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">D2.3</div>
+        <h1>Klausurantworten<br>schreiben</h1>
+        <p class="hero-sub">Musterlösungen analysieren &middot; Fehler erkennen &middot; besser formulieren</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 2</span> Aufbau</div>
+          <div class="meta-chip"><span class="val">30 min</span> Dauer</div>
+        </div>
+      </section>
+
+      <!-- Chapter 1: Analyse -->
+      <section class="chapter" id="m2-ch1">
+        <div class="chapter-label">
+          <span class="chapter-num">01</span>
+          <h2 class="chapter-title">Analyse: Gut vs. Schlecht</h2>
+        </div>
+
+        <div class="analysis-card">
+          <div class="ac-header">Aufgabe A — Freier Fall</div>
+          <div class="ac-question"><strong>Aufgabe:</strong> Ein Ball fällt aus 20 m Höhe. Berechne die Geschwindigkeit beim Aufprall ($g = 10 \text{ m/s}^2$).</div>
+          <div class="ac-cols">
+            <div class="ac-bad">
+              <div class="ac-col-label">&#10007; Schülerantwort</div>
+              <div class="ac-text">&#8222;$v = \sqrt{2 \cdot g \cdot h}$<br>$v = \sqrt{2 \cdot 10 \cdot 20}$<br>$v = 20$&#8220;</div>
+            </div>
+            <div class="ac-good">
+              <div class="ac-col-label">&#10003; Musterlösung</div>
+              <div class="ac-text">&#8222;Beim freien Fall gilt Energieerhaltung: $E_{pot} = E_{kin}$.<br>$v = \sqrt{2gh} = \sqrt{2 \cdot 10 \; \frac{\text{m}}{\text{s}^2} \cdot 20 \text{ m}} = \sqrt{400} = 20 \text{ m/s}$.<br>Die Aufprallgeschwindigkeit beträgt <strong>20 m/s</strong>.&#8220;</div>
+            </div>
+          </div>
+          <div class="ac-comment"><strong>Was fehlt:</strong> Einheit beim Ergebnis fehlt, keine Begründung (Energieerhaltung), keine abschließende Aussage. Diese Antwort würde in der Klausur Punktabzug bekommen!</div>
+        </div>
+
+        <div class="analysis-card">
+          <div class="ac-header">Aufgabe B — Kraft und Beschleunigung</div>
+          <div class="ac-question"><strong>Aufgabe:</strong> Erkläre, was mit einem Körper passiert, wenn die auf ihn wirkende Nettokraft gleich null ist.</div>
+          <div class="ac-cols">
+            <div class="ac-bad">
+              <div class="ac-col-label">&#10007; Schülerantwort</div>
+              <div class="ac-text">&#8222;Er hört auf sich zu bewegen.&#8220;</div>
+            </div>
+            <div class="ac-good">
+              <div class="ac-col-label">&#10003; Musterlösung</div>
+              <div class="ac-text">&#8222;Wirkt keine Nettokraft auf einen Körper ($F_{netto} = 0$), so ändert er seinen Bewegungszustand nicht (1. Newtonsches Gesetz / Trägheitsgesetz). Ein ruhender Körper bleibt in Ruhe; ein sich bewegender Körper behält seine Geschwindigkeit bei.&#8220;</div>
+            </div>
+          </div>
+          <div class="ac-comment"><strong>Was fehlt:</strong> Die Schülerantwort ist falsch — ein bewegter Körper hört <em>nicht</em> auf zu bewegen! Das Trägheitsgesetz wurde nicht angewendet. Kein Gesetz genannt, keine vollständige Aussage.</div>
+        </div>
+
+        <div class="analysis-card">
+          <div class="ac-header">Aufgabe C — Energieumwandlung</div>
+          <div class="ac-question"><strong>Aufgabe:</strong> Beschreibe die Energieumwandlung beim Abschuss einer Kugel mit einer gespannten Feder.</div>
+          <div class="ac-cols">
+            <div class="ac-bad">
+              <div class="ac-col-label">&#10007; Schülerantwort</div>
+              <div class="ac-text">&#8222;Die Energie wird übertragen. Die Kugel bewegt sich.&#8220;</div>
+            </div>
+            <div class="ac-good">
+              <div class="ac-col-label">&#10003; Musterlösung</div>
+              <div class="ac-text">&#8222;Beim Entspannen der Feder wird die gespeicherte <strong>elastische Spannungsenergie</strong> in <strong>kinetische Energie</strong> der Kugel umgewandelt. Nach dem Energieerhaltungssatz gilt: $E_{el} = E_{kin} = \frac{1}{2}mv^2$ (ohne Reibungsverluste).&#8220;</div>
+            </div>
+          </div>
+          <div class="ac-comment"><strong>Was fehlt:</strong> Energieformen nicht benannt, Richtung der Umwandlung unklar, kein Gesetz, keine Formel. Zwei sehr allgemeine Sätze ohne physikalischen Gehalt.</div>
+        </div>
+      </section>
+
+      <!-- Chapter 2: Rubric -->
+      <section class="chapter" id="m2-ch2" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">02</span>
+          <h2 class="chapter-title">Bewertungsraster (Rubric)</h2>
+        </div>
+        <div class="glass">
+          <p>Lehrer bewerten nach diesen Kriterien. Nutze das Raster zur Selbstkontrolle.</p>
+        </div>
+
+        <div class="rubric-card">
+          <div class="rubric-header">Kriterien für eine vollständige Klausurantwort</div>
+          <div class="rubric-row"><span class="rubric-criterion">These / Aussage</span><span class="rubric-desc">Klarer Satz, was passiert — fachlich korrekt formuliert</span><span class="rubric-pts">1 Pkt</span></div>
+          <div class="rubric-row"><span class="rubric-criterion">Physikalisches Gesetz</span><span class="rubric-desc">Relevantes Gesetz / Prinzip korrekt benannt</span><span class="rubric-pts">1 Pkt</span></div>
+          <div class="rubric-row"><span class="rubric-criterion">Formel korrekt</span><span class="rubric-desc">Richtige Formel aufgeschrieben, korrekt umgestellt</span><span class="rubric-pts">1 Pkt</span></div>
+          <div class="rubric-row"><span class="rubric-criterion">Einheiten</span><span class="rubric-desc">Alle Größen und Ergebnis mit richtiger Einheit</span><span class="rubric-pts">1 Pkt</span></div>
+          <div class="rubric-row"><span class="rubric-criterion">Rechnung korrekt</span><span class="rubric-desc">Zahlenwert richtig berechnet</span><span class="rubric-pts">1 Pkt</span></div>
+          <div class="rubric-row"><span class="rubric-criterion">Abschluss-Satz</span><span class="rubric-desc">Ergebnis als vollständiger Satz mit Einheit formuliert</span><span class="rubric-pts">1 Pkt</span></div>
+        </div>
+
+        <div class="tip-box">
+          <strong>Tipp:</strong> Prüfe jede Klausurantwort nach dem Rubric — wenn ein Kriterium fehlt, ergänze es!
+        </div>
+      </section>
+
+      <!-- Chapter 3: Exercises -->
+      <section class="chapter" id="m2-ch3" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">03</span>
+          <h2 class="chapter-title">Übungsaufgaben</h2>
+        </div>
+
+        <!-- Ex 1: MC -->
+        <div class="exercise-card" id="m2-ex1">
+          <div class="ex-header">
+            <span class="ex-num">1</span>
+            <span class="ex-title">Fehler finden</span>
+            <span class="ex-tag">Analyse</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Welcher Fehler steckt in dieser Antwort? <em>&#8222;$F = 5 \text{ kg} \cdot 3 = 15$&#8220;</em></p>
+            <div class="opt-pills" id="m2-og1">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','a')">Die Formel ist falsch.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','b')">Der Zahlenwert ist falsch.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','c')">Die Einheit fehlt beim Ergebnis und bei der Beschleunigung.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','d')">Es fehlt ein Abschluss-Satz.</button>
+            </div>
+            <input type="hidden" id="m2-a1" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(2,1,'m2-a1','m2-fb1','c')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m2-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2: MC -->
+        <div class="exercise-card" id="m2-ex2">
+          <div class="ex-header">
+            <span class="ex-num">2</span>
+            <span class="ex-title">Gesetz benennen</span>
+            <span class="ex-tag">Wissen</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Antwort enthält: Formel $W = m \cdot g \cdot h$, Rechnung, Ergebnis. Welches physikalische Gesetz / Prinzip sollte noch erwähnt werden?</p>
+            <div class="opt-pills" id="m2-og2">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a2','a')">Das Trägheitsgesetz</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a2','b')">Der Energieerhaltungssatz / Definition der Hubarbeit</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a2','c')">Das Hooksche Gesetz</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a2','d')">Die Impulserhaltung</button>
+            </div>
+            <input type="hidden" id="m2-a2" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(2,2,'m2-a2','m2-fb2','b')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m2-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3: Input -->
+        <div class="exercise-card" id="m2-ex3">
+          <div class="ex-header">
+            <span class="ex-num">3</span>
+            <span class="ex-title">Wie viele Punkte?</span>
+            <span class="ex-tag">Anwenden</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Antwort enthält: richtigen Zahlenwert, richtige Einheit, aber kein Gesetz und keinen Abschluss-Satz. Wie viele Punkte (von 6) gibt es nach dem Rubric?</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m2-a3" placeholder="Punkte eingeben...">
+              <button class="btn-check" onclick="checkInput(2,3,'m2-a3','m2-fb3','4|vier')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h3">These(?)+Gesetz(0)+Formel(?)+Einheit(&#10003;)+Rechnung(&#10003;)+Abschluss(0) — rechne nach!</div>
+            <div class="fb-block" id="m2-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4: MC -->
+        <div class="exercise-card" id="m2-ex4">
+          <div class="ex-header">
+            <span class="ex-num">4</span>
+            <span class="ex-title">Abschluss-Satz</span>
+            <span class="ex-tag">Anwenden</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Schreibe den passenden Abschluss-Satz für: Berechnung ergibt $v = 12 \text{ m/s}$.</p>
+            <div class="opt-pills" id="m2-og4">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','a')">&#8222;= 12&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','b')">&#8222;Die Geschwindigkeit des Körpers beträgt $v = 12 \text{ m/s}$.&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','c')">&#8222;Ergebnis: irgendwas.&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','d')">&#8222;Ich habe 12 bekommen.&#8220;</button>
+            </div>
+            <input type="hidden" id="m2-a4" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(2,4,'m2-a4','m2-fb4','b')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m2-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5: MC -->
+        <div class="exercise-card" id="m2-ex5">
+          <div class="ex-header">
+            <span class="ex-num">5</span>
+            <span class="ex-title">Vollständigkeit prüfen</span>
+            <span class="ex-tag">Transfer</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Welche der folgenden Antworten ist laut Rubric <strong>vollständig</strong>?</p>
+            <div class="opt-pills" id="m2-og5">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a5','a')">&#8222;Kraft = Masse mal Beschleunigung, Ergebnis = 30.&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a5','b')">&#8222;$F = m \cdot a = 3 \cdot 10 = 30$&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a5','c')">&#8222;Nach dem 2. Newtonschen Gesetz gilt $F = m \cdot a = 3 \text{ kg} \cdot 10 \text{ m/s}^2 = 30 \text{ N}$. Die Kraft auf den Körper beträgt 30 N.&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a5','d')">&#8222;30 N&#8220;</button>
+            </div>
+            <input type="hidden" id="m2-a5" value="">
+            <div style="display:flex; gap:8px; flex-wrap:wrap;">
+              <button class="btn-check" onclick="checkMC(2,5,'m2-a5','m2-fb5','c')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m2-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(2)">Ergebnis anzeigen</button>
+
+        <!-- Extra exercises -->
+        <details class="extra-section" style="margin-top:32px;">
+          <summary class="extra-toggle">
+            <span class="extra-icon">+</span>
+            Noch nicht sicher? — Zusätzliche Übungen
+            <span class="extra-count">(2 weitere)</span>
+          </summary>
+          <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong>.</p></div>
+
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Selbstcheck: Vollständige Klausurantwort schreiben</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Schreibe eine vollständige Klausurantwort auf die Frage:<br>
+              <em>&#8222;Ein Körper der Masse $m = 2\,\text{kg}$ wird mit $a = 5\,\text{m/s}^2$ beschleunigt. Welche Kraft wirkt?&#8220;</em><br><br>
+              Nutze das 4-Schritt-Schema: These &#8594; Begründung &#8594; Formel+Rechnung &#8594; Ergebnis-Satz.</p>
+              <textarea class="answer-textarea" id="m2-eTA1" rows="5" placeholder="Schreibe deine vollständige Antwort ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m2-eSol1')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m2-eSol1" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p>Die Kraft auf den Körper ist ungleich null [<em>These</em>]. Nach dem 2. Newtonschen Gesetz gilt $F = m \cdot a$ [<em>Begründung</em>]. $F = 2\,\text{kg} \cdot 5\,\text{m/s}^2 = 10\,\text{N}$ [<em>Rechnung</em>]. Die auf den Körper wirkende Kraft beträgt $F = 10\,\text{N}$ [<em>Ergebnis-Satz</em>].</p>
+                <div class="extra-rubric">
+                  <div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> These vorhanden</label>
+                  <label><input type="checkbox"> Gesetz benannt (2. Newton)</label>
+                  <label><input type="checkbox"> Einheiten korrekt (kg, m/s², N)</label>
+                  <label><input type="checkbox"> Abschluss-Satz mit Zahlenwert und Einheit</label>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Selbstcheck: Schwache Antwort verbessern</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Die folgende Schülerantwort ist unvollständig: <em>&#8222;$F = 2 \cdot 5 = 10$&#8220;</em><br>
+              Schreibe sie so um, dass sie alle Rubric-Kriterien erfüllt (These, Gesetz, Einheiten, Ergebnis-Satz).</p>
+              <textarea class="answer-textarea" id="m2-eTA2" rows="4" placeholder="Verbesserte Version ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m2-eSol2')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m2-eSol2" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p>Auf den Körper wirkt eine resultierende Kraft. Nach dem 2. Newtonschen Gesetz gilt $F = m \cdot a = 2\,\text{kg} \cdot 5\,\text{m/s}^2 = 10\,\text{N}$. Die wirkende Kraft beträgt also $F = 10\,\text{N}$.</p>
+                <div class="extra-rubric">
+                  <div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> Gesetz explizit erwähnt</label>
+                  <label><input type="checkbox"> Einheiten ergänzt (kg, m/s²)</label>
+                  <label><input type="checkbox"> Ergebnis mit Einheit N abgeschlossen</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <!-- KI exercise -->
+        <div class="exercise-card" style="margin-top:20px;">
+          <div class="ex-header">
+            <span class="ex-num" style="background:var(--accent-bright); color:#0c0c1d;">KI</span>
+            <span class="ex-title">Fachsprache anwenden</span>
+            <span class="ex-tag" style="background:var(--accent-bright);color:#fff">KI-Feedback</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Schreibe eine Klausurantwort: Erkläre, warum ein Fallschirmspringer nach dem Öffnen des Fallschirms langsamer wird, obwohl die Gravitation weiterhin nach unten zieht.</p>
+            <textarea id="ki-text-2" rows="5" style="width:100%;padding:12px;border:2px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.06);color:#e2e8f0;font-family:inherit;font-size:16px;resize:vertical;min-height:120px" placeholder="Schreibe hier deine Antwort..."></textarea>
+            <button class="btn-check" style="margin-top:8px" onclick="getKIFeedback('ki-text-2','ki-fb-2',KI_PROMPTS[2])">KI-Feedback holen</button>
+            <div id="ki-fb-2" style="margin-top:12px"></div>
+          </div>
+        </div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════ -->
+<script>
+/* ────────────────────────────────────────────
+   STATE
+   ──────────────────────────────────────────── */
+const MODULE_EX_COUNTS = [5, 5, 5];
+const modNames = ['D2.1', 'D2.2', 'D2.3'];
+let moduleStates = [false, false, false];
+let exerciseStates = {};
+
+/* ────────────────────────────────────────────
+   SCORM 1.2 API
+   ──────────────────────────────────────────── */
+const SCORM = (() => {
+  let api = null, initialized = false;
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) win = win.parent;
+      else if (win.opener) win = win.opener;
+      else break;
+    }
+    return win ? win.API : null;
+  }
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.moduleStates) moduleStates = saved.moduleStates;
+            if (saved.exerciseStates) exerciseStates = saved.exerciseStates;
+          } catch(e) {}
+        }
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
+        }
+      }
+    } catch(e) { console.log('SCORM init:', e); }
+  }
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ moduleStates, exerciseStates }));
+      let total = 0, solved = 0;
+      for (const key in exerciseStates) { total++; if (exerciseStates[key]) solved++; }
+      const score = total > 0 ? Math.round((solved / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+      if (moduleStates.every(s => s)) api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      api.LMSCommit('');
+    } catch(e) { console.log('SCORM save:', e); }
+  }
+  function finish() {
+    if (!api || !initialized) return;
+    try { save(); api.LMSFinish(''); } catch(e) {}
+  }
+  return { init, save, finish };
+})();
+
+/* ────────────────────────────────────────────
+   SCREEN NAVIGATION
+   ──────────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(id);
+  if (s) s.classList.add('active');
+  window.scrollTo(0, 0);
+  const canvas = document.getElementById('bg-canvas');
+  if (id === 'screen-landing') {
+    canvas.classList.remove('dimmed', 'hidden');
+  } else {
+    canvas.classList.add('hidden');
+  }
+}
+
+function openModule(idx) {
+  showScreen('screen-mod-' + idx);
+  restoreModuleState(idx);
+  if (idx === 0) renderGrid();
+  setTimeout(() => MathJax?.typesetPromise?.(), 100);
+}
+
+function goLanding() {
+  showScreen('screen-landing');
+  updateLanding();
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   EXERCISE SYSTEM
+   ──────────────────────────────────────────── */
+function normalize(v) {
+  return v.trim().replace(/\s+/g, '').toLowerCase()
+    .replace(/,/g, '.').replace(/\u00d7/g, '*').replace(/\u00b7/g, '*').replace(/\u00f7/g, '/').replace(/\u22c5/g, '*');
+}
+
+function selOpt(btn, hiddenId, val) {
+  btn.closest('.opt-pills').querySelectorAll('.opt-pill').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById(hiddenId).value = val;
+}
+
+function checkMC(mod, ex, inputId, fbId, correctVal) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = document.getElementById(inputId).value;
+  if (!val) return;
+  const fb = document.getElementById(fbId);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+  if (val === correctVal) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Nicht ganz — versuche es nochmal.';
+    card.classList.add('wrong-state');
+  }
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function checkInput(mod, ex, inputId, fbId, patterns) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const raw = document.getElementById(inputId).value;
+  if (!raw.trim()) return;
+  const val = normalize(raw);
+  const accepted = patterns.split('|').map(normalize);
+  const correct = accepted.some(p => val.includes(p));
+  const fb = document.getElementById(fbId);
+  const inp = document.getElementById(inputId);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+
+  if (correct) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    inp.className = 'answer-input correct';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Noch nicht ganz — schau dir den Tipp an.';
+    inp.className = 'answer-input incorrect';
+    card.classList.add('wrong-state');
+  }
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function checkExtra(inputId, fbId, patterns, okMsg, wrongMsg) {
+  const inp = document.getElementById(inputId);
+  const fb = document.getElementById(fbId);
+  if (!inp || !fb) return;
+  const val = normalize(inp.value);
+  const ok = patterns.split('|').some(p => normalize(p) === val);
+  if (ok) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = okMsg || '&#10003; Richtig!';
+    inp.className = 'answer-input correct';
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = wrongMsg || '&#10007; Noch nicht ganz.';
+    inp.className = 'answer-input incorrect';
+  }
+  MathJax?.typesetPromise?.([fb]);
+}
+
+function toggleHint(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+function toggleSolution(id) {
+  var el = document.getElementById(id);
+  if (el) {
+    el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+    if (el.style.display === 'block') MathJax?.typesetPromise?.([el]);
+  }
+}
+
+/* ────────────────────────────────────────────
+   PROGRESS TRACKING
+   ──────────────────────────────────────────── */
+function updateModuleProgress(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const pct = (solved / total) * 100;
+  const fill = document.getElementById('prog-fill-' + mod);
+  const text = document.getElementById('prog-text-' + mod);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = solved + ' / ' + total;
+
+  if (solved === total) {
+    moduleStates[mod] = true;
+  }
+}
+
+function updateLanding() {
+  const completedCount = moduleStates.filter(Boolean).length;
+  const opFill = document.getElementById('opFill');
+  const opLabel = document.getElementById('opLabel');
+  if (opFill) opFill.style.width = (completedCount / 3 * 100) + '%';
+  if (opLabel) opLabel.textContent = completedCount + ' / 3 Module';
+
+  for (let i = 0; i < 3; i++) {
+    const card = document.getElementById('card-' + i);
+    const status = document.getElementById('status-' + i);
+    if (moduleStates[i]) {
+      card.classList.add('completed');
+      status.textContent = 'Erledigt';
+      status.classList.add('done');
+    } else {
+      card.classList.remove('completed');
+      let started = false;
+      for (let e = 1; e <= MODULE_EX_COUNTS[i]; e++) {
+        if (exerciseStates[i + '-' + e]) { started = true; break; }
+      }
+      status.textContent = started ? 'Angefangen' : 'Starten';
+      status.classList.remove('done');
+    }
+  }
+}
+
+function restoreModuleState(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) {
+      const card = document.getElementById('m' + mod + '-ex' + i);
+      const fb = document.getElementById('m' + mod + '-fb' + i);
+      if (card) card.classList.add('solved');
+      if (fb) {
+        fb.className = 'fb-block correct';
+        fb.innerHTML = '&#10003; Richtig!';
+      }
+    }
+  }
+  updateModuleProgress(mod);
+}
+
+function showResult(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  let msg;
+  if (solved === total) {
+    msg = 'Modul ' + modNames[mod] + ' abgeschlossen! Alle ' + total + ' Aufgaben richtig.';
+    moduleStates[mod] = true;
+  } else if (solved === 0) {
+    msg = 'Noch keine Aufgabe gelöst. Versuche es!';
+  } else {
+    msg = solved + ' von ' + total + ' Aufgaben richtig. Weiter so!';
+  }
+  alert(msg);
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   BEGRIFFE DATA (D2.1)
+   ──────────────────────────────────────────── */
+const BEGRIFFE = [
+  { cat:'kinetik', term:'Ortsvektor', symbol:'$\\vec{r}$', def:'Gibt die Position eines K\u00f6rpers im Raum bezogen auf den Ursprung an.', einheit:'m' },
+  { cat:'kinetik', term:'Verschiebung', symbol:'$\\Delta \\vec{s}$', def:'Differenz zwischen End- und Startposition eines K\u00f6rpers.', einheit:'m' },
+  { cat:'kinetik', term:'Momentangeschwindigkeit', symbol:'$v(t)$', def:'Geschwindigkeit zu einem bestimmten Zeitpunkt \u2014 Tangente an den s-t-Graphen.', einheit:'m/s' },
+  { cat:'kinetik', term:'Durchschnittsgeschwindigkeit', symbol:'$\\bar{v}$', def:'Gesamtweg geteilt durch die Gesamtzeit: $\\bar{v} = s / t$.', einheit:'m/s' },
+  { cat:'kinetik', term:'Relativgeschwindigkeit', symbol:'$v_{rel}$', def:'Geschwindigkeit eines K\u00f6rpers bezogen auf einen anderen bewegten K\u00f6rper.', einheit:'m/s' },
+  { cat:'kinetik', term:'Wurfparabel', symbol:'', def:'\u00dcberlagerung von gleichf\u00f6rmiger Horizontalbewegung und gleichm\u00e4\u00dfig beschleunigter Vertikalbewegung.', einheit:'\u2013' },
+  { cat:'dynamik', term:'Tr\u00e4gheit', symbol:'', def:'Eigenschaft eines K\u00f6rpers, seinen Bewegungszustand beizubehalten (1. Newtonsches Gesetz).', einheit:'\u2013' },
+  { cat:'dynamik', term:'Impuls', symbol:'$p$', def:'Ma\u00df f\u00fcr die Bewegungsmenge: $p = m \\cdot v$.', einheit:'kg\u00b7m/s' },
+  { cat:'dynamik', term:'Impulserhaltung', symbol:'', def:'Der Gesamtimpuls eines abgeschlossenen Systems bleibt konstant.', einheit:'\u2013' },
+  { cat:'dynamik', term:'Reibungskraft', symbol:'$F_R$', def:'Kraft entgegen der Bewegung: $F_R = \\mu \\cdot F_N$.', einheit:'N' },
+  { cat:'dynamik', term:'Normalkraft', symbol:'$F_N$', def:'Kraft senkrecht zur Oberfl\u00e4che, auf der ein K\u00f6rper aufliegt.', einheit:'N' },
+  { cat:'dynamik', term:'Hangabtriebskraft', symbol:'$F_H$', def:'Komponente der Gewichtskraft parallel zur schiefen Ebene: $F_H = m \\cdot g \\cdot \\sin(\\alpha)$.', einheit:'N' },
+  { cat:'energie', term:'Potenzielle Energie', symbol:'$E_{pot}$', def:'Gespeicherte Energie aufgrund der Position: $E_{pot} = m \\cdot g \\cdot h$.', einheit:'J' },
+  { cat:'energie', term:'Kinetische Energie', symbol:'$E_{kin}$', def:'Energie der Bewegung: $E_{kin} = \\frac{1}{2} m v^2$.', einheit:'J' },
+  { cat:'energie', term:'W\u00e4rmeenergie', symbol:'$Q$', def:'Energie, die bei Reibung entsteht und nicht vollst\u00e4ndig zur\u00fcckgewonnen werden kann.', einheit:'J' },
+  { cat:'energie', term:'Energiedissipation', symbol:'', def:'Umwandlung mechanischer Energie in W\u00e4rme durch Reibung oder D\u00e4mpfung.', einheit:'\u2013' },
+  { cat:'energie', term:'Wirkungsgrad', symbol:'$\\eta$', def:'Verh\u00e4ltnis von Nutzenergie zur zugef\u00fchrten Energie: $\\eta = E_{nutz} / E_{zu}$.', einheit:'dimensionslos' },
+  { cat:'energie', term:'Energieerhaltungssatz', symbol:'', def:'Die Gesamtenergie in einem abgeschlossenen System bleibt konstant.', einheit:'\u2013' },
+  { cat:'arbeit', term:'Hubarbeit', symbol:'$W_{hub}$', def:'Arbeit gegen die Schwerkraft: $W = m \\cdot g \\cdot h$.', einheit:'J' },
+  { cat:'arbeit', term:'Reibungsarbeit', symbol:'$W_R$', def:'Arbeit gegen die Reibungskraft; wird in W\u00e4rme umgewandelt.', einheit:'J' },
+  { cat:'arbeit', term:'Beschleunigungsarbeit', symbol:'$W_a$', def:'Arbeit zur Geschwindigkeits\u00e4nderung: $W_a = \\Delta E_{kin}$.', einheit:'J' },
+  { cat:'arbeit', term:'Leistung', symbol:'$P$', def:'Arbeit pro Zeit: $P = W / t = F \\cdot v$.', einheit:'W = J/s' },
+  { cat:'arbeit', term:'Nutzleistung', symbol:'$P_{nutz}$', def:'Tats\u00e4chlich nutzbare Leistung nach Abzug aller Verluste.', einheit:'W' },
+  { cat:'arbeit', term:'Mechanische Leistung', symbol:'', def:'Leistung infolge einer Kraft: $P = F \\cdot v$.', einheit:'W' },
+  { cat:'schwingung', term:'Schwingung', symbol:'', def:'Periodische Bewegung um eine Gleichgewichtslage.', einheit:'\u2013' },
+  { cat:'schwingung', term:'Amplitude', symbol:'$A$', def:'Maximale Auslenkung aus der Gleichgewichtslage.', einheit:'m' },
+  { cat:'schwingung', term:'Frequenz', symbol:'$f$', def:'Anzahl der vollst\u00e4ndigen Schwingungen pro Sekunde.', einheit:'Hz = 1/s' },
+  { cat:'schwingung', term:'Periodendauer', symbol:'$T$', def:'Zeit f\u00fcr eine vollst\u00e4ndige Schwingung: $T = 1/f$.', einheit:'s' },
+  { cat:'schwingung', term:'Resonanz', symbol:'', def:'Tritt auf, wenn die Erregerfrequenz gleich der Eigenfrequenz ist \u2014 maximale Amplitude.', einheit:'\u2013' },
+  { cat:'schwingung', term:'D\u00e4mpfung', symbol:'', def:'Abnahme der Amplitude durch Energieverluste (z.B. Reibung).', einheit:'\u2013' },
+];
+
+const CAT_LABELS = { kinetik:'Kinematik', dynamik:'Dynamik', energie:'Energie', arbeit:'Arbeit & Leistung', schwingung:'Schwingung' };
+let activeCat = 'alle';
+
+function renderGrid() {
+  const grid = document.getElementById('begriffeGrid');
+  if (!grid) return;
+  const filtered = activeCat === 'alle' ? BEGRIFFE : BEGRIFFE.filter(b => b.cat === activeCat);
+  grid.innerHTML = filtered.map(b => `
+    <div class="begriff-card">
+      <div class="bc-cat">${CAT_LABELS[b.cat] || b.cat}</div>
+      <div class="bc-term">${b.term}</div>
+      ${b.symbol ? `<div class="bc-symbol">${b.symbol}</div>` : ''}
+      <div class="bc-def">${b.def}</div>
+      ${b.einheit !== '\u2013' ? `<div class="bc-einheit">Einheit: <span>${b.einheit}</span></div>` : ''}
+    </div>`).join('');
+  if (window.MathJax) MathJax.typesetPromise([grid]);
+}
+
+function filterCat(cat, btn) {
+  activeCat = cat;
+  document.querySelectorAll('.cat-pill').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  renderGrid();
+}
+
+/* ────────────────────────────────────────────
+   KI FEEDBACK
+   ──────────────────────────────────────────── */
+const WEBHOOK_URL = "https://hook.eu2.make.com/ucp5woga4t7shqejvtys8vfm94ikf411";
+
+const KI_PROMPTS = [
+  `Du bist ein Physiklehrer (Jg. 11). Prüfe: 1) Korrekte Verwendung von 'potenzielle Energie' und 'kinetische Energie'? 2) 'Energie wird UMGEWANDELT' (nicht 'verbraucht')? 3) Oben E_pot max, unten E_kin max? 4) Reibung/Wärme erwähnt? Feedback auf Deutsch, max 150 Wörter.`,
+  `Du bist ein Physiklehrer (Jg. 11). Prüfe: 1) THESE formuliert? 2) Physikalische BEGRÜNDUNG (quadratische Abhängigkeit)? 3) FORMEL s=v²/(2a) korrekt? 4) ERGEBNIS (2²=4) nachgerechnet? Prüfe Fachsprache: 'Bremsweg', 'quadratisch proportional'. Feedback auf Deutsch, max 150 Wörter.`,
+  `Du bist ein Physiklehrer (Jg. 11). Prüfe Klausurantwort: 1) Gravitationskraft UND Luftwiderstand benannt? 2) Kräftegleichgewicht / resultierende Kraft erklärt? 3) Fachbegriffe: Luftwiderstand, Gravitationskraft, resultierende Kraft? 4) Logischer Aufbau? 5) Sachlich, keine Umgangssprache? Feedback auf Deutsch, max 200 Wörter.`
+];
+
+async function getKIFeedback(textareaId, feedbackDivId, systemPrompt) {
+  const ta = document.getElementById(textareaId);
+  const fb = document.getElementById(feedbackDivId);
+  const text = ta.value.trim();
+  if (!text) { fb.innerHTML = '<span style="color:#f59e0b">Bitte schreibe zuerst deinen Text.</span>'; return; }
+  fb.innerHTML = '<span class="loading"><span class="spinner"></span> Die KI denkt nach...</span>';
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system_prompt: systemPrompt, user_text: text })
+    });
+    const raw = await res.text();
+    let feedbackText = '';
+    try {
+      const json = JSON.parse(raw);
+      feedbackText = json.choices?.[0]?.message?.content || json.content || raw;
+    } catch(e) { feedbackText = raw; }
+    fb.innerHTML = '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:16px;line-height:1.7;white-space:pre-wrap;color:#e2e8f0">' + feedbackText + '</div>';
+  } catch(err) {
+    fb.innerHTML = '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:16px;color:#fca5a5">Fehler: ' + err.message + '</div>';
+  }
+}
+
+/* ────────────────────────────────────────────
+   ANIMATED BACKGROUND (WebGL1 organic shader)
+   ──────────────────────────────────────────── */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const gl = canvas.getContext('webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+  const fs = `
+precision highp float;
+uniform vec2 iRes;
+uniform float iTime;
+void main() {
+  vec2 r = iRes.xy;
+  float t = iTime;
+  vec3 FC = vec3(gl_FragCoord.xy, t);
+  vec4 o = vec4(0.0);
+  float z = 0.0;
+  for (float i = 0.0; i < 100.0; i++) {
+    vec3 v = vec3(0., -2., 7.);
+    vec3 pp = z * normalize(FC * 2.0 - vec3(r.xy, r.x)) + v;
+    vec3 a = pp;
+    a.y *= .3;
+    float d = 1.0;
+    for (float dd = 1.0; dd < 10.0; dd++) {
+      a -= 0.1 * sin((a.zxy + t * v + dd) * dd) * pp.y / dd;
+      d = dd;
+    }
+    float f = .2 + abs(length(a.xz - cos(a.zx * 6.)) + max(pp.y / .1, -.6));
+    float stepLen = min(max(-pp.y, length(a) - 2.), f) / 8.0;
+    z += stepLen;
+    o += vec4(3., 1., stepLen, z / f) / z;
+  }
+  o = o * o.a / 1e3;
+  o = o / (1.0 + abs(o));
+  gl_FragColor = vec4(o.rgb, 1.0);
+}`;
+  function compileShader(src, type) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compileShader(vs, gl.VERTEX_SHADER));
+  gl.attachShader(prog, compileShader(fs, gl.FRAGMENT_SHADER));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  const pLoc = gl.getAttribLocation(prog, 'p');
+  gl.enableVertexAttribArray(pLoc);
+  gl.vertexAttribPointer(pLoc, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'iTime');
+  const uRes = gl.getUniformLocation(prog, 'iRes');
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  function draw(t) {
+    gl.uniform1f(uTime, t * 0.001);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+
+/* ────────────────────────────────────────────
+   INIT
+   ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  SCORM.init();
+  updateLanding();
+});
+window.addEventListener('beforeunload', () => {
+  SCORM.finish();
+});
+</script>
+</body>
+</html>

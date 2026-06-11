@@ -1,0 +1,2331 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Track C1: Diagramme lesen | Physik Bootcamp</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #7777a0;
+
+  --accent: #d97706;
+  --accent-bright: #fbbf24;
+  --accent-glow: rgba(217,119,6,0.35);
+  --accent-deep: #b45309;
+  --accent-subtle: rgba(217,119,6,0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-glow: rgba(52, 211, 153, 0.25);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(217,119,6,0.15);
+  --border-strong: rgba(217,119,6,0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-full: 100px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+input, textarea, select { font-size: 16px; }
+button, [onclick] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ══════════════════════════════════════════
+   SHADER CANVAS
+   ══════════════════════════════════════════ */
+#shader-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+#shader-canvas.dimmed { opacity: 0.15; }
+#shader-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREEN SYSTEM
+   ══════════════════════════════════════════ */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.screen.active {
+  display: block;
+  animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   LANDING PAGE
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+}
+.landing-header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(181, 83, 9, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: var(--r-full);
+  margin-bottom: 24px;
+}
+.landing-title {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-bright) 50%, #f59e0b 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+.landing-sub {
+  color: var(--ink-muted);
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+.landing-meta {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.l-meta {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+.l-meta .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* Overall progress */
+.overall-progress {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+.op-bar-wrap { display: flex; align-items: center; gap: 14px; }
+.op-track {
+  flex: 1; height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.op-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), #f59e0b);
+  border-radius: var(--r-full);
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.op-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Module cards grid */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 920px;
+}
+.mod-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.mod-card::before {
+  content: '';
+  position: absolute; inset: -1px;
+  border-radius: var(--r-lg);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+.mod-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--glow);
+}
+.mod-card:hover::before { opacity: 1; }
+.mod-card.completed { border-color: var(--ok-border); }
+.mod-card.completed::after {
+  content: '\2713';
+  position: absolute; top: 16px; right: 16px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0c0c1d;
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.85rem;
+}
+.mc-num {
+  font-family: var(--mono);
+  font-size: 0.65rem; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.mc-title {
+  font-size: 1.15rem; font-weight: 700;
+  color: #fff; margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.mc-desc {
+  font-size: 0.82rem; color: var(--ink-muted);
+  margin-bottom: 14px; line-height: 1.5;
+}
+.mc-footer { display: flex; align-items: center; justify-content: space-between; }
+.mc-time { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-dim); }
+.mc-status {
+  font-size: 0.7rem; font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--accent-subtle);
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+.mc-status.done {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: var(--ok-border);
+}
+.mod-card:nth-child(1) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+.mod-card:nth-child(2) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+.mod-card:nth-child(3) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+.mod-card:nth-child(4) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.8s both; }
+
+.landing-footer {
+  margin-top: 40px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--ink-dim);
+  text-align: center;
+}
+
+/* ══════════════════════════════════════════
+   MODULE PAGE LAYOUT
+   ══════════════════════════════════════════ */
+.module-page { background: var(--bg-deep); position: relative; }
+.module-page::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(217,119,6,0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Top navbar */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+}
+.top-nav-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex; align-items: center; gap: 16px; height: 56px;
+}
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.78rem; font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.nav-title {
+  font-size: 0.85rem; font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nav-progress {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-progress-track {
+  width: 80px; height: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.nav-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  border-radius: var(--r-full);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-progress-text {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Module content area */
+.mod-content {
+  position: relative; z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px 100px;
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 52px 0 36px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  margin-bottom: 18px;
+  border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero-sub {
+  color: var(--ink-muted);
+  font-size: 1rem;
+  max-width: 480px;
+  margin: 0 auto 20px;
+}
+.hero-meta { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+.meta-chip { font-size: 0.78rem; color: var(--ink-muted); font-weight: 500; }
+.meta-chip .val { color: var(--accent-bright); font-weight: 700; font-family: var(--mono); }
+.hero-formula {
+  margin-top: 24px;
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  display: inline-block;
+}
+.formula-tag {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  display: block;
+  margin-bottom: 8px;
+}
+
+/* ── GLASS CARDS & CHAPTERS ── */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.chapter {
+  margin-bottom: 32px;
+}
+.chapter-label {
+  display: flex; align-items: center; gap: 12px;
+  margin-bottom: 16px;
+}
+.chapter-num {
+  font-family: var(--mono);
+  font-size: 0.65rem; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+}
+.chapter-title {
+  font-size: 1.3rem; font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+/* ── CALLOUT BOXES ── */
+.callout {
+  padding: 14px 18px;
+  border-radius: var(--r-md);
+  margin: 12px 0;
+  font-size: 0.9rem;
+  line-height: 1.6;
+}
+.callout.tip { background: rgba(217,119,6,0.1); border-left: 3px solid var(--accent); }
+.callout.ok-callout { background: var(--ok-bg); border-left: 3px solid var(--ok); }
+.callout.warn { background: var(--warn-bg); border-left: 3px solid var(--warn); }
+.callout.info { background: rgba(96,165,250,0.1); border-left: 3px solid #60a5fa; }
+
+/* ── DIAGRAM BOXES ── */
+.diagram-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  margin: 12px 0;
+  text-align: center;
+}
+.diagram-box svg { max-width: 100%; height: auto; display: block; margin: 0 auto; }
+.diagram-title {
+  font-family: var(--mono);
+  font-size: 0.7rem; font-weight: 600;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.1em;
+  margin-bottom: 12px;
+}
+.diagram-caption {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  margin-top: 8px;
+  font-style: italic;
+}
+
+/* ── MOTION GRID ── */
+.motion-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 16px 0;
+}
+.motion-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  text-align: center;
+}
+.motion-card svg { max-width: 100%; height: auto; display: block; margin: 0 auto 8px; }
+.motion-label { font-weight: 700; font-size: 0.85rem; color: #fff; margin-bottom: 4px; }
+.motion-desc { font-size: 0.75rem; color: var(--ink-muted); }
+
+/* ── CHEAT GRID ── */
+.cheat-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  margin: 16px 0;
+}
+.cheat-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+}
+.cheat-card h4 { color: #fff; margin-bottom: 10px; font-size: 1rem; }
+.cheat-card p { font-size: 0.85rem; color: var(--ink-muted); margin-bottom: 4px; }
+
+/* ── COMPARE TABLE ── */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.compare-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 0.82rem;
+}
+.compare-table th, .compare-table td {
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.compare-table th {
+  background: var(--bg-elevated);
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-size: 0.75rem;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+}
+.compare-table td { color: var(--ink-muted); }
+
+/* ── EXERCISES ── */
+.exercise {
+  background: var(--bg-glass);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: border-color 0.3s;
+}
+.exercise.correct { border-color: var(--ok-border); }
+.exercise.wrong { border-color: var(--err-border); }
+
+.ex-label {
+  font-family: var(--mono);
+  font-size: 0.7rem; font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.ex-tag {
+  font-family: var(--mono);
+  font-size: 0.6rem; font-weight: 600;
+  color: var(--ink-dim);
+  background: var(--bg-elevated);
+  padding: 2px 8px;
+  border-radius: var(--r-full);
+  margin-left: auto;
+}
+.ex-question {
+  font-size: 0.95rem;
+  color: var(--ink);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+.ex-input-row {
+  display: flex; align-items: center; gap: 10px;
+  flex-wrap: wrap;
+}
+.ex-input {
+  flex: 1; min-width: 120px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ex-input:focus { border-color: var(--accent); }
+.ex-input:disabled { opacity: 0.6; }
+.ex-unit {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  font-weight: 600;
+}
+.ex-btn {
+  background: var(--accent-deep);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.82rem; font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.ex-btn:hover { background: var(--accent); }
+.ex-btn:disabled { opacity: 0.5; cursor: default; }
+
+.ex-feedback {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  font-size: 0.85rem;
+  font-weight: 600;
+  display: none;
+}
+.ex-feedback.show { display: block; }
+.ex-feedback.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border: 1px solid var(--ok-border);
+}
+.ex-feedback.err {
+  background: var(--err-bg);
+  color: var(--err);
+  border: 1px solid var(--err-border);
+}
+
+.ex-hint {
+  margin-top: 8px;
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  cursor: pointer;
+  transition: color 0.2s;
+}
+.ex-hint:hover { color: var(--accent-bright); }
+
+/* ── MC OPTIONS ── */
+.mc-options { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+.mc-opt {
+  display: flex; align-items: center; gap: 12px;
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  cursor: pointer;
+  transition: all 0.2s;
+  font-size: 0.88rem;
+}
+.mc-opt:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.mc-opt .marker {
+  min-width: 24px; height: 24px;
+  border-radius: 50%;
+  border: 2px solid var(--border-strong);
+  display: flex; align-items: center; justify-content: center;
+  font-weight: 800; font-size: 0.8rem;
+  flex-shrink: 0;
+  transition: all 0.2s;
+}
+.mc-opt.correct-choice { border-color: var(--ok); background: var(--ok-bg); pointer-events: none; }
+.mc-opt.correct-choice .marker { background: var(--ok); color: #0c0c1d; border-color: var(--ok); }
+.mc-opt.wrong-choice { border-color: var(--err); background: var(--err-bg); }
+.mc-opt.wrong-choice .marker { background: var(--err); color: #0c0c1d; border-color: var(--err); }
+
+.mc-explanation {
+  margin-top: 8px;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  font-size: 0.85rem;
+  font-weight: 500;
+  display: none;
+}
+.mc-explanation.ok { display: block; background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+.mc-explanation.err { display: block; background: var(--err-bg); color: var(--err); border: 1px solid var(--err-border); }
+
+/* ── OPT PILLS ── */
+.opt-pills {
+  display: flex; gap: 8px; flex-wrap: wrap;
+}
+.opt-pill {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.85rem; font-weight: 600;
+  padding: 8px 18px;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.opt-pill:hover { border-color: var(--accent); color: var(--accent-bright); }
+.opt-pill.selected { background: var(--accent-deep); border-color: var(--accent); color: #fff; }
+
+/* ── STEIGUNG BOX ── */
+.steigung-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 20px;
+  margin: 16px 0;
+}
+.delta-chip {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  padding: 6px 14px;
+  border-radius: var(--r-full);
+  color: var(--accent-bright);
+}
+
+/* ── SKILL CHIPS ── */
+.skill-chips { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 12px; }
+.skill-chip {
+  background: var(--bg-elevated);
+  border: 1px solid var(--border);
+  border-radius: var(--r-full);
+  padding: 6px 14px;
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+}
+
+/* ── MODULE COMPLETE ── */
+.module-complete-section {
+  text-align: center;
+  margin-top: 32px;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+}
+.btn-complete {
+  background: var(--ok);
+  color: #0c0c1d;
+  border: none;
+  font-family: var(--font);
+  font-size: 1rem; font-weight: 700;
+  padding: 14px 32px;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: all 0.2s;
+  margin-bottom: 12px;
+}
+.btn-complete:hover { transform: scale(1.03); box-shadow: 0 0 20px var(--ok-glow); }
+.btn-next {
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.85rem; font-weight: 600;
+  padding: 10px 24px;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-next:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── GATE BANNER ── */
+.gate-banner {
+  background: linear-gradient(135deg, rgba(217,119,6,0.15), rgba(251,191,36,0.08));
+  border: 1px solid var(--accent);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  text-align: center;
+  margin-top: 24px;
+}
+.gate-banner h3 { color: var(--accent-bright); margin-bottom: 8px; }
+.gate-banner p { font-size: 0.9rem; color: var(--ink-muted); }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .landing { padding: 24px 16px; }
+  .module-grid { grid-template-columns: 1fr; }
+  .landing-meta { gap: 16px; }
+  .mod-content { padding: 0 16px 80px; }
+  .top-nav-inner { gap: 10px; }
+  .nav-progress-track { width: 50px; }
+  .motion-grid { grid-template-columns: 1fr; }
+  .cheat-grid { grid-template-columns: 1fr; }
+  .ex-input-row { flex-direction: column; align-items: stretch; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SHADER CANVAS
+     ═══════════════════════════════════════════ -->
+<canvas id="shader-canvas"></canvas>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 0: LANDING PAGE
+     ═══════════════════════════════════════════ -->
+<div id="screen-landing" class="screen active">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">TRACK C1</div>
+      <h1 class="landing-title">Diagramme<br>lesen</h1>
+      <p class="landing-sub">Achsen, s-t-Diagramme, v-t-Diagramme und Übungen -- von den Grundlagen bis zur sicheren Anwendung.</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">4</span> Module</span>
+        <span class="l-meta">Level <span class="val">1</span> Grundlagen</span>
+        <span class="l-meta">~<span class="val">75</span> Minuten</span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track"><div class="op-fill" id="overall-fill"></div></div>
+        <span class="op-label" id="overall-label">0 / 4</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card" onclick="openModule(0)">
+        <div class="mc-num">C1.1</div>
+        <div class="mc-title">Achsen lesen &amp; Werte ablesen</div>
+        <div class="mc-desc">Koordinatensystem, Achsenbeschriftung, physikalische Diagramme</div>
+        <div class="mc-footer">
+          <span class="mc-time">15 min</span>
+          <span class="mc-status" id="status-0">Offen</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(1)">
+        <div class="mc-num">C1.2</div>
+        <div class="mc-title">s-t-Diagramm: Grundlagen</div>
+        <div class="mc-desc">Steigung = Geschwindigkeit -- gleichförmige vs. beschleunigte Bewegung</div>
+        <div class="mc-footer">
+          <span class="mc-time">20 min</span>
+          <span class="mc-status" id="status-1">Offen</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(2)">
+        <div class="mc-num">C1.3</div>
+        <div class="mc-title">v-t-Diagramm: Grundlagen</div>
+        <div class="mc-desc">Steigung = Beschleunigung, Fläche = Weg</div>
+        <div class="mc-footer">
+          <span class="mc-time">20 min</span>
+          <span class="mc-status" id="status-2">Offen</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(3)">
+        <div class="mc-num">C1.4</div>
+        <div class="mc-title">Übungsrunde: Diagramme</div>
+        <div class="mc-desc">Alle Diagrammtypen zusammen -- Vorbereitung auf den Gate-Test</div>
+        <div class="mc-footer">
+          <span class="mc-time">25 min</span>
+          <span class="mc-status" id="status-3">Offen</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-footer">Track C1 &middot; v4</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE C1.1: Achsen lesen & Werte ablesen
+     ═══════════════════════════════════════════ -->
+<div id="screen-mod-0" class="screen module-page">
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">&larr; Übersicht</button>
+      <span class="nav-title">C1.1 -- Achsen lesen &amp; Werte ablesen</span>
+      <div class="nav-progress">
+        <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div>
+        <span class="nav-progress-text" id="prog-text-0">0 / 5</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mod-content">
+    <div class="hero">
+      <div class="hero-badge">Track C &middot; Diagramme lesen</div>
+      <h1>Achsen lesen &amp;<br>Werte ablesen</h1>
+      <p class="hero-sub">Koordinatensystem, Achsenbeschriftung, physikalische Diagramme</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="val">C1.1</span>&nbsp;Modul</span>
+        <span class="meta-chip">Level <span class="val">1</span></span>
+        <span class="meta-chip"><span class="val">15</span>&nbsp;min</span>
+      </div>
+    </div>
+
+    <!-- Ch1: Das Koordinatensystem -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 01</span>
+        <span class="chapter-title">Das Koordinatensystem</span>
+      </div>
+      <div class="glass">
+        <p>In der Physik stellen wir Zusammenhänge zwischen zwei Größen als <strong>Diagramm</strong> dar. Das Fundament ist immer ein <strong>Koordinatensystem</strong> mit zwei Achsen.</p>
+      </div>
+      <div class="diagram-box">
+        <div class="diagram-title">Aufbau eines Koordinatensystems</div>
+        <svg viewBox="0 0 300 240" xmlns="http://www.w3.org/2000/svg" style="max-width:300px">
+          <g>
+            <line x1="30" y1="200" x2="280" y2="200" stroke="#7777a0" stroke-width="2"/>
+            <line x1="30" y1="200" x2="30" y2="20" stroke="#7777a0" stroke-width="2"/>
+          </g>
+          <g>
+            <polygon points="280,196 290,200 280,204" fill="#7777a0"/>
+            <polygon points="26,20 30,10 34,20" fill="#7777a0"/>
+          </g>
+          <g>
+            <text x="155" y="230" text-anchor="middle" font-size="12" font-weight="700" fill="#fbbf24" font-family="'IBM Plex Mono', monospace">t in s</text>
+            <text x="15" y="115" text-anchor="middle" font-size="12" font-weight="700" fill="#fbbf24" font-family="'IBM Plex Mono', monospace" transform="rotate(-90, 15, 115)">s in m</text>
+          </g>
+          <g>
+            <line x1="80" y1="198" x2="80" y2="202" stroke="#7777a0" stroke-width="1.5"/>
+            <line x1="130" y1="198" x2="130" y2="202" stroke="#7777a0" stroke-width="1.5"/>
+            <line x1="180" y1="198" x2="180" y2="202" stroke="#7777a0" stroke-width="1.5"/>
+            <line x1="230" y1="198" x2="230" y2="202" stroke="#7777a0" stroke-width="1.5"/>
+            <text x="30" y="214" text-anchor="middle" font-size="10" fill="#a8a8c8">0</text>
+            <text x="80" y="214" text-anchor="middle" font-size="10" fill="#a8a8c8">1</text>
+            <text x="130" y="214" text-anchor="middle" font-size="10" fill="#a8a8c8">2</text>
+            <text x="180" y="214" text-anchor="middle" font-size="10" fill="#a8a8c8">3</text>
+            <text x="230" y="214" text-anchor="middle" font-size="10" fill="#a8a8c8">4</text>
+            <line x1="28" y1="155" x2="32" y2="155" stroke="#7777a0" stroke-width="1.5"/>
+            <line x1="28" y1="110" x2="32" y2="110" stroke="#7777a0" stroke-width="1.5"/>
+            <line x1="28" y1="65" x2="32" y2="65" stroke="#7777a0" stroke-width="1.5"/>
+            <line x1="28" y1="20" x2="32" y2="20" stroke="#7777a0" stroke-width="1.5"/>
+            <text x="25" y="159" text-anchor="end" font-size="10" fill="#a8a8c8">10</text>
+            <text x="25" y="114" text-anchor="end" font-size="10" fill="#a8a8c8">20</text>
+            <text x="25" y="69" text-anchor="end" font-size="10" fill="#a8a8c8">30</text>
+            <text x="25" y="24" text-anchor="end" font-size="10" fill="#a8a8c8">40</text>
+          </g>
+          <g>
+            <line x1="130" y1="155" x2="130" y2="110" stroke="rgba(217,119,6,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
+            <line x1="30" y1="110" x2="130" y2="110" stroke="rgba(217,119,6,0.3)" stroke-width="1" stroke-dasharray="4,3"/>
+            <circle cx="130" cy="110" r="6" fill="#fbbf24" opacity="0.9"/>
+            <text x="145" y="107" font-size="11" fill="#fbbf24" font-weight="700">P(2 | 20)</text>
+          </g>
+        </svg>
+        <p class="diagram-caption">Punkt P(2 | 20) bedeutet: bei t=2 s ist s=20 m.</p>
+      </div>
+      <div class="callout tip">
+        <strong>x-Achse (horizontal):</strong> Zeigt die Größe, die wir verändern -- in der Physik oft die <strong>Zeit $t$</strong> in Sekunden.<br>
+        <strong>y-Achse (vertikal):</strong> Zeigt die Größe, die sich ändert -- z.B. den <strong>Weg $s$</strong> in Metern.
+      </div>
+      <div class="callout warn">
+        <strong>Wichtig:</strong> Jede Achse muss eine <strong>Einheit</strong> haben! Ohne Einheit bedeutet eine Zahl nichts.
+      </div>
+    </div>
+
+    <!-- Ch2: Werte ablesen -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 02</span>
+        <span class="chapter-title">Werte ablesen -- Schritt für Schritt</span>
+      </div>
+      <div class="glass">
+        <p>Zu jedem Punkt $P$ in einem Diagramm lassen sich genau zwei Werte ablesen: der <strong>x-Wert</strong> und der <strong>y-Wert</strong>.</p>
+      </div>
+      <div class="diagram-box">
+        <div class="diagram-title">s-t-Diagramm: Punkt P ablesen</div>
+        <svg viewBox="0 0 320 260" xmlns="http://www.w3.org/2000/svg">
+          <line x1="94" y1="20" x2="94" y2="220" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="138" y1="20" x2="138" y2="220" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="182" y1="20" x2="182" y2="220" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="226" y1="20" x2="226" y2="220" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="270" y1="20" x2="270" y2="220" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="50" y1="180" x2="275" y2="180" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="50" y1="140" x2="275" y2="140" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="50" y1="100" x2="275" y2="100" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="50" y1="60" x2="275" y2="60" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="50" y1="20" x2="275" y2="20" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="50" y1="220" x2="278" y2="220" stroke="#7777a0" stroke-width="2"/>
+          <polygon points="278,216 288,220 278,224" fill="#7777a0"/>
+          <line x1="50" y1="220" x2="50" y2="12" stroke="#7777a0" stroke-width="2"/>
+          <polygon points="46,12 50,2 54,12" fill="#7777a0"/>
+          <text x="50" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">0</text>
+          <text x="94" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">1</text>
+          <text x="138" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">2</text>
+          <text x="182" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">3</text>
+          <text x="226" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">4</text>
+          <text x="270" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">5</text>
+          <text x="163" y="250" text-anchor="middle" font-size="11" font-weight="600" fill="#a8a8c8">t in s</text>
+          <text x="44" y="184" text-anchor="end" font-size="10" fill="#a8a8c8">10</text>
+          <text x="44" y="144" text-anchor="end" font-size="10" fill="#a8a8c8">20</text>
+          <text x="44" y="104" text-anchor="end" font-size="10" fill="#a8a8c8">30</text>
+          <text x="44" y="64" text-anchor="end" font-size="10" fill="#a8a8c8">40</text>
+          <text x="44" y="24" text-anchor="end" font-size="10" fill="#a8a8c8">50</text>
+          <text x="12" y="115" text-anchor="middle" font-size="11" font-weight="600" fill="#a8a8c8" transform="rotate(-90 12 115)">s in m</text>
+          <line x1="50" y1="220" x2="270" y2="20" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="50" y1="100" x2="182" y2="100" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.6"/>
+          <line x1="182" y1="220" x2="182" y2="100" stroke="#fbbf24" stroke-width="1.5" stroke-dasharray="6,4" opacity="0.6"/>
+          <circle cx="182" cy="100" r="7" fill="#fbbf24" stroke="#0c0c1d" stroke-width="2"/>
+          <text x="192" y="96" font-size="13" font-weight="700" fill="#fbbf24">P</text>
+        </svg>
+        <p class="diagram-caption">Punkt P liegt bei $t = 3\,\text{s}$ und $s = 30\,\text{m}$</p>
+      </div>
+      <div class="callout tip">
+        <strong>Merke:</strong> Koordinaten immer <em>mit Einheit</em> angeben. &bdquo;$t = 3$&ldquo; ist falsch -- korrekt ist &bdquo;$t = 3\,\text{s}$&ldquo;.
+      </div>
+    </div>
+
+    <!-- Ch3: Typische Diagramme -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 03</span>
+        <span class="chapter-title">Typische Diagramme in der Physik</span>
+      </div>
+      <div class="glass">
+        <div class="table-wrap">
+          <table class="compare-table">
+            <thead><tr><th>Diagramm</th><th>x-Achse</th><th>y-Achse</th><th>Bedeutung</th></tr></thead>
+            <tbody>
+              <tr><td>s-t-Diagramm</td><td>Zeit $t$ in s</td><td>Weg $s$ in m</td><td>Bewegung eines Körpers</td></tr>
+              <tr><td>v-t-Diagramm</td><td>Zeit $t$ in s</td><td>Geschwindigkeit $v$ in m/s</td><td>Wie ändert sich die Geschwindigkeit?</td></tr>
+              <tr><td>F-s-Diagramm</td><td>Weg $s$ in m</td><td>Kraft $F$ in N</td><td>Arbeit = Fläche unter dem Graphen</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ch4: Exercises C1.1 -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 04</span>
+        <span class="chapter-title">Übungsaufgaben</span>
+      </div>
+
+      <!-- Exercise diagram -->
+      <div class="diagram-box" style="margin-bottom:20px;">
+        <div class="diagram-title">Diagramm für alle Übungen</div>
+        <svg viewBox="0 0 380 270" xmlns="http://www.w3.org/2000/svg" style="max-width:460px">
+          <line x1="94" y1="20" x2="94" y2="225" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="138" y1="20" x2="138" y2="225" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="182" y1="20" x2="182" y2="225" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="226" y1="20" x2="226" y2="225" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="270" y1="20" x2="270" y2="225" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="55" y1="185" x2="275" y2="185" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="55" y1="145" x2="275" y2="145" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="55" y1="105" x2="275" y2="105" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="55" y1="65" x2="275" y2="65" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="55" y1="25" x2="275" y2="25" stroke="rgba(217,119,6,0.06)" stroke-width="1"/>
+          <line x1="55" y1="225" x2="280" y2="225" stroke="#7777a0" stroke-width="2"/>
+          <polygon points="280,221 290,225 280,229" fill="#7777a0"/>
+          <line x1="55" y1="225" x2="55" y2="12" stroke="#7777a0" stroke-width="2"/>
+          <polygon points="51,12 55,2 59,12" fill="#7777a0"/>
+          <text x="55" y="240" text-anchor="middle" font-size="11" fill="#a8a8c8">0</text>
+          <text x="99" y="240" text-anchor="middle" font-size="11" fill="#a8a8c8">1</text>
+          <text x="143" y="240" text-anchor="middle" font-size="11" fill="#a8a8c8">2</text>
+          <text x="187" y="240" text-anchor="middle" font-size="11" fill="#a8a8c8">3</text>
+          <text x="231" y="240" text-anchor="middle" font-size="11" fill="#a8a8c8">4</text>
+          <text x="275" y="240" text-anchor="middle" font-size="11" fill="#a8a8c8">5</text>
+          <text x="165" y="258" text-anchor="middle" font-size="12" font-weight="700" fill="#a8a8c8">t in s</text>
+          <text x="48" y="189" text-anchor="end" font-size="11" fill="#a8a8c8">10</text>
+          <text x="48" y="149" text-anchor="end" font-size="11" fill="#a8a8c8">20</text>
+          <text x="48" y="109" text-anchor="end" font-size="11" fill="#a8a8c8">30</text>
+          <text x="48" y="69" text-anchor="end" font-size="11" fill="#a8a8c8">40</text>
+          <text x="48" y="29" text-anchor="end" font-size="11" fill="#a8a8c8">50</text>
+          <text x="16" y="120" text-anchor="middle" font-size="12" font-weight="700" fill="#a8a8c8" transform="rotate(-90 16 120)">s in m</text>
+          <line x1="55" y1="225" x2="275" y2="25" stroke="#fbbf24" stroke-width="2.5" stroke-linecap="round"/>
+          <circle cx="143" cy="145" r="7" fill="#60a5fa" stroke="#0c0c1d" stroke-width="2"/>
+          <text x="153" y="141" font-size="13" font-weight="700" fill="#60a5fa">A</text>
+          <circle cx="231" cy="65" r="7" fill="#34d399" stroke="#0c0c1d" stroke-width="2"/>
+          <text x="241" y="61" font-size="13" font-weight="700" fill="#34d399">B</text>
+          <circle cx="275" cy="25" r="7" fill="#a78bfa" stroke="#0c0c1d" stroke-width="2"/>
+          <text x="280" y="21" font-size="13" font-weight="700" fill="#a78bfa">C</text>
+          <rect x="295" y="85" width="78" height="75" rx="6" fill="#1a1a3e" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+          <circle cx="308" cy="100" r="5" fill="#60a5fa"/>
+          <text x="318" y="104" font-size="11" fill="#a8a8c8">A (2s | 20m)</text>
+          <circle cx="308" cy="118" r="5" fill="#34d399"/>
+          <text x="318" y="122" font-size="11" fill="#a8a8c8">B (4s | 40m)</text>
+          <circle cx="308" cy="136" r="5" fill="#a78bfa"/>
+          <text x="318" y="140" font-size="11" fill="#a8a8c8">C (5s | 50m)</text>
+        </svg>
+      </div>
+
+      <!-- Ex 0-0: MC s-Wert Punkt A -->
+      <div class="exercise" id="ex-0-0">
+        <div class="ex-label">Aufgabe 1 <span class="ex-tag">Ablesen</span></div>
+        <div class="ex-question">Welchen s-Wert zeigt Punkt <strong>A</strong> (blauer Punkt) im Diagramm?</div>
+        <div class="mc-options" id="mc-0-0">
+          <div class="mc-opt" onclick="checkMC(0,0,this,false,'Nein -- das wäre der t-Wert (x-Achse), nicht der s-Wert.')"><div class="marker"></div><span>$s = 2\,\text{m}$</span></div>
+          <div class="mc-opt" onclick="checkMC(0,0,this,true,'Richtig! Punkt A liegt bei t = 2 s und s = 20 m.')"><div class="marker"></div><span>$s = 20\,\text{m}$</span></div>
+          <div class="mc-opt" onclick="checkMC(0,0,this,false,'Nein -- das ist der Wert von Punkt B, nicht A.')"><div class="marker"></div><span>$s = 40\,\text{m}$</span></div>
+          <div class="mc-opt" onclick="checkMC(0,0,this,false,'Nein -- 12 m gibt es gar nicht im Diagramm.')"><div class="marker"></div><span>$s = 12\,\text{m}$</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-0-0"></div>
+      </div>
+
+      <!-- Ex 0-1: MC Achsenbeschriftung -->
+      <div class="exercise" id="ex-0-1">
+        <div class="ex-label">Aufgabe 2 <span class="ex-tag">Verstehen</span></div>
+        <div class="ex-question">Was zeigt die <strong>y-Achse</strong> in diesem Diagramm an?</div>
+        <div class="mc-options" id="mc-0-1">
+          <div class="mc-opt" onclick="checkMC(0,1,this,false,'Nein -- die Zeit steht auf der x-Achse (horizontal).')"><div class="marker"></div><span>Die Zeit $t$ in Sekunden</span></div>
+          <div class="mc-opt" onclick="checkMC(0,1,this,true,'Richtig! Die y-Achse zeigt den zurückgelegten Weg s in Metern.')"><div class="marker"></div><span>Den Weg $s$ in Metern</span></div>
+          <div class="mc-opt" onclick="checkMC(0,1,this,false,'Nein -- die Geschwindigkeit wäre in einem v-t-Diagramm zu sehen.')"><div class="marker"></div><span>Die Geschwindigkeit $v$ in m/s</span></div>
+          <div class="mc-opt" onclick="checkMC(0,1,this,false,'Nein -- Kraft wäre in einem F-t-Diagramm zu sehen.')"><div class="marker"></div><span>Die Kraft $F$ in Newton</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-0-1"></div>
+      </div>
+
+      <!-- Ex 0-2: Input s bei t=3 -->
+      <div class="exercise" id="ex-0-2">
+        <div class="ex-label">Aufgabe 3 <span class="ex-tag">Ablesen</span></div>
+        <div class="ex-question">Lies aus dem Diagramm ab: Welchen s-Wert hat die Kurve bei $t = 3\,\text{s}$?</div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">s =</span>
+          <input class="ex-input" id="inp-0-2" placeholder="Zahl eingeben..." onkeydown="if(event.key==='Enter')checkEx(0,2)">
+          <span class="ex-unit">m</span>
+          <button class="ex-btn" onclick="checkEx(0,2)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-0-2"></div>
+        <div class="ex-hint" id="hint-0-2" onclick="this.textContent='Gehe auf der x-Achse zum Wert t = 3 s, dann senkrecht hoch bis zur Kurve, dann waagrecht zur y-Achse.'">Tipp anzeigen</div>
+      </div>
+
+      <!-- Ex 0-3: MC Koordinaten Punkt B -->
+      <div class="exercise" id="ex-0-3">
+        <div class="ex-label">Aufgabe 4 <span class="ex-tag">Ablesen</span></div>
+        <div class="ex-question">Punkt <strong>B</strong> (grüner Punkt) hat die Koordinaten ...</div>
+        <div class="mc-options" id="mc-0-3">
+          <div class="mc-opt" onclick="checkMC(0,3,this,false,'Fast -- aber die Einheiten stimmen nicht. t hat die Einheit Sekunden, s hat Meter.')"><div class="marker"></div><span>$t = 40\,\text{s}$ und $s = 4\,\text{m}$</span></div>
+          <div class="mc-opt" onclick="checkMC(0,3,this,false,'Nein -- die Koordinaten sind vertauscht.')"><div class="marker"></div><span>$t = 40\,\text{s}$ und $s = 40\,\text{m}$</span></div>
+          <div class="mc-opt" onclick="checkMC(0,3,this,true,'Perfekt! Punkt B liegt bei t = 4 s (x-Achse) und s = 40 m (y-Achse).')"><div class="marker"></div><span>$t = 4\,\text{s}$ und $s = 40\,\text{m}$</span></div>
+          <div class="mc-opt" onclick="checkMC(0,3,this,false,'Nein -- das wären die Koordinaten von Punkt A, nicht B.')"><div class="marker"></div><span>$t = 2\,\text{s}$ und $s = 20\,\text{m}$</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-0-3"></div>
+      </div>
+
+      <!-- Ex 0-4: Input t bei s=50 -->
+      <div class="exercise" id="ex-0-4">
+        <div class="ex-label">Aufgabe 5 <span class="ex-tag">Ablesen</span></div>
+        <div class="ex-question">Bei welchem t-Wert erreicht der Graph einen s-Wert von $s = 50\,\text{m}$? (Punkt C)</div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">t =</span>
+          <input class="ex-input" id="inp-0-4" placeholder="Zahl eingeben..." onkeydown="if(event.key==='Enter')checkEx(0,4)">
+          <span class="ex-unit">s</span>
+          <button class="ex-btn" onclick="checkEx(0,4)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-0-4"></div>
+      </div>
+    </div>
+
+    <div class="module-complete-section">
+      <button class="btn-complete" onclick="completeModule(0)">&check; Modul abschliessen</button><br>
+      <button class="btn-next" onclick="openModule(1)">Weiter zu C1.2 &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE C1.2: s-t-Diagramm
+     ═══════════════════════════════════════════ -->
+<div id="screen-mod-1" class="screen module-page">
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">&larr; Übersicht</button>
+      <span class="nav-title">C1.2 -- s-t-Diagramm: Grundlagen</span>
+      <div class="nav-progress">
+        <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div>
+        <span class="nav-progress-text" id="prog-text-1">0 / 5</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mod-content">
+    <div class="hero">
+      <div class="hero-badge">Track C &middot; Diagramme lesen</div>
+      <h1>s-t-Diagramm:<br>Grundlagen</h1>
+      <p class="hero-sub">Steigung = Geschwindigkeit -- gleichförmige vs. beschleunigte Bewegung</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="val">C1.2</span>&nbsp;Modul</span>
+        <span class="meta-chip">Level <span class="val">1</span></span>
+        <span class="meta-chip"><span class="val">20</span>&nbsp;min</span>
+      </div>
+      <div class="hero-formula">
+        <span class="formula-tag">Kernformel</span>
+        $$v = \frac{\Delta s}{\Delta t}$$
+      </div>
+    </div>
+
+    <!-- Ch1: Was zeigt das s-t-Diagramm -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 01</span>
+        <span class="chapter-title">Was zeigt das s-t-Diagramm?</span>
+      </div>
+      <div class="glass">
+        <p>Im <strong>s-t-Diagramm</strong> steht auf der x-Achse die <strong>Zeit $t$</strong> und auf der y-Achse der <strong>Weg $s$</strong>. Die <strong>Steigung</strong> des Graphen ist die <strong>Geschwindigkeit $v$</strong>.</p>
+        $$v = \frac{\Delta s}{\Delta t}$$
+        <p>Eine steilere Gerade bedeutet eine größere Geschwindigkeit.</p>
+      </div>
+    </div>
+
+    <!-- Ch2: Drei Bewegungstypen -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 02</span>
+        <span class="chapter-title">Drei Graphen -- drei Bewegungen</span>
+      </div>
+      <div class="motion-grid">
+        <div class="motion-card">
+          <div class="diagram-title">Ruhezustand</div>
+          <svg viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg">
+            <line x1="20" y1="110" x2="145" y2="110" stroke="#7777a0" stroke-width="2"/>
+            <polygon points="145,106 152,110 145,114" fill="#7777a0"/>
+            <line x1="20" y1="110" x2="20" y2="15" stroke="#7777a0" stroke-width="2"/>
+            <polygon points="16,15 20,8 24,15" fill="#7777a0"/>
+            <text x="90" y="122" text-anchor="middle" font-size="9" fill="#a8a8c8">t</text>
+            <text x="10" y="60" text-anchor="middle" font-size="9" fill="#a8a8c8" transform="rotate(-90 10 60)">s</text>
+            <line x1="20" y1="60" x2="140" y2="60" stroke="#d97706" stroke-width="2.5"/>
+          </svg>
+          <div class="motion-label">Waagrechte Gerade</div>
+          <div class="motion-desc">$s = \text{const.}$ &middot; $v = 0$</div>
+        </div>
+        <div class="motion-card">
+          <div class="diagram-title">Gleichförmig</div>
+          <svg viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg">
+            <line x1="20" y1="110" x2="145" y2="110" stroke="#7777a0" stroke-width="2"/>
+            <polygon points="145,106 152,110 145,114" fill="#7777a0"/>
+            <line x1="20" y1="110" x2="20" y2="15" stroke="#7777a0" stroke-width="2"/>
+            <polygon points="16,15 20,8 24,15" fill="#7777a0"/>
+            <text x="90" y="122" text-anchor="middle" font-size="9" fill="#a8a8c8">t</text>
+            <text x="10" y="60" text-anchor="middle" font-size="9" fill="#a8a8c8" transform="rotate(-90 10 60)">s</text>
+            <line x1="20" y1="110" x2="140" y2="20" stroke="#d97706" stroke-width="2.5"/>
+          </svg>
+          <div class="motion-label">Gerade mit Steigung</div>
+          <div class="motion-desc">$v = \frac{\Delta s}{\Delta t} = \text{const.}$</div>
+        </div>
+        <div class="motion-card">
+          <div class="diagram-title">Beschleunigt</div>
+          <svg viewBox="0 0 160 130" xmlns="http://www.w3.org/2000/svg">
+            <line x1="20" y1="110" x2="145" y2="110" stroke="#7777a0" stroke-width="2"/>
+            <polygon points="145,106 152,110 145,114" fill="#7777a0"/>
+            <line x1="20" y1="110" x2="20" y2="15" stroke="#7777a0" stroke-width="2"/>
+            <polygon points="16,15 20,8 24,15" fill="#7777a0"/>
+            <text x="90" y="122" text-anchor="middle" font-size="9" fill="#a8a8c8">t</text>
+            <text x="10" y="60" text-anchor="middle" font-size="9" fill="#a8a8c8" transform="rotate(-90 10 60)">s</text>
+            <path d="M20,110 Q60,105 80,85 Q100,65 120,35 Q130,20 140,15" stroke="#d97706" stroke-width="2.5" fill="none"/>
+          </svg>
+          <div class="motion-label">Kurve (Parabel)</div>
+          <div class="motion-desc">$v$ nimmt zu &middot; Steigung wächst</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ch3: Steigung berechnen -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 03</span>
+        <span class="chapter-title">Geschwindigkeit aus dem Diagramm</span>
+      </div>
+      <div class="steigung-box">
+        <p><strong>Beispiel:</strong> $P_1(1\,\text{s}\,|\,10\,\text{m})$ und $P_2(4\,\text{s}\,|\,40\,\text{m})$</p>
+        $$v = \frac{\Delta s}{\Delta t} = \frac{40\,\text{m} - 10\,\text{m}}{4\,\text{s} - 1\,\text{s}} = \frac{30\,\text{m}}{3\,\text{s}} = 10\,\frac{\text{m}}{\text{s}}$$
+      </div>
+    </div>
+
+    <!-- Ch4: Exercises C1.2 -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 04</span>
+        <span class="chapter-title">Übungsaufgaben</span>
+      </div>
+
+      <div class="diagram-box" style="margin-bottom:20px;">
+        <div class="diagram-title">Drei Körper A, B, C im s-t-Diagramm</div>
+        <svg viewBox="0 0 310 250" xmlns="http://www.w3.org/2000/svg">
+          <line x1="90" y1="20" x2="90" y2="220" stroke="rgba(119,119,160,0.15)" stroke-width="1"/>
+          <line x1="145" y1="20" x2="145" y2="220" stroke="rgba(119,119,160,0.15)" stroke-width="1"/>
+          <line x1="200" y1="20" x2="200" y2="220" stroke="rgba(119,119,160,0.15)" stroke-width="1"/>
+          <line x1="255" y1="20" x2="255" y2="220" stroke="rgba(119,119,160,0.15)" stroke-width="1"/>
+          <line x1="35" y1="175" x2="260" y2="175" stroke="rgba(119,119,160,0.15)" stroke-width="1"/>
+          <line x1="35" y1="130" x2="260" y2="130" stroke="rgba(119,119,160,0.15)" stroke-width="1"/>
+          <line x1="35" y1="85" x2="260" y2="85" stroke="rgba(119,119,160,0.15)" stroke-width="1"/>
+          <line x1="35" y1="40" x2="260" y2="40" stroke="rgba(119,119,160,0.15)" stroke-width="1"/>
+          <line x1="35" y1="220" x2="263" y2="220" stroke="#7777a0" stroke-width="2"/>
+          <polygon points="263,216 272,220 263,224" fill="#7777a0"/>
+          <line x1="35" y1="220" x2="35" y2="12" stroke="#7777a0" stroke-width="2"/>
+          <polygon points="31,12 35,2 39,12" fill="#7777a0"/>
+          <text x="35" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">0</text>
+          <text x="90" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">1</text>
+          <text x="145" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">2</text>
+          <text x="200" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">3</text>
+          <text x="255" y="234" text-anchor="middle" font-size="10" fill="#a8a8c8">4</text>
+          <text x="150" y="248" text-anchor="middle" font-size="11" font-weight="700" fill="#a8a8c8">t in s</text>
+          <text x="28" y="179" text-anchor="end" font-size="10" fill="#a8a8c8">15</text>
+          <text x="28" y="134" text-anchor="end" font-size="10" fill="#a8a8c8">30</text>
+          <text x="28" y="89" text-anchor="end" font-size="10" fill="#a8a8c8">45</text>
+          <text x="28" y="44" text-anchor="end" font-size="10" fill="#a8a8c8">60</text>
+          <text x="14" y="115" text-anchor="middle" font-size="11" font-weight="700" fill="#a8a8c8" transform="rotate(-90 14 115)">s in m</text>
+          <line x1="35" y1="220" x2="255" y2="40" stroke="#d97706" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="35" y1="220" x2="255" y2="160" stroke="#38bdf8" stroke-width="2.5" stroke-linecap="round"/>
+          <line x1="35" y1="130" x2="255" y2="130" stroke="#34d399" stroke-width="2.5" stroke-linecap="round"/>
+          <text x="258" y="37" font-size="13" font-weight="700" fill="#fbbf24">A</text>
+          <text x="258" y="157" font-size="13" font-weight="700" fill="#38bdf8">B</text>
+          <text x="258" y="127" font-size="13" font-weight="700" fill="#34d399">C</text>
+        </svg>
+        <p class="diagram-caption">A (orange), B (blau), C (grün) im selben s-t-Diagramm</p>
+      </div>
+
+      <!-- Ex 1-0: MC Körper C -->
+      <div class="exercise" id="ex-1-0">
+        <div class="ex-label">Aufgabe 1 <span class="ex-tag">Ablesen</span></div>
+        <div class="ex-question">Welche Aussage über <strong>Körper C</strong> (grüne Linie) ist korrekt?</div>
+        <div class="mc-options" id="mc-1-0">
+          <div class="mc-opt" onclick="checkMC(1,0,this,false,'Nein -- Körper C ist waagrecht, also nicht der schnellste.')"><div class="marker"></div><span>Körper C ist am schnellsten</span></div>
+          <div class="mc-opt" onclick="checkMC(1,0,this,false,'Nein -- eine waagrechte Linie bedeutet keine Bewegung.')"><div class="marker"></div><span>Körper C bewegt sich mit $v = 30\,\frac{\text{m}}{\text{s}}$</span></div>
+          <div class="mc-opt" onclick="checkMC(1,0,this,true,'Richtig! Die grüne Linie ist waagrecht: Steigung = 0, also v = 0. Körper C steht bei s = 30 m.')"><div class="marker"></div><span>Körper C steht still (Ruhezustand bei $s = 30\,\text{m}$)</span></div>
+          <div class="mc-opt" onclick="checkMC(1,0,this,false,'Nein -- Körper C ist grün, nicht blau.')"><div class="marker"></div><span>Körper C ist der blaue Körper</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-1-0"></div>
+      </div>
+
+      <!-- Ex 1-1: MC Schnellster -->
+      <div class="exercise" id="ex-1-1">
+        <div class="ex-label">Aufgabe 2 <span class="ex-tag">Vergleichen</span></div>
+        <div class="ex-question">Welcher Körper ist am schnellsten?</div>
+        <div class="mc-options" id="mc-1-1">
+          <div class="mc-opt" onclick="checkMC(1,1,this,false,'Nein -- Körper B hat eine flachere Steigung als A.')"><div class="marker"></div><span>Körper B -- er startet am weitesten oben</span></div>
+          <div class="mc-opt" onclick="checkMC(1,1,this,true,'Richtig! Körper A hat die steilste Gerade und damit die größte Geschwindigkeit.')"><div class="marker"></div><span>Körper A -- steilste Gerade, größte Geschwindigkeit</span></div>
+          <div class="mc-opt" onclick="checkMC(1,1,this,false,'Nein -- Körper C steht still (v = 0).')"><div class="marker"></div><span>Körper C -- größter s-Wert am Anfang</span></div>
+          <div class="mc-opt" onclick="checkMC(1,1,this,false,'Nein -- alle Körper haben unterschiedliche Steigungen.')"><div class="marker"></div><span>Alle sind gleich schnell</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-1-1"></div>
+      </div>
+
+      <!-- Ex 1-2: Input v von A -->
+      <div class="exercise" id="ex-1-2">
+        <div class="ex-label">Aufgabe 3 <span class="ex-tag">Rechnen</span></div>
+        <div class="ex-question">Berechne die Geschwindigkeit von <strong>Körper A</strong>. Nutze $t_1 = 0\,\text{s},\,s_1 = 0\,\text{m}$ und $t_2 = 4\,\text{s},\,s_2 = 60\,\text{m}$.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">v =</span>
+          <input class="ex-input" id="inp-1-2" placeholder="?" onkeydown="if(event.key==='Enter')checkEx(1,2)">
+          <span class="ex-unit">m/s</span>
+          <button class="ex-btn" onclick="checkEx(1,2)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-1-2"></div>
+        <div class="ex-hint" id="hint-1-2" onclick="this.textContent='v = Delta_s / Delta_t = (60-0)/(4-0) = ?'">Tipp anzeigen</div>
+      </div>
+
+      <!-- Ex 1-3: Input v von B -->
+      <div class="exercise" id="ex-1-3">
+        <div class="ex-label">Aufgabe 4 <span class="ex-tag">Rechnen</span></div>
+        <div class="ex-question">Berechne die Geschwindigkeit von <strong>Körper B</strong>. Er legt in 4 Sekunden 20 Meter zurück.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">v =</span>
+          <input class="ex-input" id="inp-1-3" placeholder="?" onkeydown="if(event.key==='Enter')checkEx(1,3)">
+          <span class="ex-unit">m/s</span>
+          <button class="ex-btn" onclick="checkEx(1,3)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-1-3"></div>
+        <div class="ex-hint" id="hint-1-3" onclick="this.textContent='v = 20 m / 4 s = ?'">Tipp anzeigen</div>
+      </div>
+
+      <!-- Ex 1-4: MC Transfer -->
+      <div class="exercise" id="ex-1-4">
+        <div class="ex-label">Aufgabe 5 <span class="ex-tag">Transfer</span></div>
+        <div class="ex-question">Ein Körper legt in 6 Sekunden 90 Meter zurück. Seine s-t-Gerade wäre im Diagramm ...</div>
+        <div class="mc-options" id="mc-1-4">
+          <div class="mc-opt" onclick="checkMC(1,4,this,false,'Nein -- flacher als A wäre kleiner als 15 m/s.')"><div class="marker"></div><span>flacher als Körper A ($v_A = 15\,\frac{\text{m}}{\text{s}}$)</span></div>
+          <div class="mc-opt" onclick="checkMC(1,4,this,false,'Nein -- waagrecht wäre v = 0.')"><div class="marker"></div><span>waagrecht (Ruhezustand)</span></div>
+          <div class="mc-opt" onclick="checkMC(1,4,this,true,'Richtig! v = 90 m / 6 s = 15 m/s -- gleiche Geschwindigkeit wie A, also gleich steile Gerade.')"><div class="marker"></div><span>genauso steil wie Körper A (gleiche Geschwindigkeit)</span></div>
+          <div class="mc-opt" onclick="checkMC(1,4,this,false,'Nein -- v = 90 m / 6 s = 15 m/s. Das ist gleich wie A, nicht steiler.')"><div class="marker"></div><span>steiler als Körper A (schneller)</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-1-4"></div>
+      </div>
+    </div>
+
+    <div class="module-complete-section">
+      <button class="btn-complete" onclick="completeModule(1)">&check; Modul abschliessen</button><br>
+      <button class="btn-next" onclick="openModule(2)">Weiter zu C1.3 &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE C1.3: v-t-Diagramm
+     ═══════════════════════════════════════════ -->
+<div id="screen-mod-2" class="screen module-page">
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">&larr; Übersicht</button>
+      <span class="nav-title">C1.3 -- v-t-Diagramm: Grundlagen</span>
+      <div class="nav-progress">
+        <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-2"></div></div>
+        <span class="nav-progress-text" id="prog-text-2">0 / 5</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mod-content">
+    <div class="hero">
+      <div class="hero-badge">Track C &middot; Diagramme lesen</div>
+      <h1>v-t-Diagramm:<br>Grundlagen</h1>
+      <p class="hero-sub">Steigung = Beschleunigung, Fläche unter dem Graphen = Weg</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="val">C1.3</span>&nbsp;Modul</span>
+        <span class="meta-chip">Level <span class="val">1</span></span>
+        <span class="meta-chip"><span class="val">20</span>&nbsp;min</span>
+      </div>
+      <div class="hero-formula">
+        <span class="formula-tag">Kernformeln</span>
+        $$a = \frac{\Delta v}{\Delta t} \qquad s = v \cdot t$$
+      </div>
+    </div>
+
+    <!-- Ch1: Was zeigt das v-t-Diagramm -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 01</span>
+        <span class="chapter-title">Was zeigt das v-t-Diagramm?</span>
+      </div>
+      <div class="glass">
+        <p>Im <strong>v-t-Diagramm</strong> steht auf der x-Achse die <strong>Zeit $t$</strong> und auf der y-Achse die <strong>Geschwindigkeit $v$</strong>.</p>
+        <p><strong>Steigung</strong> = Beschleunigung $a = \frac{\Delta v}{\Delta t}$</p>
+        <p><strong>Fläche unter dem Graphen</strong> = zurückgelegter Weg $s$</p>
+      </div>
+    </div>
+
+    <!-- Ch2: Drei Bewegungstypen -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 02</span>
+        <span class="chapter-title">Drei Graphen -- drei Bewegungen</span>
+      </div>
+      <div class="motion-grid">
+        <div class="motion-card">
+          <svg viewBox="0 0 140 110" width="140" height="110">
+            <line x1="20" y1="90" x2="130" y2="90" stroke="#7777a0" stroke-width="1.5"/>
+            <line x1="20" y1="10" x2="20" y2="90" stroke="#7777a0" stroke-width="1.5"/>
+            <text x="133" y="93" font-size="9" fill="#a8a8c8">t</text>
+            <text x="16" y="8" font-size="9" fill="#a8a8c8">v</text>
+            <line x1="25" y1="90" x2="125" y2="90" stroke="#f87171" stroke-width="2.5"/>
+          </svg>
+          <div class="motion-label">Ruhezustand</div>
+          <div class="motion-desc">$v = 0$ -- liegt auf der t-Achse</div>
+        </div>
+        <div class="motion-card">
+          <svg viewBox="0 0 140 110" width="140" height="110">
+            <line x1="20" y1="90" x2="130" y2="90" stroke="#7777a0" stroke-width="1.5"/>
+            <line x1="20" y1="10" x2="20" y2="90" stroke="#7777a0" stroke-width="1.5"/>
+            <text x="133" y="93" font-size="9" fill="#a8a8c8">t</text>
+            <text x="16" y="8" font-size="9" fill="#a8a8c8">v</text>
+            <line x1="25" y1="52" x2="125" y2="52" stroke="#fbbf24" stroke-width="2.5"/>
+          </svg>
+          <div class="motion-label">Gleichförmig</div>
+          <div class="motion-desc">$v = \text{const}$, $a = 0$</div>
+        </div>
+        <div class="motion-card">
+          <svg viewBox="0 0 140 110" width="140" height="110">
+            <line x1="20" y1="90" x2="130" y2="90" stroke="#7777a0" stroke-width="1.5"/>
+            <line x1="20" y1="10" x2="20" y2="90" stroke="#7777a0" stroke-width="1.5"/>
+            <text x="133" y="93" font-size="9" fill="#a8a8c8">t</text>
+            <text x="16" y="8" font-size="9" fill="#a8a8c8">v</text>
+            <line x1="25" y1="90" x2="125" y2="20" stroke="#a78bfa" stroke-width="2.5"/>
+          </svg>
+          <div class="motion-label">Beschleunigt</div>
+          <div class="motion-desc">$v$ steigt linear, $a &gt; 0$</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ch3: Zusammenfassung s-t vs v-t -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 03</span>
+        <span class="chapter-title">s-t vs. v-t im Vergleich</span>
+      </div>
+      <div class="glass">
+        <div class="table-wrap">
+          <table class="compare-table">
+            <thead><tr><th>Eigenschaft</th><th>s-t-Diagramm</th><th>v-t-Diagramm</th></tr></thead>
+            <tbody>
+              <tr><td><strong>y-Achse</strong></td><td>Weg $s$ in m</td><td>Geschwindigkeit $v$ in m/s</td></tr>
+              <tr><td><strong>Steigung</strong></td><td>Geschwindigkeit $v$</td><td>Beschleunigung $a$</td></tr>
+              <tr><td><strong>Fläche</strong></td><td>-- (nicht direkt nutzbar)</td><td>Weg $s$</td></tr>
+              <tr><td><strong>Waagrechte Linie</strong></td><td>Körper steht still</td><td>Gleichförmige Bewegung ($v = \text{const}$)</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ch4: Exercises C1.3 -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 04</span>
+        <span class="chapter-title">Übungsaufgaben</span>
+      </div>
+
+      <div class="diagram-box" style="margin-bottom:20px;">
+        <div class="diagram-title">v-t-Diagramm -- Körper A, B und C</div>
+        <svg viewBox="0 0 400 270" width="400" height="270">
+          <line x1="60" y1="30" x2="370" y2="30" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="60" y1="70" x2="370" y2="70" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="60" y1="110" x2="370" y2="110" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="60" y1="150" x2="370" y2="150" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="60" y1="190" x2="370" y2="190" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="60" y1="230" x2="370" y2="230" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="110" y1="30" x2="110" y2="230" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="160" y1="30" x2="160" y2="230" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="210" y1="30" x2="210" y2="230" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="260" y1="30" x2="260" y2="230" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="310" y1="30" x2="310" y2="230" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="360" y1="30" x2="360" y2="230" stroke="rgba(217,119,6,0.12)" stroke-width="1"/>
+          <line x1="60" y1="230" x2="375" y2="230" stroke="#a8a8c8" stroke-width="2"/>
+          <line x1="60" y1="240" x2="60" y2="20" stroke="#a8a8c8" stroke-width="2"/>
+          <text x="378" y="234" font-size="12" fill="#a8a8c8">t / s</text>
+          <text x="36" y="17" font-size="12" fill="#a8a8c8">v / (m/s)</text>
+          <text x="56" y="244" font-size="11" fill="#7777a0" text-anchor="middle">0</text>
+          <text x="110" y="244" font-size="11" fill="#7777a0" text-anchor="middle">1</text>
+          <text x="160" y="244" font-size="11" fill="#7777a0" text-anchor="middle">2</text>
+          <text x="210" y="244" font-size="11" fill="#7777a0" text-anchor="middle">3</text>
+          <text x="260" y="244" font-size="11" fill="#7777a0" text-anchor="middle">4</text>
+          <text x="310" y="244" font-size="11" fill="#7777a0" text-anchor="middle">5</text>
+          <text x="360" y="244" font-size="11" fill="#7777a0" text-anchor="middle">6</text>
+          <text x="53" y="234" font-size="11" fill="#7777a0" text-anchor="end">0</text>
+          <text x="53" y="194" font-size="11" fill="#7777a0" text-anchor="end">5</text>
+          <text x="53" y="154" font-size="11" fill="#7777a0" text-anchor="end">10</text>
+          <text x="53" y="114" font-size="11" fill="#7777a0" text-anchor="end">15</text>
+          <text x="53" y="74" font-size="11" fill="#7777a0" text-anchor="end">20</text>
+          <text x="53" y="34" font-size="11" fill="#7777a0" text-anchor="end">25</text>
+          <line x1="60" y1="230" x2="310" y2="70" stroke="#fbbf24" stroke-width="2.5"/>
+          <text x="316" y="68" font-size="12" font-weight="700" fill="#fbbf24">A</text>
+          <line x1="60" y1="150" x2="360" y2="150" stroke="#60a5fa" stroke-width="2.5"/>
+          <text x="362" y="148" font-size="12" font-weight="700" fill="#60a5fa">B</text>
+          <line x1="60" y1="228" x2="360" y2="228" stroke="#34d399" stroke-width="2.5"/>
+          <text x="362" y="226" font-size="12" font-weight="700" fill="#34d399">C</text>
+        </svg>
+        <p class="diagram-caption">A (orange): beschleunigt | B (blau): gleichförmig | C (grün): Ruhe</p>
+      </div>
+
+      <!-- Ex 2-0: MC Körper C -->
+      <div class="exercise" id="ex-2-0">
+        <div class="ex-label">Aufgabe 1 <span class="ex-tag">MC</span></div>
+        <div class="ex-question">Welche Bewegung zeigt Körper C im v-t-Diagramm?</div>
+        <div class="mc-options" id="mc-2-0">
+          <div class="mc-opt" onclick="checkMC(2,0,this,false,'Nicht ganz. Eine steigende Gerade würde Beschleunigung anzeigen. Körper C liegt auf der t-Achse.')"><div class="marker"></div><span>Körper C beschleunigt gleichmäßig.</span></div>
+          <div class="mc-opt" onclick="checkMC(2,0,this,true,'Richtig! Körper C liegt genau auf der t-Achse: v = 0 -- der Körper steht still.')"><div class="marker"></div><span>Körper C befindet sich im Ruhezustand ($v = 0$).</span></div>
+          <div class="mc-opt" onclick="checkMC(2,0,this,false,'Nein. Gleichförmige Bewegung wäre eine waagrechte Linie über der t-Achse.')"><div class="marker"></div><span>Körper C bewegt sich gleichförmig.</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-2-0"></div>
+      </div>
+
+      <!-- Ex 2-1: MC Steigung von A -->
+      <div class="exercise" id="ex-2-1">
+        <div class="ex-label">Aufgabe 2 <span class="ex-tag">MC</span></div>
+        <div class="ex-question">Was gibt die Steigung der Geraden von Körper A an?</div>
+        <div class="mc-options" id="mc-2-1">
+          <div class="mc-opt" onclick="checkMC(2,1,this,false,'Nicht ganz. Die Geschwindigkeit ist auf der y-Achse direkt abzulesen -- sie ist nicht die Steigung.')"><div class="marker"></div><span>Die Geschwindigkeit $v$ des Körpers A.</span></div>
+          <div class="mc-opt" onclick="checkMC(2,1,this,false,'Nein. Der zurückgelegte Weg ist die Fläche unter dem Graphen, nicht die Steigung.')"><div class="marker"></div><span>Den zurückgelegten Weg $s$.</span></div>
+          <div class="mc-opt" onclick="checkMC(2,1,this,true,'Richtig! Im v-t-Diagramm ist die Steigung die Beschleunigung: $a = \\frac{\\Delta v}{\\Delta t}$.')"><div class="marker"></div><span>Die Beschleunigung $a$ des Körpers A.</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-2-1"></div>
+      </div>
+
+      <!-- Ex 2-2: Input Beschleunigung -->
+      <div class="exercise" id="ex-2-2">
+        <div class="ex-label">Aufgabe 3 <span class="ex-tag">Rechnen</span></div>
+        <div class="ex-question">Körper A startet bei $t = 0$ mit $v = 0$ und erreicht bei $t = 5\,\text{s}$ eine Geschwindigkeit von $v = 20\,\frac{\text{m}}{\text{s}}$. Berechne die Beschleunigung $a$.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">a =</span>
+          <input class="ex-input" id="inp-2-2" placeholder="?" onkeydown="if(event.key==='Enter')checkEx(2,2)">
+          <span class="ex-unit">m/s&sup2;</span>
+          <button class="ex-btn" onclick="checkEx(2,2)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-2-2"></div>
+        <div class="ex-hint" id="hint-2-2" onclick="this.textContent='a = Delta_v / Delta_t = (20 - 0) / (5 - 0) = ?'">Tipp anzeigen</div>
+      </div>
+
+      <!-- Ex 2-3: MC Weg von B -->
+      <div class="exercise" id="ex-2-3">
+        <div class="ex-label">Aufgabe 4 <span class="ex-tag">MC</span></div>
+        <div class="ex-question">Körper B bewegt sich mit konstant $v = 10\,\frac{\text{m}}{\text{s}}$. Welchen Weg legt Körper B in $t = 4\,\text{s}$ zurück?</div>
+        <div class="mc-options" id="mc-2-3">
+          <div class="mc-opt" onclick="checkMC(2,3,this,false,'Nicht ganz. Das wäre das Ergebnis für 14 s, nicht 4 s.')"><div class="marker"></div><span>$s = 14\,\text{m}$</span></div>
+          <div class="mc-opt" onclick="checkMC(2,3,this,true,'Richtig! $s = v \\cdot t = 10 \\cdot 4 = 40\\,\\text{m}$.')"><div class="marker"></div><span>$s = 40\,\text{m}$</span></div>
+          <div class="mc-opt" onclick="checkMC(2,3,this,false,'Nein. Das wäre bei t = 6 s: s = 10 * 6 = 60 m. Aber es sind nur 4 Sekunden.')"><div class="marker"></div><span>$s = 60\,\text{m}$</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-2-3"></div>
+      </div>
+
+      <!-- Ex 2-4: Input Zeit -->
+      <div class="exercise" id="ex-2-4">
+        <div class="ex-label">Aufgabe 5 <span class="ex-tag">Rechnen</span></div>
+        <div class="ex-question">Körper B bewegt sich gleichförmig mit $v = 10\,\frac{\text{m}}{\text{s}}$. Nach wie vielen Sekunden hat Körper B einen Weg von $s = 60\,\text{m}$ zurückgelegt?</div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">t =</span>
+          <input class="ex-input" id="inp-2-4" placeholder="?" onkeydown="if(event.key==='Enter')checkEx(2,4)">
+          <span class="ex-unit">s</span>
+          <button class="ex-btn" onclick="checkEx(2,4)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-2-4"></div>
+        <div class="ex-hint" id="hint-2-4" onclick="this.textContent='t = s / v = 60 / 10 = ?'">Tipp anzeigen</div>
+      </div>
+    </div>
+
+    <div class="module-complete-section">
+      <button class="btn-complete" onclick="completeModule(2)">&check; Modul abschliessen</button><br>
+      <button class="btn-next" onclick="openModule(3)">Weiter zu C1.4 &rarr;</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE C1.4: Übungsrunde Diagramme
+     ═══════════════════════════════════════════ -->
+<div id="screen-mod-3" class="screen module-page">
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">&larr; Übersicht</button>
+      <span class="nav-title">C1.4 -- Übungsrunde: Diagramme</span>
+      <div class="nav-progress">
+        <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-3"></div></div>
+        <span class="nav-progress-text" id="prog-text-3">0 / 5</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mod-content">
+    <div class="hero">
+      <div class="hero-badge">Track C &middot; Diagramme lesen</div>
+      <h1>Übungsrunde:<br>Diagramme lesen</h1>
+      <p class="hero-sub">s-t- und v-t-Diagramme meistern -- Vorbereitung auf den Gate-Test</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="val">C1.4</span>&nbsp;Modul</span>
+        <span class="meta-chip">Level <span class="val">1</span></span>
+        <span class="meta-chip"><span class="val">25</span>&nbsp;min</span>
+      </div>
+    </div>
+
+    <!-- Ch1: Spickzettel -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 01</span>
+        <span class="chapter-title">Dein Spickzettel</span>
+      </div>
+      <div class="cheat-grid">
+        <div class="cheat-card">
+          <h4>s-t-Diagramm</h4>
+          <p><strong>y-Achse:</strong> Weg $s$ in m</p>
+          <p><strong>Steigung =</strong> Geschwindigkeit $v = \frac{\Delta s}{\Delta t}$</p>
+          <p><strong>Waagrecht:</strong> Körper steht still</p>
+          <p><strong>Gerade:</strong> gleichförmige Bewegung</p>
+        </div>
+        <div class="cheat-card">
+          <h4>v-t-Diagramm</h4>
+          <p><strong>y-Achse:</strong> Geschwindigkeit $v$ in m/s</p>
+          <p><strong>Steigung =</strong> Beschleunigung $a = \frac{\Delta v}{\Delta t}$</p>
+          <p><strong>Auf t-Achse:</strong> Körper ruht ($v = 0$)</p>
+          <p><strong>Fläche unter Graph:</strong> Weg $s$</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ch2: Exercises C1.4 -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 02</span>
+        <span class="chapter-title">Übungsaufgaben</span>
+      </div>
+
+      <!-- Ex 3-0: s bei t=3 aus s-t -->
+      <div class="exercise" id="ex-3-0">
+        <div class="ex-label">Aufgabe 1 <span class="ex-tag">Ablesen</span></div>
+        <div class="ex-question">Lies den zurückgelegten Weg $s$ bei $t = 3\,\text{s}$ aus dem Diagramm ab.</div>
+        <div class="diagram-box">
+          <div class="diagram-title">s-t-Diagramm: Radfahrerin</div>
+          <svg viewBox="0 0 360 230" width="360" height="230">
+            <line x1="50" y1="30" x2="320" y2="30" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="70" x2="320" y2="70" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="110" x2="320" y2="110" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="150" x2="320" y2="150" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="190" x2="320" y2="190" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="30" x2="50" y2="200" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="110" y1="30" x2="110" y2="200" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="170" y1="30" x2="170" y2="200" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="230" y1="30" x2="230" y2="200" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="290" y1="30" x2="290" y2="200" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="200" x2="325" y2="200" stroke="#a8a8c8" stroke-width="2"/>
+            <line x1="50" y1="210" x2="50" y2="20" stroke="#a8a8c8" stroke-width="2"/>
+            <text x="328" y="204" font-size="12" fill="#a8a8c8">t / s</text>
+            <text x="28" y="17" font-size="12" fill="#a8a8c8">s / m</text>
+            <text x="46" y="214" font-size="11" fill="#7777a0" text-anchor="middle">0</text>
+            <text x="110" y="214" font-size="11" fill="#7777a0" text-anchor="middle">1</text>
+            <text x="170" y="214" font-size="11" fill="#7777a0" text-anchor="middle">2</text>
+            <text x="230" y="214" font-size="11" fill="#7777a0" text-anchor="middle">3</text>
+            <text x="290" y="214" font-size="11" fill="#7777a0" text-anchor="middle">4</text>
+            <text x="43" y="204" font-size="11" fill="#7777a0" text-anchor="end">0</text>
+            <text x="43" y="164" font-size="11" fill="#7777a0" text-anchor="end">5</text>
+            <text x="43" y="124" font-size="11" fill="#7777a0" text-anchor="end">10</text>
+            <text x="43" y="84" font-size="11" fill="#7777a0" text-anchor="end">15</text>
+            <text x="43" y="44" font-size="11" fill="#7777a0" text-anchor="end">20</text>
+            <line x1="50" y1="200" x2="290" y2="72" stroke="#fbbf24" stroke-width="2.5"/>
+            <line x1="230" y1="104" x2="230" y2="200" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="5,4"/>
+            <line x1="50" y1="104" x2="230" y2="104" stroke="#fbbf24" stroke-width="1.2" stroke-dasharray="5,4"/>
+            <circle cx="230" cy="104" r="5" fill="#fbbf24"/>
+            <text x="33" y="107" font-size="12" font-weight="700" fill="#fbbf24" text-anchor="middle">?</text>
+          </svg>
+          <p class="diagram-caption">Gleichförmige Bewegung mit $v = 4\,\frac{\text{m}}{\text{s}}$</p>
+        </div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">s =</span>
+          <input class="ex-input" id="inp-3-0" placeholder="?" onkeydown="if(event.key==='Enter')checkEx(3,0)">
+          <span class="ex-unit">m</span>
+          <button class="ex-btn" onclick="checkEx(3,0)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-0"></div>
+        <div class="ex-hint" id="hint-3-0" onclick="this.textContent='Folge der gestrichelten Linie: Vom Punkt bei t = 3 s waagrecht zur s-Achse.'">Tipp anzeigen</div>
+      </div>
+
+      <!-- Ex 3-1: v berechnen -->
+      <div class="exercise" id="ex-3-1">
+        <div class="ex-label">Aufgabe 2 <span class="ex-tag">Berechnen</span></div>
+        <div class="ex-question">Im selben s-t-Diagramm: $P_1 = (0\,\text{s},\; 0\,\text{m})$ und $P_2 = (4\,\text{s},\; 16\,\text{m})$. Berechne die Geschwindigkeit $v$.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">v =</span>
+          <input class="ex-input" id="inp-3-1" placeholder="?" onkeydown="if(event.key==='Enter')checkEx(3,1)">
+          <span class="ex-unit">m/s</span>
+          <button class="ex-btn" onclick="checkEx(3,1)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-1"></div>
+        <div class="ex-hint" id="hint-3-1" onclick="this.textContent='v = Delta_s / Delta_t = (16-0)/(4-0) = ?'">Tipp anzeigen</div>
+      </div>
+
+      <!-- Ex 3-2: MC waagrechte Linie im v-t -->
+      <div class="exercise" id="ex-3-2">
+        <div class="ex-label">Aufgabe 3 <span class="ex-tag">Verstehen</span></div>
+        <div class="ex-question">Was beschreibt eine <strong>waagrechte Linie</strong> im v-t-Diagramm?</div>
+        <div class="diagram-box" style="max-width:300px">
+          <div class="diagram-title">v-t: waagrechte Linie</div>
+          <svg viewBox="0 0 260 160" width="260" height="160">
+            <line x1="40" y1="120" x2="240" y2="120" stroke="#a8a8c8" stroke-width="2"/>
+            <line x1="40" y1="130" x2="40" y2="20" stroke="#a8a8c8" stroke-width="2"/>
+            <text x="242" y="124" font-size="11" fill="#a8a8c8">t</text>
+            <text x="24" y="16" font-size="11" fill="#a8a8c8">v</text>
+            <line x1="45" y1="68" x2="230" y2="68" stroke="#a78bfa" stroke-width="2.5"/>
+          </svg>
+        </div>
+        <div class="mc-options" id="mc-3-2">
+          <div class="mc-opt" onclick="checkMC(3,2,this,false,'Nein. Der Körper ruht, wenn v = 0 -- also wenn die Linie auf der t-Achse liegt. Hier liegt sie über der Achse.')"><div class="marker"></div><span>Der Körper ruht -- seine Geschwindigkeit ist null.</span></div>
+          <div class="mc-opt" onclick="checkMC(3,2,this,true,'Richtig! Steigung = 0, also a = 0. Der Körper bewegt sich gleichförmig mit konstantem v.')"><div class="marker"></div><span>Der Körper bewegt sich gleichförmig mit $a = 0$.</span></div>
+          <div class="mc-opt" onclick="checkMC(3,2,this,false,'Nein. Gleichmäßige Beschleunigung zeigt sich als steigende oder fallende Gerade.')"><div class="marker"></div><span>Der Körper beschleunigt gleichmäßig.</span></div>
+        </div>
+        <div class="mc-explanation" id="mcfb-3-2"></div>
+      </div>
+
+      <!-- Ex 3-3: Beschleunigung Zug -->
+      <div class="exercise" id="ex-3-3">
+        <div class="ex-label">Aufgabe 4 <span class="ex-tag">Berechnen</span></div>
+        <div class="ex-question">Ein Zug beschleunigt: $t_1 = 0\,\text{s}$, $v_1 = 0$; $t_2 = 10\,\text{s}$, $v_2 = 30\,\frac{\text{m}}{\text{s}}$. Berechne $a$.</div>
+        <div class="diagram-box" style="max-width:340px">
+          <div class="diagram-title">v-t-Diagramm: Zug</div>
+          <svg viewBox="0 0 340 220" width="340" height="220">
+            <line x1="50" y1="30" x2="315" y2="30" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="80" x2="315" y2="80" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="130" x2="315" y2="130" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="180" x2="315" y2="180" stroke="rgba(217,119,6,0.15)" stroke-width="1"/>
+            <line x1="50" y1="185" x2="320" y2="185" stroke="#a8a8c8" stroke-width="2"/>
+            <line x1="50" y1="195" x2="50" y2="18" stroke="#a8a8c8" stroke-width="2"/>
+            <text x="322" y="189" font-size="11" fill="#a8a8c8">t / s</text>
+            <text x="24" y="15" font-size="11" fill="#a8a8c8">v / (m/s)</text>
+            <text x="46" y="199" font-size="10" fill="#7777a0" text-anchor="middle">0</text>
+            <text x="310" y="199" font-size="10" fill="#7777a0" text-anchor="middle">10</text>
+            <text x="43" y="189" font-size="10" fill="#7777a0" text-anchor="end">0</text>
+            <text x="43" y="134" font-size="10" fill="#7777a0" text-anchor="end">10</text>
+            <text x="43" y="82" font-size="10" fill="#7777a0" text-anchor="end">20</text>
+            <text x="43" y="33" font-size="10" fill="#7777a0" text-anchor="end">30</text>
+            <line x1="50" y1="185" x2="310" y2="30" stroke="#a78bfa" stroke-width="2.5"/>
+            <circle cx="50" cy="185" r="5" fill="#a78bfa"/>
+            <circle cx="310" cy="30" r="5" fill="#a78bfa"/>
+            <line x1="50" y1="185" x2="310" y2="185" stroke="#60a5fa" stroke-width="1.5" stroke-dasharray="5,4"/>
+            <line x1="310" y1="185" x2="310" y2="30" stroke="#34d399" stroke-width="1.5" stroke-dasharray="5,4"/>
+            <text x="180" y="198" font-size="10" fill="#60a5fa" text-anchor="middle">&#916;t = 10 s</text>
+            <text x="328" y="112" font-size="10" fill="#34d399" text-anchor="middle">&#916;v = 30</text>
+          </svg>
+        </div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">a =</span>
+          <input class="ex-input" id="inp-3-3" placeholder="?" onkeydown="if(event.key==='Enter')checkEx(3,3)">
+          <span class="ex-unit">m/s&sup2;</span>
+          <button class="ex-btn" onclick="checkEx(3,3)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-3"></div>
+        <div class="ex-hint" id="hint-3-3" onclick="this.textContent='a = Delta_v / Delta_t = 30 / 10 = ?'">Tipp anzeigen</div>
+      </div>
+
+      <!-- Ex 3-4: Weg als Fläche -->
+      <div class="exercise" id="ex-3-4">
+        <div class="ex-label">Aufgabe 5 <span class="ex-tag">Anwenden</span></div>
+        <div class="ex-question">Ein Läufer bewegt sich 8 Sekunden mit $v = 5\,\frac{\text{m}}{\text{s}}$. Welchen Weg $s$ hat er zurückgelegt?</div>
+        <div class="diagram-box" style="max-width:300px">
+          <div class="diagram-title">v-t-Diagramm: Läufer</div>
+          <svg viewBox="0 0 290 175" width="290" height="175">
+            <line x1="40" y1="150" x2="275" y2="150" stroke="#a8a8c8" stroke-width="2"/>
+            <line x1="40" y1="160" x2="40" y2="30" stroke="#a8a8c8" stroke-width="2"/>
+            <text x="278" y="154" font-size="11" fill="#a8a8c8">t / s</text>
+            <text x="18" y="26" font-size="11" fill="#a8a8c8">v</text>
+            <text x="36" y="163" font-size="10" fill="#7777a0" text-anchor="middle">0</text>
+            <text x="264" y="163" font-size="10" fill="#7777a0" text-anchor="middle">8</text>
+            <text x="33" y="154" font-size="10" fill="#7777a0" text-anchor="end">0</text>
+            <text x="33" y="54" font-size="10" fill="#7777a0" text-anchor="end">5</text>
+            <rect x="40" y="50" width="224" height="100" fill="rgba(96,165,250,0.2)" stroke="none"/>
+            <line x1="40" y1="50" x2="264" y2="50" stroke="#fbbf24" stroke-width="2.5"/>
+            <line x1="264" y1="50" x2="264" y2="150" stroke="#fbbf24" stroke-width="2" stroke-dasharray="4,3"/>
+            <text x="152" y="106" font-size="12" font-weight="600" fill="#60a5fa" text-anchor="middle">Fläche = s = ?</text>
+          </svg>
+        </div>
+        <div class="ex-input-row">
+          <span style="color:var(--accent-bright);font-weight:600;">s =</span>
+          <input class="ex-input" id="inp-3-4" placeholder="?" onkeydown="if(event.key==='Enter')checkEx(3,4)">
+          <span class="ex-unit">m</span>
+          <button class="ex-btn" onclick="checkEx(3,4)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-4"></div>
+        <div class="ex-hint" id="hint-3-4" onclick="this.textContent='s = v * t = 5 * 8 = ?'">Tipp anzeigen</div>
+      </div>
+    </div>
+
+    <!-- Track complete section -->
+    <div class="chapter">
+      <div class="chapter-label">
+        <span class="chapter-num">Abschluss</span>
+        <span class="chapter-title">Track C &middot; Level 1 abgeschlossen</span>
+      </div>
+      <div class="glass">
+        <p>Wenn du alle vier Module durchgearbeitet hast, kannst du den Gate-Test ablegen.</p>
+        <div class="skill-chips">
+          <div class="skill-chip">s-t-Diagramm: Steigung = $v$</div>
+          <div class="skill-chip">v-t-Diagramm: Steigung = $a$</div>
+          <div class="skill-chip">Fläche unter v-t = Weg</div>
+          <div class="skill-chip">Steigungsdreieck anwenden</div>
+        </div>
+      </div>
+      <div class="gate-banner">
+        <h3>Bereit für den Gate-Test?</h3>
+        <p>Im Gate-Test Track C Level 1 warten 10 Fragen zu s-t- und v-t-Diagrammen auf dich.<br>Du brauchst mindestens <strong>70 %</strong> (7 von 10).</p>
+      </div>
+    </div>
+
+    <div class="module-complete-section">
+      <button class="btn-complete" onclick="completeModule(3)">&check; Modul abschliessen</button><br>
+      <button class="btn-next" onclick="goLanding()">&larr; Zurück zur Übersicht</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════ -->
+<script>
+// ══════════════════════════════════════════
+// SCORM 1.2 API WRAPPER
+// ══════════════════════════════════════════
+const SCORM = (() => {
+  let api = null;
+  let initialized = false;
+
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) { win = win.parent; }
+      else if (win.opener) { win = win.opener; }
+      else break;
+    }
+    return win ? win.API : null;
+  }
+
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.moduleStates) moduleStates = saved.moduleStates;
+            if (saved.exerciseStates) exerciseStates = saved.exerciseStates;
+          } catch(e) {}
+        }
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
+        }
+      }
+    } catch(e) {
+      console.log('SCORM init:', e);
+    }
+  }
+
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      const data = { moduleStates, exerciseStates };
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify(data));
+      let total = 0, solved = 0;
+      for (const key in exerciseStates) {
+        total++;
+        if (exerciseStates[key]) solved++;
+      }
+      const score = total > 0 ? Math.round((solved / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+      const allComplete = moduleStates.every(s => s);
+      if (allComplete) {
+        api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      }
+      api.LMSCommit('');
+    } catch(e) {
+      console.log('SCORM save:', e);
+    }
+  }
+
+  function finish() {
+    if (!api || !initialized) return;
+    try { save(); api.LMSFinish(''); } catch(e) {}
+  }
+
+  return { init, save, finish };
+})();
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let moduleStates = [false, false, false, false];
+let exerciseStates = {};
+let currentScreen = 'landing';
+
+// Exercise definitions
+const exercises = {
+  // C1.1
+  '0-2': { answers: '30|30.0', ok: 'Richtig! Bei t = 3 s ist s = 30 m.', err: 'Schau nochmal auf das Diagramm bei t = 3 s.' },
+  '0-4': { answers: '5|5.0', ok: 'Richtig! Punkt C liegt bei t = 5 s.', err: 'Schau auf Punkt C im Diagramm.' },
+  // C1.2
+  '1-2': { answers: '15|15.0', ok: 'Richtig! v = 60/4 = 15 m/s.', err: 'v = Delta_s / Delta_t = 60/4 = ?' },
+  '1-3': { answers: '5|5.0', ok: 'Richtig! v = 20/4 = 5 m/s.', err: 'v = 20 m / 4 s = ?' },
+  // C1.3
+  '2-2': { answers: '4|4.0', ok: 'Richtig! a = 20/5 = 4 m/s^2.', err: 'a = Delta_v / Delta_t = 20/5 = ?' },
+  '2-4': { answers: '6|6.0', ok: 'Richtig! t = 60/10 = 6 s.', err: 't = s/v = 60/10 = ?' },
+  // C1.4
+  '3-0': { answers: '12|12.0', ok: 'Richtig! Bei t = 3 s ist s = 12 m.', err: 'Folge der gestrichelten Linie bei t = 3 s.' },
+  '3-1': { answers: '4|4.0', ok: 'Richtig! v = 16/4 = 4 m/s.', err: 'v = Delta_s / Delta_t = 16/4 = ?' },
+  '3-3': { answers: '3|3.0', ok: 'Richtig! a = 30/10 = 3 m/s^2.', err: 'a = 30 / 10 = ?' },
+  '3-4': { answers: '40|40.0', ok: 'Richtig! s = 5 * 8 = 40 m.', err: 's = v * t = 5 * 8 = ?' },
+};
+
+const exCounts = [5, 5, 5, 5];
+
+// ══════════════════════════════════════════
+// NORMALIZE
+// ══════════════════════════════════════════
+function normalize(v) {
+  return v.trim().replace(/\s+/g, '').toLowerCase()
+    .replace(/,/g, '.').replace(/\u00d7/g, '*').replace(/\u00b7/g, '*').replace(/\u22c5/g, '*');
+}
+
+// ══════════════════════════════════════════
+// TEXT INPUT CHECK
+// ══════════════════════════════════════════
+function checkEx(mod, ex) {
+  const key = mod + '-' + ex;
+  const inp = document.getElementById('inp-' + key);
+  const fb = document.getElementById('fb-' + key);
+  const hint = document.getElementById('hint-' + key);
+  const card = document.getElementById('ex-' + key);
+  const def = exercises[key];
+  if (!inp || !fb || !def) return;
+
+  const val = normalize(inp.value);
+  if (!val) return;
+
+  const accepted = def.answers.split('|').map(normalize);
+  const correct = accepted.some(a => val === a);
+
+  fb.className = 'ex-feedback show ' + (correct ? 'ok' : 'err');
+  fb.textContent = correct ? def.ok : def.err;
+  card.className = 'exercise ' + (correct ? 'correct' : 'wrong');
+
+  if (correct) {
+    exerciseStates[key] = true;
+    inp.disabled = true;
+    inp.style.borderColor = 'var(--ok-border)';
+    card.querySelector('.ex-btn').disabled = true;
+    if (hint) hint.style.display = 'none';
+    updateModuleProgress(mod);
+    SCORM.save();
+  } else {
+    if (hint) hint.classList.add('show');
+  }
+}
+
+// ══════════════════════════════════════════
+// MC CHECK
+// ══════════════════════════════════════════
+function checkMC(mod, ex, el, correct, explanation) {
+  const key = mod + '-' + ex;
+  const card = document.getElementById('ex-' + key);
+  if (exerciseStates[key]) return;
+
+  const fb = document.getElementById('mcfb-' + key);
+  el.classList.add(correct ? 'correct-choice' : 'wrong-choice');
+  const marker = el.querySelector('.marker');
+  marker.textContent = correct ? '\u2713' : '\u2717';
+  fb.textContent = explanation;
+  fb.className = 'mc-explanation ' + (correct ? 'ok' : 'err');
+
+  if (correct) {
+    exerciseStates[key] = true;
+    card.className = 'exercise correct';
+    // Disable all options in this group
+    var opts = document.getElementById('mc-' + key);
+    if (opts) opts.querySelectorAll('.mc-opt').forEach(function(o) { o.style.pointerEvents = 'none'; });
+    updateModuleProgress(mod);
+    SCORM.save();
+  }
+
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([fb]).catch(function(){});
+}
+
+// ══════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════
+function updateModuleProgress(mod) {
+  let solved = 0;
+  for (let i = 0; i < exCounts[mod]; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const pct = Math.round((solved / exCounts[mod]) * 100);
+  const fill = document.getElementById('prog-fill-' + mod);
+  const text = document.getElementById('prog-text-' + mod);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = solved + ' / ' + exCounts[mod];
+}
+
+function updateOverallProgress() {
+  const done = moduleStates.filter(s => s).length;
+  const fill = document.getElementById('overall-fill');
+  const label = document.getElementById('overall-label');
+  if (fill) fill.style.width = (done / 4 * 100) + '%';
+  if (label) label.textContent = done + ' / 4';
+
+  for (let i = 0; i < 4; i++) {
+    const status = document.getElementById('status-' + i);
+    const card = document.querySelectorAll('.mod-card')[i];
+    if (moduleStates[i]) {
+      if (status) { status.textContent = 'Fertig \u2713'; status.className = 'mc-status done'; }
+      if (card) card.classList.add('completed');
+    }
+  }
+}
+
+function completeModule(idx) {
+  moduleStates[idx] = true;
+  SCORM.save();
+  goLanding();
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function openModule(idx) {
+  const canvas = document.getElementById('shader-canvas');
+  canvas.classList.add('hidden');
+  showScreen('screen-mod-' + idx);
+  currentScreen = 'mod-' + idx;
+  updateModuleProgress(idx);
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise();
+  }
+}
+
+function goLanding() {
+  const canvas = document.getElementById('shader-canvas');
+  canvas.classList.remove('hidden');
+  canvas.classList.remove('dimmed');
+  showScreen('screen-landing');
+  currentScreen = 'landing';
+  updateOverallProgress();
+}
+
+// ══════════════════════════════════════════
+// WEBGL SHADER (Perlin Noise Hills)
+// ══════════════════════════════════════════
+function initShader() {
+  const canvas = document.getElementById('shader-canvas');
+  const gl = canvas.getContext('webgl');
+  if (!gl) {
+    canvas.style.background = 'linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #0c0c1d 100%)';
+    return;
+  }
+
+  const vsSource = `
+    attribute vec4 aVertexPosition;
+    void main() { gl_Position = aVertexPosition; }
+  `;
+
+  const fsSource = `
+    precision highp float;
+    uniform vec2 iResolution;
+    uniform float iTime;
+
+    // Perlin-style noise
+    vec2 hash(vec2 p) {
+      p = vec2(dot(p, vec2(127.1, 311.7)), dot(p, vec2(269.5, 183.3)));
+      return -1.0 + 2.0 * fract(sin(p) * 43758.5453123);
+    }
+
+    float noise(vec2 p) {
+      vec2 i = floor(p);
+      vec2 f = fract(p);
+      vec2 u = f * f * (3.0 - 2.0 * f);
+      return mix(
+        mix(dot(hash(i + vec2(0.0, 0.0)), f - vec2(0.0, 0.0)),
+            dot(hash(i + vec2(1.0, 0.0)), f - vec2(1.0, 0.0)), u.x),
+        mix(dot(hash(i + vec2(0.0, 1.0)), f - vec2(0.0, 1.0)),
+            dot(hash(i + vec2(1.0, 1.0)), f - vec2(1.0, 1.0)), u.x),
+        u.y
+      );
+    }
+
+    float fbm(vec2 p) {
+      float v = 0.0;
+      float a = 0.5;
+      vec2 shift = vec2(100.0);
+      mat2 rot = mat2(cos(0.5), sin(0.5), -sin(0.5), cos(0.5));
+      for (int i = 0; i < 5; i++) {
+        v += a * noise(p);
+        p = rot * p * 2.0 + shift;
+        a *= 0.5;
+      }
+      return v;
+    }
+
+    float terrain(vec2 p) {
+      return fbm(p * 0.6 + vec2(iTime * 0.04, iTime * 0.02)) * 0.5
+           + fbm(p * 1.2 + vec2(-iTime * 0.03, iTime * 0.05)) * 0.25;
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / iResolution.xy;
+
+      // Camera: looking down at terrain from an angle
+      float camHeight = 1.8;
+      vec2 p = vec2(uv.x * 4.0 - 2.0, 0.0);
+
+      // Raymarching from top
+      float depth = 0.0;
+      float hit = 0.0;
+      vec3 col = vec3(0.047, 0.035, 0.11); // dark bg
+
+      // Render layered terrain lines
+      for (int i = 0; i < 80; i++) {
+        float fi = float(i);
+        float z = fi * 0.05 + 0.1;
+        float perspective = 1.0 / (z + 0.3);
+        float xWorld = (uv.x - 0.5) * z * 3.0;
+        float h = terrain(vec2(xWorld * 1.5, z * 2.0 + iTime * 0.15));
+        float yScreen = 0.3 + (h * 0.35 + 0.1) * perspective;
+
+        // Distance fog
+        float fog = exp(-z * 0.8);
+
+        if (uv.y < yScreen) {
+          // Surface color: orange gradient with depth
+          float shade = 0.5 + h * 0.5;
+          vec3 surfCol = mix(
+            vec3(0.15, 0.06, 0.02),  // dark orange-brown (far)
+            vec3(0.92, 0.55, 0.12),  // bright orange (near)
+            fog
+          ) * shade;
+
+          // Grid lines on terrain
+          float gridLine = smoothstep(0.003, 0.0, abs(fract(z * 4.0) - 0.5) - 0.48);
+          float gridLineX = smoothstep(0.004, 0.0, abs(fract(xWorld * 2.0) - 0.5) - 0.48);
+          vec3 lineCol = vec3(0.95, 0.6, 0.15) * fog;
+          surfCol = mix(surfCol, lineCol, (gridLine + gridLineX) * 0.4 * fog);
+
+          col = surfCol;
+        }
+      }
+
+      // Subtle glow at horizon
+      float horizonGlow = smoothstep(0.5, 0.25, uv.y) * 0.15;
+      col += vec3(0.9, 0.5, 0.1) * horizonGlow;
+
+      // Vignette
+      float vignette = 1.0 - length((uv - 0.5) * vec2(1.2, 1.0)) * 0.6;
+      col *= vignette;
+
+      gl_FragColor = vec4(col, 1.0);
+    }
+  `;
+
+  function loadShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('Shader error:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  const vs = loadShader(gl.VERTEX_SHADER, vsSource);
+  const fs = loadShader(gl.FRAGMENT_SHADER, fsSource);
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program link error:', gl.getProgramInfoLog(program));
+    return;
+  }
+
+  const posBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+
+  const posLoc = gl.getAttribLocation(program, 'aVertexPosition');
+  const resLoc = gl.getUniformLocation(program, 'iResolution');
+  const timeLoc = gl.getUniformLocation(program, 'iTime');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const startTime = Date.now();
+  function render() {
+    const t = (Date.now() - startTime) / 1000;
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(program);
+    gl.uniform2f(resLoc, canvas.width, canvas.height);
+    gl.uniform1f(timeLoc, t);
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(posLoc);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('load', () => {
+  SCORM.init();
+  initShader();
+  updateOverallProgress();
+
+  // Restore module progress from saved exercise states
+  for (let m = 0; m < 4; m++) {
+    updateModuleProgress(m);
+    // Restore UI state for solved exercises
+    for (let e = 0; e < exCounts[m]; e++) {
+      const key = m + '-' + e;
+      if (exerciseStates[key]) {
+        const card = document.getElementById('ex-' + key);
+        if (card) card.className = 'exercise correct';
+        const inp = document.getElementById('inp-' + key);
+        if (inp) { inp.disabled = true; inp.style.borderColor = 'var(--ok-border)'; }
+        const btn = card ? card.querySelector('.ex-btn') : null;
+        if (btn) btn.disabled = true;
+        const fb = document.getElementById('fb-' + key);
+        const def = exercises[key];
+        if (fb && def) { fb.className = 'ex-feedback show ok'; fb.textContent = def.ok; }
+        const hint = document.getElementById('hint-' + key);
+        if (hint) hint.style.display = 'none';
+      }
+    }
+  }
+
+  // Typeset MathJax for the landing page
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise();
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  SCORM.finish();
+});
+</script>
+</body>
+</html>

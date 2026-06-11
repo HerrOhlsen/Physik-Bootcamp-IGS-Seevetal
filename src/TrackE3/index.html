@@ -1,0 +1,1713 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Physik Bootcamp — Track E3: Synthese (Level 3)</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c1a19;
+  --bg-surface: #0f2926;
+  --bg-card: #153632;
+  --bg-elevated: #1a4540;
+  --bg-glass: rgba(15, 41, 38, 0.72);
+  --bg-glass-heavy: rgba(12, 26, 25, 0.92);
+
+  --ink: #e0f2f1;
+  --ink-muted: #94b8b4;
+  --ink-dim: #5f8a84;
+
+  --accent: #0d9488;
+  --accent-bright: #2dd4bf;
+  --accent-glow: rgba(13,148,136,0.3);
+  --accent-deep: #0f766e;
+  --accent-subtle: rgba(13,148,136,0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-glow: rgba(52, 211, 153, 0.25);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(13, 148, 136, 0.15);
+  --border-strong: rgba(13, 148, 136, 0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-full: 100px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+input, textarea, select { font-size: 16px; }
+button, [onclick] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ══════════════════════════════════════════
+   ANIMATED BACKGROUND CANVAS
+   ══════════════════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+#bg-canvas.dimmed { opacity: 0.15; }
+#bg-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREEN SYSTEM
+   ══════════════════════════════════════════ */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.screen.active {
+  display: block;
+  animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   LANDING PAGE
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+}
+.landing-header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(15, 118, 110, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: var(--r-full);
+  margin-bottom: 24px;
+}
+.landing-title {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-bright) 50%, #5eead4 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+.landing-sub {
+  color: var(--ink-muted);
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+.landing-meta {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.l-meta {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+.l-meta .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* Overall progress */
+.overall-progress {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+.op-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.op-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.op-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), #5eead4);
+  border-radius: var(--r-full);
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.op-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Module cards grid */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 920px;
+}
+.mod-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.mod-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--r-lg);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+.mod-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--glow);
+}
+.mod-card:hover::before { opacity: 1; }
+.mod-card.completed { border-color: var(--ok-border); }
+.mod-card.completed::after {
+  content: '\2713';
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0c1a19;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.mc-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.mc-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.mc-desc {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.mc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mc-time {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+}
+.mc-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--accent-subtle);
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+.mc-status.done {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: var(--ok-border);
+}
+.mod-card:nth-child(1) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+.mod-card:nth-child(2) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+
+/* Footer */
+.landing-footer {
+  margin-top: 48px;
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 1s both;
+}
+
+/* ══════════════════════════════════════════
+   MODULE PAGE LAYOUT
+   ══════════════════════════════════════════ */
+.module-page { background: var(--bg-deep); position: relative; }
+.module-page::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(13,148,136,0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Top navbar */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+}
+.top-nav-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+}
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.nav-title {
+  font-size: 0.85rem; font-weight: 600; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nav-progress {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-progress-track {
+  width: 80px; height: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.nav-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  border-radius: var(--r-full);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-progress-text {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Module content */
+.mod-content {
+  position: relative; z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px 100px;
+}
+
+/* ══════════════════════════════════════════
+   MODULE COMPONENTS
+   ══════════════════════════════════════════ */
+.hero {
+  padding: 52px 0 36px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  margin-bottom: 18px;
+  border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  font-weight: 900; line-height: 1.1; letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero-sub {
+  color: var(--ink-muted); font-size: 1rem;
+  max-width: 480px; margin: 0 auto 20px;
+}
+.hero-meta {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+}
+.meta-chip {
+  font-size: 0.78rem; color: var(--ink-muted); font-weight: 500;
+}
+.meta-chip .val {
+  color: var(--accent-bright); font-weight: 700; font-family: var(--mono);
+}
+
+/* Glass cards */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+/* Chapter sections */
+.chapter { margin-top: 40px; }
+.chapter-label { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.chapter-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  border: 2px solid var(--accent);
+  color: var(--accent-bright);
+  font-family: var(--mono); font-size: 0.8rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.chapter-title {
+  font-size: 1.3rem; font-weight: 800; color: #fff;
+}
+
+/* Exercise cards */
+.exercise-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.exercise-card.solved { border-color: var(--ok-border); }
+.exercise-card.wrong-state { border-color: var(--err-border); }
+.ex-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.ex-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.ex-title { font-weight: 600; font-size: 0.9rem; color: var(--ink); }
+.ex-tag {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  color: var(--accent); background: var(--accent-subtle);
+  padding: 2px 8px; border-radius: var(--r-full);
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.ex-body { padding: 20px; }
+.ex-question { color: var(--ink); margin-bottom: 16px; line-height: 1.6; }
+
+/* Answer inputs */
+.answer-row {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.answer-prefix {
+  font-weight: 600; font-size: 1.1rem; color: var(--accent-bright);
+}
+.answer-input {
+  flex: 1; min-width: 160px;
+  padding: 10px 14px;
+  background: var(--bg-deep);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--mono); font-size: 1rem;
+  outline: none; transition: all 0.2s;
+}
+.answer-input::placeholder { color: var(--ink-dim); }
+.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.answer-input.correct { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.answer-input.incorrect { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+
+/* MC Options (pill style) */
+.opt-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.opt-pill {
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  font-size: 0.88rem; font-weight: 600;
+  color: var(--ink); cursor: pointer; transition: all 0.2s;
+  line-height: 1.5;
+}
+.opt-pill:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.opt-pill.selected { border-color: var(--accent); background: var(--accent-deep); color: #fff; }
+
+/* Buttons */
+.btn-check {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  background: var(--accent-deep);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-check:hover { background: var(--accent); transform: translateY(-1px); }
+.btn-hint {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 8px 14px;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.8rem;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-hint:hover { border-color: var(--warn); color: var(--warn); }
+
+/* Hint & Feedback */
+.hint-box {
+  display: none; margin-top: 12px; padding: 12px 16px;
+  background: var(--warn-bg);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: var(--r-md);
+  font-size: 0.85rem; color: var(--warn);
+}
+.hint-box.open { display: block; }
+.fb-block {
+  margin-top: 12px; padding: 10px 14px;
+  border-radius: var(--r-md);
+  font-size: 0.85rem; display: none;
+}
+.fb-block.correct {
+  display: block;
+  background: var(--ok-bg); color: var(--ok);
+  border: 1px solid var(--ok-border);
+}
+.fb-block.incorrect {
+  display: block;
+  background: var(--err-bg); color: var(--err);
+  border: 1px solid var(--err-border);
+}
+
+/* Result button */
+.btn-result {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; max-width: 360px;
+  margin: 32px auto 0;
+  padding: 16px 28px;
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  border: none; border-radius: var(--r-lg);
+  color: #fff;
+  font-family: var(--font); font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-result:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px var(--accent-glow);
+}
+
+/* Table */
+.table-wrap { overflow-x: auto; margin: 16px 0; border-radius: var(--r-lg); border: 1px solid var(--border); background: var(--bg-surface); }
+.data-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.data-table thead tr { background: var(--bg-card); }
+.data-table th {
+  padding: 10px 14px; text-align: left; font-weight: 700; font-size: 0.7rem;
+  color: var(--accent-bright); text-transform: uppercase; letter-spacing: 0.1em;
+  border-bottom: 1px solid var(--border);
+}
+.data-table tbody tr { transition: background 0.15s; }
+.data-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+.data-table tbody tr:hover { background: rgba(13,148,136,0.06); }
+.data-table td { padding: 8px 14px; border-bottom: 1px solid var(--border); color: var(--ink-muted); vertical-align: middle; }
+
+/* Formula block */
+.formula-block {
+  background: rgba(13,148,136,0.08); border: 1px solid var(--border-strong);
+  border-radius: var(--r-md); padding: 14px 18px; text-align: center;
+  font-size: 1rem; margin: 10px 0;
+}
+
+/* SVG wrap */
+.svg-wrap { display: flex; justify-content: center; margin: 12px 0; }
+.svg-wrap svg { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-surface); max-width: 100%; }
+
+/* Fachtext */
+.fachtext-sample {
+  background: var(--bg-card); border: 1px solid var(--border); border-radius: var(--r-md);
+  padding: 14px 18px; font-size: 0.88rem; line-height: 1.65; color: var(--ink); margin-top: 10px;
+}
+.fachtext-sample .kw { font-weight: 700; color: var(--accent-bright); }
+
+/* Hero formula */
+.hero-formula {
+  margin: 36px auto 0; max-width: 360px;
+  background: var(--bg-surface); border: 1px solid var(--border-strong);
+  border-radius: var(--r-xl); padding: 28px 32px; position: relative; overflow: hidden;
+}
+.hero-formula::before {
+  content: ''; position: absolute; inset: -1px; border-radius: var(--r-xl); padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude; pointer-events: none;
+}
+.hero-formula .formula-tag {
+  position: absolute; top: 10px; right: 14px;
+  font-family: var(--mono); font-size: 0.65rem; color: var(--ink-dim);
+  text-transform: uppercase; letter-spacing: 0.12em;
+}
+
+/* Project steps */
+.proj-step {
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  padding: 20px; margin-bottom: 16px; transition: all 0.3s;
+}
+.proj-step:hover { border-color: var(--border-strong); }
+.proj-step-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.ps-num {
+  width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff;
+  display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.9rem; flex-shrink: 0;
+}
+.ps-title { font-size: 0.95rem; font-weight: 700; color: #fff; }
+.ps-track {
+  display: inline-flex; font-size: 0.68rem; font-weight: 700; padding: 2px 8px; border-radius: 100px;
+  color: #fff; margin-left: 6px;
+}
+
+/* Experiment ideas */
+.exp-idea {
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg);
+  padding: 18px 20px; margin-bottom: 12px; transition: all 0.25s;
+}
+.exp-idea:hover { border-color: var(--accent); box-shadow: 0 4px 20px var(--accent-glow); }
+.exp-idea h4 { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.exp-idea p { font-size: 0.88rem; color: var(--ink-muted); line-height: 1.5; }
+.exp-vars { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+.var-tag {
+  font-family: var(--mono); font-size: 0.68rem; font-weight: 600;
+  padding: 3px 10px; border-radius: 100px;
+  background: rgba(13,148,136,0.12); color: var(--accent-bright); border: 1px solid var(--border);
+}
+
+/* Planner */
+.planner { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; margin-bottom: 20px; }
+.planner-header { background: var(--accent-deep); color: #fff; padding: 12px 20px; font-size: 0.9rem; font-weight: 700; border-bottom: 1px solid var(--accent); }
+.planner-section { padding: 14px 20px; border-bottom: 1px solid var(--border); }
+.planner-section:last-child { border-bottom: none; }
+.planner-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; color: var(--accent-bright); margin-bottom: 8px; }
+.planner-input {
+  width: 100%; padding: 10px 14px;
+  background: var(--bg-deep); border: 2px solid var(--border-strong); border-radius: var(--r-md);
+  color: var(--ink); font-family: var(--font); font-size: 0.88rem;
+  resize: vertical; min-height: 60px; outline: none; transition: all 0.2s;
+}
+.planner-input::placeholder { color: var(--ink-dim); }
+.planner-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.single-input { height: auto; min-height: auto; resize: none; }
+
+/* Checklist */
+.checklist { display: flex; flex-direction: column; gap: 6px; margin-bottom: 12px; }
+.cl-item {
+  display: flex; gap: 12px; padding: 10px 16px;
+  background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s; align-items: center;
+}
+.cl-item:hover { border-color: var(--accent); background: var(--bg-card); }
+.cl-item.checked { background: var(--ok-bg); border-color: rgba(52,211,153,0.3); }
+.cl-check {
+  width: 22px; height: 22px; border-radius: var(--r-sm); border: 2px solid var(--border-strong);
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  font-size: 0.8rem; color: transparent; transition: all 0.2s;
+}
+.cl-item.checked .cl-check { background: var(--ok); border-color: var(--ok); color: #fff; }
+.cl-text { font-size: 0.88rem; color: var(--ink); }
+.cl-progress { height: 4px; background: var(--bg-elevated); border-radius: 100px; margin-top: 10px; overflow: hidden; }
+.cl-bar { height: 100%; background: linear-gradient(90deg, var(--accent-deep), var(--ok)); border-radius: 100px; width: 0; transition: width 0.4s cubic-bezier(0.22, 1, 0.36, 1); }
+
+/* Integration notice */
+.integration-notice {
+  background: rgba(13,148,136,0.08); border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg); padding: 16px 20px; margin-bottom: 16px;
+  display: flex; align-items: center; gap: 14px;
+}
+.in-text { font-size: 0.88rem; color: var(--accent-bright); font-weight: 600; }
+.track-pills { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+.track-pill { display: inline-flex; padding: 2px 10px; border-radius: 100px; font-size: 0.7rem; font-weight: 700; color: #fff; }
+
+/* Extra section */
+.extra-section { margin-top: 32px; border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-deep); overflow: hidden; }
+.extra-toggle { display: flex; align-items: center; gap: 10px; padding: 14px 20px; cursor: pointer; font-size: 0.92rem; font-weight: 600; color: var(--ink-muted); list-style: none; user-select: none; }
+.extra-toggle::-webkit-details-marker { display: none; }
+.extra-section[open] .extra-toggle { color: var(--ink); background: var(--bg-card); border-bottom: 1px solid var(--border); }
+.extra-icon { font-size: 1.1rem; font-weight: 700; color: var(--accent); transition: transform 0.2s; display: inline-block; width: 18px; text-align: center; }
+.extra-section[open] .extra-icon { transform: rotate(45deg); }
+.extra-count { font-size: 0.78rem; font-weight: 400; color: var(--ink-dim); margin-left: auto; }
+.extra-intro { padding: 12px 20px 4px; font-size: 0.85rem; color: var(--ink-muted); border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.extra-card { border-left: 3px solid var(--accent-deep); opacity: 0.95; }
+.extra-card .ex-num { background: var(--accent-deep); }
+.extra-tag { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+.extra-btn { background: var(--bg-card); border: 1px solid var(--border-strong); color: var(--ink-muted); }
+.extra-btn:hover { background: var(--accent-deep); color: var(--ink); }
+.solution-box { margin-top: 12px; padding: 14px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--r-sm); font-size: 0.88rem; color: var(--ink-muted); }
+.solution-title { font-weight: 700; color: var(--accent-bright); margin-bottom: 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.extra-rubric { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.extra-rubric-title { font-size: 0.78rem; color: var(--ink-dim); margin-bottom: 6px; }
+.extra-rubric label { display: flex; align-items: center; gap: 8px; font-size: 0.83rem; color: var(--ink-muted); margin-bottom: 4px; cursor: pointer; }
+.answer-textarea { width: 100%; min-height: 80px; padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--ink); font-family: var(--font); font-size: 0.9rem; resize: vertical; margin-top: 10px; }
+.answer-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* Scroll reveal */
+.reveal { opacity: 0; transform: translateY(24px); transition: opacity 0.6s ease, transform 0.6s ease; }
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .hero { padding: 40px 0 28px; }
+  .hero h1 { font-size: 1.8rem; }
+  .glass { padding: 16px; }
+  .answer-row { flex-direction: column; align-items: stretch; }
+  .answer-input { min-width: 0; }
+  .proj-step, .exp-idea, .planner { padding: 16px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     ANIMATED BACKGROUND CANVAS
+     ══════════════════════════════════════════ -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 0: LANDING PAGE
+     ══════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">TRACK E &middot; LEVEL 3</div>
+      <h1 class="landing-title">Synthese</h1>
+      <p class="landing-sub">Projekt: Freier Fall analysieren &amp; Selbstgewähltes Experiment</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">2</span> Module</span>
+        <span class="l-meta"><span class="val">10</span> Aufgaben</span>
+        <span class="l-meta"><span class="val">~85 min</span> Dauer</span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track"><div class="op-fill" id="opFill"></div></div>
+        <span class="op-label" id="opLabel">0 / 2 Module</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card" onclick="openModule(0)" id="card-0">
+        <div class="mc-num">E3.1</div>
+        <div class="mc-title">Projekt: Freier Fall analysieren</div>
+        <div class="mc-desc">Daten auswerten, Diagramm lesen, Formel ableiten, Ergebnis berechnen, Fachtext schreiben</div>
+        <div class="mc-footer">
+          <span class="mc-time">40 min</span>
+          <span class="mc-status" id="status-0">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(1)" id="card-1">
+        <div class="mc-num">E3.2</div>
+        <div class="mc-title">Selbstgewähltes Experiment</div>
+        <div class="mc-desc">Planen, Durchführen, Auswerten, Dokumentieren — alle 5 Tracks kombiniert</div>
+        <div class="mc-footer">
+          <span class="mc-time">45 min</span>
+          <span class="mc-status" id="status-1">Starten</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-footer">Track E3 &middot; v4</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1: MODULE E3.1 — Projekt: Freier Fall analysieren
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-0">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">E3.1 &mdash; Projekt: Freier Fall</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div>
+          <span class="nav-progress-text" id="prog-text-0">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">E3.1</div>
+        <h1>Projekt: Freier Fall</h1>
+        <p class="hero-sub">Daten auswerten, Diagramm lesen, Formel ableiten, Ergebnis berechnen, Fachtext schreiben</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 3</span> Projekt</div>
+          <div class="meta-chip"><span class="val">40 min</span> Dauer</div>
+        </div>
+        <div class="hero-formula">
+          <span class="formula-tag">Kernformel</span>
+          $$s = \frac{1}{2}\,g\,t^2$$
+        </div>
+      </section>
+
+      <!-- Chapter 1: Das Projekt -->
+      <section class="chapter" id="m0-ch1">
+        <div class="chapter-label">
+          <span class="chapter-num">01</span>
+          <h2 class="chapter-title">Das Projekt: Freier Fall</h2>
+        </div>
+
+        <div class="proj-step reveal">
+          <div class="proj-step-header">
+            <div class="ps-num">1</div>
+            <div><div class="ps-title">Fragestellung &amp; Messdaten <span class="ps-track" style="background:#c2410c;">Track C</span></div></div>
+          </div>
+          <p style="font-size:0.88rem; color:var(--ink-muted); margin-bottom:12px;"><strong style="color:var(--ink);">Fragestellung:</strong> Wie hängt die Fallstrecke $s$ beim freien Fall von der Fallzeit $t$ ab?</p>
+          <div class="table-wrap">
+            <table class="data-table">
+              <thead><tr><th>Fallzeit $t$ (s)</th><th>Fallstrecke $s$ (m)</th><th>$s/t^2$ (m/s²)</th></tr></thead>
+              <tbody>
+                <tr><td>0</td><td>0</td><td>--</td></tr>
+                <tr><td>0,5</td><td>1,23</td><td>4,92</td></tr>
+                <tr><td>1,0</td><td>4,90</td><td>4,90</td></tr>
+                <tr><td>1,5</td><td>11,03</td><td>4,90</td></tr>
+                <tr><td>2,0</td><td>19,62</td><td>4,91</td></tr>
+                <tr><td>2,5</td><td>30,63</td><td>4,90</td></tr>
+              </tbody>
+            </table>
+          </div>
+          <p style="font-size:0.8rem; color:var(--ink-dim); margin-top:8px;">Die Spalte $s/t^2$ ist nahezu konstant ≈ $g/2 \approx 4{,}91 \text{ m/s}^2$</p>
+        </div>
+
+        <div class="proj-step reveal">
+          <div class="proj-step-header">
+            <div class="ps-num">2</div>
+            <div><div class="ps-title">Hypothese <span class="ps-track" style="background:#9333ea;">Track D</span></div></div>
+          </div>
+          <div style="background:rgba(13,148,136,0.08); border:1px solid var(--border-strong); border-radius:var(--r-md); padding:12px 16px; font-size:0.88rem; color:var(--accent-bright);">
+            "Wenn ein Körper frei fällt, dann ist die Fallstrecke proportional zum Quadrat der Zeit, weil die Schwerkraft eine konstante Beschleunigung $g \approx 9{,}81 \text{ m/s}^2$ verursacht."
+          </div>
+        </div>
+
+        <div class="proj-step reveal">
+          <div class="proj-step-header">
+            <div class="ps-num">3</div>
+            <div><div class="ps-title">Formel ableiten <span class="ps-track" style="background:#4f46e5;">Track A</span></div></div>
+          </div>
+          <div class="formula-block">$s = \dfrac{1}{2} g t^2$</div>
+          <p style="font-size:0.88rem; color:var(--ink-muted);">Aus den Daten: $s/t^2 \approx 4{,}91 \Rightarrow \frac{g}{2} \approx 4{,}91 \Rightarrow g \approx 9{,}81 \text{ m/s}^2$</p>
+        </div>
+
+        <div class="proj-step reveal">
+          <div class="proj-step-header">
+            <div class="ps-num">4</div>
+            <div><div class="ps-title">Berechnung &amp; Ergebnis <span class="ps-track" style="background:#15803d;">Track B</span></div></div>
+          </div>
+          <p style="font-size:0.88rem; color:var(--ink-muted); margin-bottom:8px;">Bei $t = 3 \text{ s}$:</p>
+          <div class="formula-block">$s = \frac{1}{2} \cdot 9{,}81 \text{ m/s}^2 \cdot (3 \text{ s})^2 = \frac{1}{2} \cdot 9{,}81 \cdot 9 = 44{,}1 \text{ m}$</div>
+          <div style="background:var(--accent-deep); color:#fff; border-radius:var(--r-md); padding:12px 16px; text-align:center; font-weight:700; margin-top:10px;">Der Körper fällt in 3 s genau 44,1 m.</div>
+        </div>
+
+        <div class="proj-step reveal">
+          <div class="proj-step-header">
+            <div class="ps-num">5</div>
+            <div><div class="ps-title">Schlussfolgerung (Fachtext) <span class="ps-track" style="background:#9333ea;">Track D</span></div></div>
+          </div>
+          <div class="fachtext-sample">"Die Messdaten bestätigen die <span class="kw">Hypothese</span>: Die Fallstrecke ist proportional zum Quadrat der Zeit ($s \propto t^2$). Die <span class="kw">Erdbeschleunigung</span> wurde experimentell zu $g \approx 9{,}81 \text{ m/s}^2$ bestimmt, was dem Literaturwert entspricht. <span class="kw">Mögliche Fehlerquellen</span>: Luftwiderstand (vernachlässigt), Reaktionszeit bei der Zeitmessung."</div>
+        </div>
+      </section>
+
+      <!-- Chapter 2: Diagramme -->
+      <section class="chapter" id="m0-ch2" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">02</span>
+          <h2 class="chapter-title">Diagramme</h2>
+        </div>
+        <div class="glass"><p><strong>Track C:</strong> Das s-t-Diagramm des freien Falls zeigt eine Parabel.</p></div>
+        <div class="proj-step reveal">
+          <div style="font-size:0.9rem; font-weight:700; color:#fff; margin-bottom:12px;">s-t-Diagramm: Freier Fall</div>
+          <div class="svg-wrap">
+            <svg viewBox="0 0 260 180" width="260" height="180">
+              <line x1="35" y1="155" x2="240" y2="155" stroke="#5f8a84" stroke-width="1.5"/>
+              <line x1="35" y1="155" x2="35" y2="15" stroke="#5f8a84" stroke-width="1.5"/>
+              <text x="240" y="170" font-size="10" fill="#94b8b4" text-anchor="middle" font-family="'IBM Plex Mono',monospace">t (s)</text>
+              <text x="20" y="18" font-size="10" fill="#94b8b4" text-anchor="middle" font-family="'IBM Plex Mono',monospace">s (m)</text>
+              <line x1="35" y1="153" x2="35" y2="157" stroke="#5f8a84"/><text x="35" y="167" font-size="8" fill="#5f8a84" text-anchor="middle">0</text>
+              <line x1="74" y1="153" x2="74" y2="157" stroke="#5f8a84"/><text x="74" y="167" font-size="8" fill="#5f8a84" text-anchor="middle">0.5</text>
+              <line x1="113" y1="153" x2="113" y2="157" stroke="#5f8a84"/><text x="113" y="167" font-size="8" fill="#5f8a84" text-anchor="middle">1</text>
+              <line x1="152" y1="153" x2="152" y2="157" stroke="#5f8a84"/><text x="152" y="167" font-size="8" fill="#5f8a84" text-anchor="middle">1.5</text>
+              <line x1="191" y1="153" x2="191" y2="157" stroke="#5f8a84"/><text x="191" y="167" font-size="8" fill="#5f8a84" text-anchor="middle">2</text>
+              <line x1="230" y1="153" x2="230" y2="157" stroke="#5f8a84"/><text x="230" y="167" font-size="8" fill="#5f8a84" text-anchor="middle">2.5</text>
+              <line x1="33" y1="155" x2="37" y2="155" stroke="#5f8a84"/><text x="28" y="158" font-size="8" fill="#5f8a84" text-anchor="end">0</text>
+              <line x1="33" y1="130" x2="37" y2="130" stroke="#5f8a84"/><text x="28" y="133" font-size="8" fill="#5f8a84" text-anchor="end">5</text>
+              <line x1="33" y1="105" x2="37" y2="105" stroke="#5f8a84"/><text x="28" y="108" font-size="8" fill="#5f8a84" text-anchor="end">10</text>
+              <line x1="33" y1="80" x2="37" y2="80" stroke="#5f8a84"/><text x="28" y="83" font-size="8" fill="#5f8a84" text-anchor="end">15</text>
+              <line x1="33" y1="55" x2="37" y2="55" stroke="#5f8a84"/><text x="28" y="58" font-size="8" fill="#5f8a84" text-anchor="end">20</text>
+              <line x1="33" y1="30" x2="37" y2="30" stroke="#5f8a84"/><text x="28" y="33" font-size="8" fill="#5f8a84" text-anchor="end">25</text>
+              <path d="M35,155 Q113,120 230,36" fill="none" stroke="#2dd4bf" stroke-width="2.5"/>
+              <circle cx="35" cy="155" r="4" fill="#0d9488"/><circle cx="74" cy="150" r="4" fill="#0d9488"/>
+              <circle cx="113" cy="136" r="4" fill="#0d9488"/><circle cx="152" cy="112" r="4" fill="#0d9488"/>
+              <circle cx="191" cy="78.5" r="4" fill="#0d9488"/><circle cx="230" cy="36" r="4" fill="#0d9488"/>
+              <text x="155" y="60" font-size="9" fill="#2dd4bf" font-weight="700">Parabel!</text>
+            </svg>
+          </div>
+          <p style="font-size:0.82rem; color:var(--ink-dim); margin-top:8px;">Die <strong style="color:var(--ink);">Parabel</strong> zeigt: gleichmäßig beschleunigte Bewegung.</p>
+        </div>
+        <div class="proj-step reveal">
+          <div style="font-size:0.9rem; font-weight:700; color:#fff; margin-bottom:12px;">v-t-Diagramm: Geschwindigkeit beim freien Fall</div>
+          <div class="svg-wrap">
+            <svg viewBox="0 0 260 160" width="260" height="160">
+              <line x1="35" y1="130" x2="240" y2="130" stroke="#5f8a84" stroke-width="1.5"/>
+              <line x1="35" y1="130" x2="35" y2="15" stroke="#5f8a84" stroke-width="1.5"/>
+              <text x="240" y="145" font-size="10" fill="#94b8b4" text-anchor="middle" font-family="'IBM Plex Mono',monospace">t (s)</text>
+              <text x="20" y="18" font-size="10" fill="#94b8b4" text-anchor="middle" font-family="'IBM Plex Mono',monospace">v (m/s)</text>
+              <line x1="35" y1="128" x2="35" y2="132" stroke="#5f8a84"/><text x="35" y="142" font-size="8" fill="#5f8a84" text-anchor="middle">0</text>
+              <line x1="113" y1="128" x2="113" y2="132" stroke="#5f8a84"/><text x="113" y="142" font-size="8" fill="#5f8a84" text-anchor="middle">1</text>
+              <line x1="191" y1="128" x2="191" y2="132" stroke="#5f8a84"/><text x="191" y="142" font-size="8" fill="#5f8a84" text-anchor="middle">2</text>
+              <line x1="33" y1="130" x2="37" y2="130" stroke="#5f8a84"/><text x="28" y="133" font-size="8" fill="#5f8a84" text-anchor="end">0</text>
+              <line x1="33" y1="91" x2="37" y2="91" stroke="#5f8a84"/><text x="28" y="94" font-size="8" fill="#5f8a84" text-anchor="end">10</text>
+              <line x1="33" y1="52" x2="37" y2="52" stroke="#5f8a84"/><text x="28" y="55" font-size="8" fill="#5f8a84" text-anchor="end">20</text>
+              <line x1="35" y1="130" x2="230" y2="22" stroke="#2dd4bf" stroke-width="2.5"/>
+              <text x="150" y="50" font-size="9" fill="#2dd4bf" font-weight="700">Gerade → konst. Beschl.</text>
+            </svg>
+          </div>
+          <p style="font-size:0.82rem; color:var(--ink-dim); margin-top:8px;">Die <strong style="color:var(--ink);">Gerade</strong> im v-t-Diagramm → konstante Beschleunigung $a = g = 9{,}81 \text{ m/s}^2$.</p>
+        </div>
+      </section>
+
+      <!-- Chapter 3: Aufgaben -->
+      <section class="chapter" id="m0-ch3" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">03</span>
+          <h2 class="chapter-title">Aufgaben</h2>
+        </div>
+
+        <!-- Ex 1 -->
+        <div class="exercise-card" id="m0-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Fallstrecke berechnen</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Berechne die Fallstrecke nach $t = 4 \text{ s}$ ($g = 10 \text{ m/s}^2$).</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m0-a1" placeholder="Meter eingeben...">
+              <button class="btn-check" onclick="checkInput(0,1,'m0-a1','m0-fb1','80|80.0|80,0')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h1')">Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h1">$s = \frac{1}{2} \cdot g \cdot t^2 = \frac{1}{2} \cdot 10 \cdot 16 = ?$</div>
+            <div class="fb-block" id="m0-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2 -->
+        <div class="exercise-card" id="m0-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Diagrammtyp</span><span class="ex-tag">Diagramm</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Das s-t-Diagramm des freien Falls zeigt eine ...</p>
+            <div class="opt-pills" id="m0-og2">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a2','gerade')">Gerade durch den Ursprung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a2','parabel')">Parabel ($s \propto t^2$)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a2','horizontal')">Horizontale Linie</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a2','hyperbel')">Hyperbel</button>
+            </div>
+            <input type="hidden" id="m0-a2" value="">
+            <button class="btn-check" onclick="checkMC(0,2,'m0-a2','m0-fb2','parabel')">Prüfen</button>
+            <div class="fb-block" id="m0-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3 -->
+        <div class="exercise-card" id="m0-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Geschwindigkeit</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Nach $t = 3 \text{ s}$ freiem Fall: Wie hoch ist die Geschwindigkeit? ($g = 9{,}81 \text{ m/s}^2$)</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m0-a3" placeholder="Zahl eingeben...">
+              <button class="btn-check" onclick="checkInput(0,3,'m0-a3','m0-fb3','29.43|29.4|29|29.42|29,43|29,4|29,42')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h3')">Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h3">$v = g \cdot t = 9{,}81 \cdot 3 = ?$</div>
+            <div class="fb-block" id="m0-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4 -->
+        <div class="exercise-card" id="m0-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Hypothesenprüfung</span><span class="ex-tag">Analyse</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Die Messung ergibt $s/t^2 \approx 4{,}91 \text{ m/s}^2$. Wie hängt das mit $g$ zusammen?</p>
+            <div class="opt-pills" id="m0-og4">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a4','a')">$s/t^2 = g$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a4','b')">$s/t^2 = 2g$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a4','c')">$s/t^2 = g/2$, also $g \approx 9{,}81$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a4','d')">Kein Zusammenhang</button>
+            </div>
+            <input type="hidden" id="m0-a4" value="">
+            <button class="btn-check" onclick="checkMC(0,4,'m0-a4','m0-fb4','c')">Prüfen</button>
+            <div class="fb-block" id="m0-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5 -->
+        <div class="exercise-card" id="m0-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Fachsprache</span><span class="ex-tag">Sprache</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Welcher Satz beschreibt den freien Fall fachsprachlich korrekt?</p>
+            <div class="opt-pills" id="m0-og5">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','a')">"Der Stein fällt immer schneller."</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','b')">"Der Stein wird von der Erde angezogen."</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','c')">"Im freien Fall beschleunigt der Körper gleichmäßig mit $g$; $s \propto t^2$."</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','d')">"Das ist Gravitation."</button>
+            </div>
+            <input type="hidden" id="m0-a5" value="">
+            <button class="btn-check" onclick="checkMC(0,5,'m0-a5','m0-fb5','c')">Prüfen</button>
+            <div class="fb-block" id="m0-fb5"></div>
+          </div>
+        </div>
+
+        <!-- Extra -->
+        <details class="extra-section">
+          <summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? — Zusätzliche Übungen<span class="extra-count">(2 weitere Aufgaben)</span></summary>
+          <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong> — sie zählen nicht zum Score.</p></div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">$g$ aus Messdaten bestimmen</span><span class="ex-tag extra-tag">Synthese</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Ein Ball wird waagerecht abgeworfen. Vertikale Fallstrecke: $t = 0{,}2\,\text{s} \to y = 0{,}20\,\text{m}$. Berechne $g = 2y/t^2$ (gerundet).</p>
+              <div class="answer-row">
+                <span class="answer-prefix">$g \approx $</span>
+                <input class="answer-input" id="m0-eA1" placeholder="Zahl in m/s²">
+                <button class="btn-check extra-btn" onclick="checkExtra('m0-eA1','m0-eFb1','10|10.0|10,0')">Prüfen</button>
+                <button class="btn-hint" onclick="toggleHint('m0-eH1')">Tipp</button>
+              </div>
+              <div class="hint-box" id="m0-eH1">$g = 2 \cdot 0{,}20 / (0{,}2)^2 = 0{,}40 / 0{,}04 = ?$</div>
+              <div class="fb-block" id="m0-eFb1"></div>
+            </div>
+          </div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Warum gilt $s \propto t^2$?</span><span class="ex-tag extra-tag">Synthese</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Erkläre in 3–4 Sätzen: Warum gilt $s \propto t^2$? Nutze: Beschleunigung, Geschwindigkeit, zurückgelegte Strecke.</p>
+              <textarea class="answer-textarea" rows="4" placeholder="Da der Körper gleichmäßig beschleunigt wird ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m0-sol2')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m0-sol2" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p>Da der Körper gleichmäßig beschleunigt wird ($a = g$), wächst $v$ linear ($v = gt$). Die Strecke ist die Fläche unter dem v-t-Graph (Dreieck), also $s = \frac{1}{2}gt^2$.</p>
+                <div class="extra-rubric"><div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> Gleichmäßige Beschleunigung erklärt</label>
+                  <label><input type="checkbox"> Lineares Wachstum von $v$ erwähnt</label>
+                  <label><input type="checkbox"> Bezug zur Fläche unter dem v-t-Graphen</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <button class="btn-result" onclick="showResult(0)">Ergebnis anzeigen</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2: MODULE E3.2 — Selbstgewähltes Experiment
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-1">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">E3.2 &mdash; Selbstgewähltes Experiment</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div>
+          <span class="nav-progress-text" id="prog-text-1">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">E3.2</div>
+        <h1>Selbstgewähltes Experiment</h1>
+        <p class="hero-sub">Planen · Durchführen · Auswerten · Dokumentieren</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 3</span> Abschluss</div>
+          <div class="meta-chip"><span class="val">45 min</span> Dauer</div>
+        </div>
+        <div class="integration-notice" style="margin-top:32px; justify-content:center; text-align:center; flex-direction:column;">
+          <div class="in-text">Abschluss-Modul – alle 5 Tracks kombiniert</div>
+          <div class="track-pills" style="justify-content:center;">
+            <span class="track-pill" style="background:#4f46e5">A</span>
+            <span class="track-pill" style="background:#15803d">B</span>
+            <span class="track-pill" style="background:#c2410c">C</span>
+            <span class="track-pill" style="background:#9333ea">D</span>
+            <span class="track-pill" style="background:#0d9488">E</span>
+          </div>
+        </div>
+        <div class="glass" style="text-align:left; margin-top:24px;">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:10px;">Kompetenzen</div>
+          <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:8px;">
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst ein selbstgewähltes Experiment planen, durchführen und auswerten</li>
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst die 5-Abschnitte-Struktur komplett selbstständig anwenden</li>
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst das vollständige Physik-Bootcamp-Können in einem Projekt zeigen</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Chapter 1: Experiment-Ideen -->
+      <section class="chapter" id="m1-ch1">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Experiment-Ideen</h2></div>
+        <div class="glass"><p><strong style="color:var(--accent-bright);">Wähle ein Experiment</strong> aus den Vorschlägen oder schlage ein eigenes vor.</p></div>
+        <div class="exp-idea reveal">
+          <h4>&#127936; Fallexperiment mit Ball</h4>
+          <p>Messe, wie lange ein Ball aus verschiedenen Höhen fällt. Bestimme $g$ experimentell.</p>
+          <div class="exp-vars"><span class="var-tag">Variabel: Fallhöhe h</span><span class="var-tag">Gemessen: Fallzeit t</span><span class="var-tag">Formel: s = ½gt²</span></div>
+        </div>
+        <div class="exp-idea reveal">
+          <h4>&#128208; Schiefe Ebene</h4>
+          <p>Lass ein Objekt auf einer schiefen Ebene rollen. Messe Neigungswinkel und Beschleunigung.</p>
+          <div class="exp-vars"><span class="var-tag">Variabel: Winkel α</span><span class="var-tag">Gemessen: Zeit / Weg</span><span class="var-tag">Formel: a = g·sin(α)</span></div>
+        </div>
+        <div class="exp-idea reveal">
+          <h4>&#127754; Pendel</h4>
+          <p>Messe die Periodendauer eines Pendels in Abhängigkeit von der Fadenlänge.</p>
+          <div class="exp-vars"><span class="var-tag">Variabel: Fadenlänge L</span><span class="var-tag">Gemessen: Periodendauer T</span><span class="var-tag">Formel: T = 2π√(L/g)</span></div>
+        </div>
+        <div class="exp-idea reveal">
+          <h4>&#128663; Bremsweg-Messung</h4>
+          <p>Messe den Bremsweg bei verschiedenen Startgeschwindigkeiten.</p>
+          <div class="exp-vars"><span class="var-tag">Variabel: v₀</span><span class="var-tag">Gemessen: Bremsweg s</span><span class="var-tag">Formel: s = v₀²/(2a)</span></div>
+        </div>
+        <div class="exp-idea reveal">
+          <h4>&#128267; Federdehnung</h4>
+          <p>Hänge verschiedene Massen an eine Feder und miss die Dehnung (Hookesches Gesetz).</p>
+          <div class="exp-vars"><span class="var-tag">Variabel: Masse m</span><span class="var-tag">Gemessen: Dehnung x</span><span class="var-tag">Formel: F = D·x</span></div>
+        </div>
+      </section>
+
+      <!-- Chapter 2: Protokoll-Planer -->
+      <section class="chapter" id="m1-ch2" style="margin-top:40px;">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Protokoll-Planer</h2></div>
+        <div class="glass"><p><strong style="color:var(--accent-bright);">Protokoll-Planer</strong> – Fülle alle Felder aus. Nutze Fachsprache und die Wenn-dann-weil-Struktur!</p></div>
+        <div class="planner reveal">
+          <div class="planner-header">&#128196; Mein Experiment-Protokoll</div>
+          <div class="planner-section"><div class="planner-label">1. Fragestellung</div><textarea class="planner-input single-input" style="min-height:50px" placeholder="Wie hängt [Variable A] von [Variable B] ab?"></textarea></div>
+          <div class="planner-section"><div class="planner-label">2. Hypothese (Wenn–dann–weil)</div><textarea class="planner-input" placeholder="Wenn... dann... weil..."></textarea></div>
+          <div class="planner-section"><div class="planner-label">3. Materialien &amp; Durchführung</div><textarea class="planner-input" placeholder="Was brauche ich? Was mache ich?"></textarea></div>
+          <div class="planner-section"><div class="planner-label">4. Messwerte</div><textarea class="planner-input" placeholder="t (s) | s (m) | v (m/s) | ..."></textarea></div>
+          <div class="planner-section"><div class="planner-label">5. Auswertung (Formel + Rechnung)</div><textarea class="planner-input" placeholder="Formel: ... Einsetzen: ... Ergebnis: ..."></textarea></div>
+          <div class="planner-section"><div class="planner-label">6. Schlussfolgerung</div><textarea class="planner-input" placeholder="Die Hypothese wird... weil... Fehlerquellen: ..."></textarea></div>
+        </div>
+        <div class="glass reveal" style="text-align:left;">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:12px;">Selbst-Check</div>
+          <div class="checklist" id="plannerChecklist">
+            <div class="cl-item" onclick="togglePlanCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Fragestellung als Frage formuliert</div></div>
+            <div class="cl-item" onclick="togglePlanCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Hypothese nach Wenn-dann-weil-Schema</div></div>
+            <div class="cl-item" onclick="togglePlanCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Formel korrekt aufgeschrieben mit Einheiten</div></div>
+            <div class="cl-item" onclick="togglePlanCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Rechnung mit Einheiten vollständig</div></div>
+            <div class="cl-item" onclick="togglePlanCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Ergebnis als vollständiger Satz formuliert</div></div>
+            <div class="cl-item" onclick="togglePlanCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Schlussfolgerung mit Hypothesen-Vergleich</div></div>
+            <div class="cl-item" onclick="togglePlanCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Mögliche Fehlerquellen genannt</div></div>
+          </div>
+          <div class="cl-progress"><div class="cl-bar" id="planBar"></div></div>
+          <div id="planCount" style="font-family:var(--mono); font-size:0.75rem; color:var(--ink-dim); text-align:right; margin-top:6px;">0 / 7 erledigt</div>
+        </div>
+      </section>
+
+      <!-- Chapter 3: Aufgaben -->
+      <section class="chapter" id="m1-ch3" style="margin-top:40px;">
+        <div class="chapter-label"><span class="chapter-num">03</span><h2 class="chapter-title">Aufgaben</h2></div>
+
+        <!-- Ex 1 -->
+        <div class="exercise-card" id="m1-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Experiment planen</span><span class="ex-tag">Analyse</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Beim Pendelexperiment wird die Fadenlänge als unabhängige Variable gewählt. Was ist die abhängige Variable?</p>
+            <div class="opt-pills" id="m1-og1">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','a')">Die Masse des Pendels</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','b')">Die Periodendauer $T$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','c')">Die Erdbeschleunigung $g$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a1','d')">Die Amplitude</button>
+            </div>
+            <input type="hidden" id="m1-a1" value="">
+            <button class="btn-check" onclick="checkMC(1,1,'m1-a1','m1-fb1','b')">Prüfen</button>
+            <div class="fb-block" id="m1-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2 -->
+        <div class="exercise-card" id="m1-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Formel auswählen</span><span class="ex-tag">Formeln</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Beim Pendelexperiment mit $L = 1 \text{ m}$, $g = 9{,}81 \text{ m/s}^2$: Welche Formel gilt?</p>
+            <div class="opt-pills" id="m1-og2">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','a')">$T = L \cdot g$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','b')">$T = \sqrt{L \cdot g}$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','c')">$T = 2\pi\sqrt{L/g}$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','d')">$T = g / L$</button>
+            </div>
+            <input type="hidden" id="m1-a2" value="">
+            <button class="btn-check" onclick="checkMC(1,2,'m1-a2','m1-fb2','c')">Prüfen</button>
+            <div class="fb-block" id="m1-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3 -->
+        <div class="exercise-card" id="m1-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Periodendauer berechnen</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Berechne die Periodendauer eines Pendels der Länge $L = 1 \text{ m}$ ($g = 9{,}81 \text{ m/s}^2$, $\pi \approx 3{,}14$).</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m1-a3" placeholder="Sekunden eingeben...">
+              <button class="btn-check" onclick="checkInput(1,3,'m1-a3','m1-fb3','2.0|2|2.01|2.00|2,01|2,0|2,00')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h3')">Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h3">$T = 2\pi\sqrt{1/9{,}81} = 2 \cdot 3{,}14 \cdot 0{,}319 \approx 2{,}00 \text{ s}$</div>
+            <div class="fb-block" id="m1-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4 -->
+        <div class="exercise-card" id="m1-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Protokoll-Struktur</span><span class="ex-tag">Sprache</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Welche Elemente gehören in ein vollständiges Physik-Protokoll?</p>
+            <div class="opt-pills" id="m1-og4">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a4','a')">Name, Klasse und Datum</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a4','b')">Nur die Messwerte</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a4','c')">Fragestellung, Hypothese, Durchführung, Auswertung, Schlussfolgerung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a4','d')">Formel und Ergebnis</button>
+            </div>
+            <input type="hidden" id="m1-a4" value="">
+            <button class="btn-check" onclick="checkMC(1,4,'m1-a4','m1-fb4','c')">Prüfen</button>
+            <div class="fb-block" id="m1-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5 -->
+        <div class="exercise-card" id="m1-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Fehlerquellen</span><span class="ex-tag">Analyse</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Was ist beim Pendelexperiment eine realistische Fehlerquelle?</p>
+            <div class="opt-pills" id="m1-og5">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','a')">Die Farbe des Fadens</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','b')">Reaktionszeit beim Stoppen; Messfehler Fadenlänge</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','c')">Das Wetter</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a5','d')">Die Marke der Stoppuhr</button>
+            </div>
+            <input type="hidden" id="m1-a5" value="">
+            <button class="btn-check" onclick="checkMC(1,5,'m1-a5','m1-fb5','b')">Prüfen</button>
+            <div class="fb-block" id="m1-fb5"></div>
+          </div>
+        </div>
+
+        <!-- Extra -->
+        <details class="extra-section">
+          <summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? — Zusätzliche Übungen<span class="extra-count">(3 weitere Aufgaben)</span></summary>
+          <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong> — sie zählen nicht zum Score.</p></div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Protokoll-Abschnitte zuordnen</span><span class="ex-tag extra-tag">Synthese</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Welcher Abschnitt passt zur Aussage: <em>&bdquo;Die Messung bestätigt $T = 2\pi\sqrt{L/g}$: Bei $L = 1\,\text{m}$ ist $T \approx 2\,\text{s}$.&ldquo;</em><br>Tippe: <code>Fragestellung</code>, <code>Hypothese</code> oder <code>Schlussfolgerung</code></p>
+              <div class="answer-row">
+                <input class="answer-input" id="m1-eA1" placeholder="Abschnitt eingeben">
+                <button class="btn-check extra-btn" onclick="checkExtra('m1-eA1','m1-eFb1','schlussfolgerung|Schlussfolgerung')">Prüfen</button>
+                <button class="btn-hint" onclick="toggleHint('m1-eH1')">Tipp</button>
+              </div>
+              <div class="hint-box" id="m1-eH1">Schlussfolgerung = Was hat die Messung gezeigt?</div>
+              <div class="fb-block" id="m1-eFb1"></div>
+            </div>
+          </div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Pendel-Periodendauer berechnen</span><span class="ex-tag extra-tag">Synthese</span></div>
+            <div class="ex-body">
+              <p class="ex-question">$L = 0{,}25\,\text{m}$, $g = 9{,}81\,\text{m/s}^2$. Berechne $T = 2\pi\sqrt{L/g}$ (2 Dezimalstellen).</p>
+              <div class="answer-row">
+                <span class="answer-prefix">$T = $</span>
+                <input class="answer-input" id="m1-eA2" placeholder="Zahl in s">
+                <button class="btn-check extra-btn" onclick="checkExtra('m1-eA2','m1-eFb2','1.0|1,0|1.00|1,00|1')">Prüfen</button>
+                <button class="btn-hint" onclick="toggleHint('m1-eH2')">Tipp</button>
+              </div>
+              <div class="hint-box" id="m1-eH2">$\sqrt{0{,}25/9{,}81} \approx 0{,}16$. Dann $T = 2\pi \cdot 0{,}16 \approx 1{,}00\,\text{s}$.</div>
+              <div class="fb-block" id="m1-eFb2"></div>
+            </div>
+          </div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+3</span><span class="ex-title">Schlussfolgerung formulieren</span><span class="ex-tag extra-tag">Synthese</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Das Pendel-Experiment ergibt: Je länger der Faden, desto größer die Periodendauer. Schreibe eine fachsprachliche Schlussfolgerung mit Formel und Diagrammtyp.</p>
+              <textarea class="answer-textarea" rows="3" placeholder="Die Messung zeigt ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m1-sol3')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m1-sol3" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p>Die Messung zeigt: Je länger der Faden, desto größer die Periodendauer, gemäß $T = 2\pi\sqrt{L/g}$ (Wurzelkurve im $T$-$L$-Diagramm). $T \propto \sqrt{L}$.</p>
+                <div class="extra-rubric"><div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> Formel $T = 2\pi\sqrt{L/g}$ erwähnt</label>
+                  <label><input type="checkbox"> Diagrammtyp korrekt (Wurzelkurve)</label>
+                  <label><input type="checkbox"> Grammatikalisch vollständiger Satz</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+
+        <button class="btn-result" onclick="showResult(1)">Ergebnis anzeigen</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════ -->
+<script>
+/* ────────────────────────────────────────────
+   STATE
+   ──────────────────────────────────────────── */
+const MODULE_EX_COUNTS = [5, 5];
+const NUM_MODULES = 2;
+let moduleStates = [false, false];
+let exerciseStates = {};
+
+/* ────────────────────────────────────────────
+   SCORM 1.2 API
+   ──────────────────────────────────────────── */
+const SCORM = (() => {
+  let api = null, initialized = false;
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) win = win.parent;
+      else if (win.opener) win = win.opener;
+      else break;
+    }
+    return win ? win.API : null;
+  }
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.moduleStates) moduleStates = saved.moduleStates;
+            if (saved.exerciseStates) exerciseStates = saved.exerciseStates;
+          } catch(e) {}
+        }
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
+        }
+      }
+    } catch(e) { console.log('SCORM init:', e); }
+  }
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ moduleStates, exerciseStates }));
+      let total = 0, solved = 0;
+      for (const key in exerciseStates) { total++; if (exerciseStates[key]) solved++; }
+      const score = total > 0 ? Math.round((solved / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+      if (moduleStates.every(s => s)) api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      api.LMSCommit('');
+    } catch(e) { console.log('SCORM save:', e); }
+  }
+  function finish() {
+    if (!api || !initialized) return;
+    try { save(); api.LMSFinish(''); } catch(e) {}
+  }
+  return { init, save, finish };
+})();
+
+/* ────────────────────────────────────────────
+   SCREEN NAVIGATION
+   ──────────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(id);
+  if (s) s.classList.add('active');
+  window.scrollTo(0, 0);
+  const canvas = document.getElementById('bg-canvas');
+  if (id === 'screen-landing') {
+    canvas.classList.remove('dimmed', 'hidden');
+    if (!animId) startAnim();
+  } else {
+    canvas.classList.add('hidden');
+    if (animId) { cancelAnimationFrame(animId); animId = null; }
+  }
+}
+
+function openModule(idx) {
+  showScreen('screen-mod-' + idx);
+  restoreModuleState(idx);
+  document.querySelectorAll('#screen-mod-' + idx + ' .reveal').forEach(el => revealObserver.observe(el));
+  setTimeout(() => MathJax?.typesetPromise?.(), 100);
+}
+
+function goLanding() {
+  showScreen('screen-landing');
+  updateLanding();
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   EXERCISE SYSTEM
+   ──────────────────────────────────────────── */
+function normalize(v) {
+  return v.trim().replace(/\s+/g, '').toLowerCase()
+    .replace(/,/g, '.').replace(/\u00d7/g, '*').replace(/\u00b7/g, '*').replace(/\u00f7/g, '/').replace(/\u22c5/g, '*');
+}
+
+function selOpt(btn, hiddenId, val) {
+  btn.closest('.opt-pills').querySelectorAll('.opt-pill').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById(hiddenId).value = val;
+}
+
+function checkMC(mod, ex, inputId, fbId, correctVal) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = document.getElementById(inputId).value;
+  if (!val) return;
+  const fb = document.getElementById(fbId);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+  if (val === correctVal) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Nicht ganz – versuche es nochmal.';
+    card.classList.add('wrong-state');
+  }
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function checkInput(mod, ex, inputId, fbId, patterns) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = normalize(document.getElementById(inputId).value);
+  if (!val) return;
+  const accepted = patterns.split('|').map(normalize);
+  const correct = accepted.some(p => val === p);
+  const fb = document.getElementById(fbId);
+  const inp = document.getElementById(inputId);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+  if (correct) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    inp.className = 'answer-input correct';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Noch nicht ganz – schau dir den Tipp an.';
+    inp.className = 'answer-input incorrect';
+    card.classList.add('wrong-state');
+  }
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function checkExtra(inputId, fbId, patterns) {
+  const inp = document.getElementById(inputId);
+  const fb = document.getElementById(fbId);
+  if (!inp || !fb) return;
+  const val = normalize(inp.value);
+  if (!val) return;
+  const ok = patterns.split('|').some(p => normalize(p) === val);
+  if (ok) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    inp.className = 'answer-input correct';
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Noch nicht ganz.';
+    inp.className = 'answer-input incorrect';
+  }
+  MathJax?.typesetPromise?.([fb]);
+}
+
+function toggleHint(id) { document.getElementById(id).classList.toggle('open'); }
+
+function toggleSolution(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+}
+
+/* ────────────────────────────────────────────
+   PLANNER CHECKLIST (E3.2)
+   ──────────────────────────────────────────── */
+function togglePlanCheck(item) {
+  item.classList.toggle('checked');
+  const checked = document.querySelectorAll('#plannerChecklist .cl-item.checked').length;
+  document.getElementById('planBar').style.width = (checked / 7 * 100) + '%';
+  document.getElementById('planCount').textContent = checked + ' / 7 erledigt';
+}
+
+/* ────────────────────────────────────────────
+   PROGRESS TRACKING
+   ──────────────────────────────────────────── */
+function updateModuleProgress(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const pct = (solved / total) * 100;
+  const fill = document.getElementById('prog-fill-' + mod);
+  const text = document.getElementById('prog-text-' + mod);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = solved + ' / ' + total;
+  if (solved === total) moduleStates[mod] = true;
+}
+
+function updateLanding() {
+  const completedCount = moduleStates.filter(Boolean).length;
+  const opFill = document.getElementById('opFill');
+  const opLabel = document.getElementById('opLabel');
+  if (opFill) opFill.style.width = (completedCount / NUM_MODULES * 100) + '%';
+  if (opLabel) opLabel.textContent = completedCount + ' / ' + NUM_MODULES + ' Module';
+  for (let i = 0; i < NUM_MODULES; i++) {
+    const card = document.getElementById('card-' + i);
+    const status = document.getElementById('status-' + i);
+    if (moduleStates[i]) {
+      card.classList.add('completed');
+      status.textContent = 'Erledigt';
+      status.classList.add('done');
+    } else {
+      card.classList.remove('completed');
+      let started = false;
+      for (let e = 1; e <= MODULE_EX_COUNTS[i]; e++) {
+        if (exerciseStates[i + '-' + e]) { started = true; break; }
+      }
+      status.textContent = started ? 'Angefangen' : 'Starten';
+      status.classList.remove('done');
+    }
+  }
+}
+
+function restoreModuleState(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) {
+      const card = document.getElementById('m' + mod + '-ex' + i);
+      const fb = document.getElementById('m' + mod + '-fb' + i);
+      if (card) card.classList.add('solved');
+      if (fb) { fb.className = 'fb-block correct'; fb.innerHTML = '&#10003; Richtig!'; }
+    }
+  }
+  updateModuleProgress(mod);
+}
+
+function showResult(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const modNames = ['E3.1', 'E3.2'];
+  let msg;
+  if (solved === total) {
+    msg = 'Modul ' + modNames[mod] + ' abgeschlossen! Alle ' + total + ' Aufgaben richtig.';
+    moduleStates[mod] = true;
+  } else if (solved === 0) {
+    msg = 'Noch keine Aufgabe gelöst. Versuche es!';
+  } else {
+    msg = solved + ' von ' + total + ' Aufgaben richtig. Weiter so!';
+  }
+  alert(msg);
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   SCROLL REVEAL
+   ──────────────────────────────────────────── */
+const revealObserver = new IntersectionObserver((entries) => {
+  entries.forEach(e => { if (e.isIntersecting) e.target.classList.add('visible'); });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+/* ────────────────────────────────────────────
+   ANIMATED BACKGROUND (WebGL teal flow shader)
+   ──────────────────────────────────────────── */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const gl = canvas.getContext('webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+  const fs = `
+precision mediump float;
+uniform vec2 iRes;
+uniform float iTime;
+float hash(vec2 p){return fract(sin(dot(p,vec2(127.1,311.7)))*43758.5453);}
+float noise(vec2 p){vec2 i=floor(p);vec2 f=fract(p);vec2 u=f*f*(3.0-2.0*f);return mix(mix(hash(i),hash(i+vec2(1,0)),u.x),mix(hash(i+vec2(0,1)),hash(i+vec2(1,1)),u.x),u.y);}
+void main(){
+  vec2 uv=gl_FragCoord.xy/iRes.xy;
+  float t=iTime*0.25;
+  float n1=noise(uv*3.0+vec2(t*0.7,t*0.5));
+  float n2=noise(uv*5.0-vec2(t*0.4,t*0.3)+n1*0.5);
+  float n3=noise(uv*2.0+vec2(t*0.3,-t*0.6)+n2*0.3);
+  float flow=n1*0.5+n2*0.3+n3*0.2;
+  vec3 deep=vec3(0.03,0.10,0.09);
+  vec3 mid=vec3(0.05,0.32,0.29);
+  vec3 bright=vec3(0.10,0.50,0.44);
+  vec3 col=mix(deep,mid,flow*0.9);
+  col=mix(col,bright,max(0.0,flow-0.55)*1.8*0.4);
+  gl_FragColor=vec4(col,1.0);
+}`;
+  function compileShader(src,type){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  const prog=gl.createProgram();
+  gl.attachShader(prog,compileShader(vs,gl.VERTEX_SHADER));
+  gl.attachShader(prog,compileShader(fs,gl.FRAGMENT_SHADER));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const pLoc=gl.getAttribLocation(prog,'p');
+  gl.enableVertexAttribArray(pLoc);gl.vertexAttribPointer(pLoc,2,gl.FLOAT,false,0,0);
+  const uTime=gl.getUniformLocation(prog,'iTime');
+  const uRes=gl.getUniformLocation(prog,'iRes');
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;gl.viewport(0,0,canvas.width,canvas.height);}
+  function draw(t){gl.uniform1f(uTime,t*0.001);gl.uniform2f(uRes,canvas.width,canvas.height);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(draw);}
+  window.addEventListener('resize',resize);resize();requestAnimationFrame(draw);
+})();
+
+/* ────────────────────────────────────────────
+   INIT
+   ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  SCORM.init();
+  updateLanding();
+});
+window.addEventListener('beforeunload', () => {
+  SCORM.finish();
+});
+</script>
+</body>
+</html>

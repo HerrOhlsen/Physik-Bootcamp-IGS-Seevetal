@@ -1,0 +1,2474 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Track D1 — Fachsprache der Physik | Physik Bootcamp</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' },
+  startup: { typeset: false }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #7777a0;
+
+  --accent: #9333ea;
+  --accent-bright: #c084fc;
+  --accent-glow: rgba(147, 51, 234, 0.35);
+  --accent-deep: #7e22ce;
+  --accent-subtle: rgba(147, 51, 234, 0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-glow: rgba(52, 211, 153, 0.25);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(147, 51, 234, 0.15);
+  --border-strong: rgba(147, 51, 234, 0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-full: 100px;
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+input, textarea, select { font-size: 16px; }
+button, [onclick] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ══════════════════════════════════════════
+   RAINING LETTERS CANVAS
+   ══════════════════════════════════════════ */
+#rain-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+#rain-canvas.dimmed { opacity: 0.15; }
+#rain-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREEN SYSTEM
+   ══════════════════════════════════════════ */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.screen.active {
+  display: block;
+  animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   LANDING PAGE
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+}
+
+.landing-header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(126, 34, 206, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: var(--r-full);
+  margin-bottom: 24px;
+}
+
+.scramble-title {
+  font-family: var(--mono);
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  color: #fff;
+  min-height: 1.2em;
+  letter-spacing: -0.02em;
+}
+.scramble-title .dud {
+  color: #00ff00;
+  text-shadow: 0 0 8px rgba(0, 255, 0, 0.5);
+  opacity: 0.7;
+}
+
+.landing-sub {
+  color: var(--ink-muted);
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 480px;
+  margin: 16px auto 20px;
+  line-height: 1.6;
+}
+
+.landing-meta {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.l-meta {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+.l-meta .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* Overall progress */
+.overall-progress {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+.op-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.op-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.op-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), #e879f9);
+  border-radius: var(--r-full);
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.op-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Module cards grid */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 920px;
+}
+
+.mod-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.mod-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--r-lg);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+.mod-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--glow);
+}
+.mod-card:hover::before { opacity: 1; }
+
+.mod-card.completed {
+  border-color: var(--ok-border);
+}
+.mod-card.completed::after {
+  content: '\2713';
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0c0c1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.mc-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.mc-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.mc-desc {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.mc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mc-time {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+}
+.mc-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--accent-subtle);
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+.mc-status.done {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: var(--ok-border);
+}
+
+.mod-card:nth-child(1) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+.mod-card:nth-child(2) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+.mod-card:nth-child(3) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+
+/* Footer */
+.landing-footer {
+  margin-top: 48px;
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  color: var(--ink-dim);
+  letter-spacing: 0.08em;
+  animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.9s both;
+}
+
+/* ══════════════════════════════════════════
+   MODULE PAGE LAYOUT
+   ══════════════════════════════════════════ */
+.module-page {
+  background: var(--bg-deep);
+  position: relative;
+}
+.module-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(147,51,234,0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Top navbar */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+}
+.top-nav-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+}
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.nav-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-progress {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.nav-progress-track {
+  width: 80px;
+  height: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.nav-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  border-radius: var(--r-full);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-progress-text {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Module content area */
+.mod-content {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px 100px;
+}
+
+/* ══════════════════════════════════════════
+   HERO
+   ══════════════════════════════════════════ */
+.hero {
+  padding: 52px 0 36px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  margin-bottom: 18px;
+  border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero-sub {
+  color: var(--ink-muted);
+  font-size: 1rem;
+  max-width: 480px;
+  margin: 0 auto 20px;
+}
+.hero-meta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.meta-chip {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+.meta-chip .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* ══════════════════════════════════════════
+   CHAPTER
+   ══════════════════════════════════════════ */
+.chapter {
+  margin-top: 52px;
+  scroll-margin-top: 72px;
+}
+.chapter.locked {
+  display: block;
+  height: 0;
+  overflow: hidden;
+  opacity: 0;
+  pointer-events: none;
+  margin: 0;
+  padding: 0;
+}
+.chapter.unlocking {
+  height: auto;
+  overflow: visible;
+  pointer-events: auto;
+  animation: chapterUnlock 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
+@keyframes chapterUnlock {
+  from { opacity: 0; transform: translateY(40px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.chapter-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.chapter-num {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: var(--accent-subtle);
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border);
+}
+.chapter-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+/* ══════════════════════════════════════════
+   GLASS CARD
+   ══════════════════════════════════════════ */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: border-color 0.3s;
+}
+.glass:hover { border-color: var(--border-strong); }
+.glass p { color: var(--ink); }
+.glass p + p { margin-top: 10px; }
+.glass strong { color: #fff; font-weight: 700; }
+
+/* ══════════════════════════════════════════
+   INFO BOX
+   ══════════════════════════════════════════ */
+.info-box {
+  background: rgba(147, 51, 234, 0.08);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  margin-bottom: 16px;
+}
+.info-box h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+  margin-bottom: 8px;
+}
+.info-box p {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.6;
+}
+
+/* ══════════════════════════════════════════
+   FLASHCARD
+   ══════════════════════════════════════════ */
+.flashcard-section { margin-bottom: 24px; }
+.fc-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 14px;
+}
+.fc-header h3 {
+  font-size: 1rem;
+  font-weight: 700;
+  color: #fff;
+}
+.fc-counter {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent-bright);
+  background: rgba(147, 51, 234, 0.15);
+  padding: 4px 12px;
+  border-radius: 100px;
+  border: 1px solid var(--border);
+}
+.flashcard-area {
+  perspective: 1200px;
+  margin: 0 auto 14px;
+  max-width: 520px;
+}
+.flashcard {
+  width: 100%;
+  height: 180px;
+  cursor: pointer;
+  position: relative;
+  border-radius: var(--r-lg);
+  user-select: none;
+}
+.flashcard-inner {
+  width: 100%;
+  height: 100%;
+  transition: transform 0.5s;
+  transform-style: preserve-3d;
+  position: relative;
+}
+.flashcard.flipped .flashcard-inner { transform: rotateY(180deg); }
+.fc-front, .fc-back {
+  position: absolute;
+  width: 100%;
+  height: 100%;
+  backface-visibility: hidden;
+  -webkit-backface-visibility: hidden;
+  border-radius: var(--r-lg);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+  text-align: center;
+}
+.fc-front {
+  background: var(--bg-surface);
+  border: 2px solid var(--accent);
+  box-shadow: var(--glow);
+}
+.fc-back {
+  background: linear-gradient(135deg, var(--accent-deep) 0%, var(--accent) 100%);
+  color: #fff;
+  transform: rotateY(180deg);
+  border: 2px solid var(--accent-bright);
+}
+.fc-term {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: var(--accent-bright);
+  margin-bottom: 6px;
+}
+.fc-symbol {
+  font-size: 0.95rem;
+  color: var(--accent-bright);
+  background: rgba(147, 51, 234, 0.2);
+  padding: 3px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.fc-hint-text {
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+  margin-top: 10px;
+}
+.fc-def {
+  font-size: 0.95rem;
+  font-weight: 600;
+  line-height: 1.5;
+  margin-bottom: 8px;
+}
+.fc-einheit {
+  font-size: 0.85rem;
+  background: rgba(255,255,255,0.2);
+  padding: 3px 12px;
+  border-radius: var(--r-sm);
+}
+.fc-controls {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 12px;
+  max-width: 520px;
+  margin: 0 auto;
+}
+.fc-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--accent-bright);
+  padding: 8px 20px;
+  border-radius: var(--r-md);
+  font-family: var(--font);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.fc-btn:hover { background: var(--accent-deep); border-color: var(--accent); color: #fff; }
+.fc-btn:disabled { opacity: 0.3; cursor: not-allowed; }
+.fc-flip-btn {
+  background: var(--accent-deep);
+  border: 1px solid var(--accent);
+  color: #fff;
+  padding: 8px 22px;
+  border-radius: var(--r-md);
+  font-family: var(--font);
+  font-weight: 600;
+  cursor: pointer;
+  font-size: 0.85rem;
+  transition: all 0.2s;
+}
+.fc-flip-btn:hover { background: var(--accent); }
+.fc-progress-dots { display: flex; gap: 6px; align-items: center; }
+.fc-dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--ink-dim);
+  transition: all 0.2s;
+}
+.fc-dot.active { background: var(--accent); box-shadow: 0 0 8px var(--accent-glow); }
+.fc-dot.done { background: var(--accent-bright); opacity: 0.6; }
+
+/* ══════════════════════════════════════════
+   EXERCISE CARDS
+   ══════════════════════════════════════════ */
+.exercise-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  overflow: visible;
+  margin-bottom: 20px;
+  transition: all 0.3s;
+}
+.exercise-card.solved { border-color: var(--ok); box-shadow: 0 0 20px var(--ok-glow); }
+.exercise-card.wrong-state { border-color: var(--err); }
+.ex-header {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 14px 20px;
+  border-bottom: 1px solid var(--border);
+  background: var(--bg-card);
+  border-radius: var(--r-lg) var(--r-lg) 0 0;
+}
+.ex-num {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  color: var(--bg-deep);
+  background: var(--accent);
+  width: 26px;
+  height: 26px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 50%;
+}
+.ex-title {
+  flex: 1;
+  font-weight: 600;
+  font-size: 0.9rem;
+}
+.ex-tag {
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--ink-dim);
+  background: var(--bg-deep);
+  padding: 2px 8px;
+  border-radius: 100px;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+}
+.ex-body { padding: 20px; }
+.ex-question {
+  color: var(--ink);
+  margin-bottom: 16px;
+  line-height: 1.6;
+}
+.scenario-box {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+  line-height: 1.6;
+}
+
+/* MC Options */
+.mc-options {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+.mc-opt {
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  cursor: pointer;
+  font-family: var(--font);
+  font-size: 0.88rem;
+  color: var(--ink);
+  transition: all 0.2s;
+  text-align: left;
+  line-height: 1.5;
+}
+.mc-opt:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.mc-opt.selected-correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); font-weight: 600; }
+.mc-opt.selected-wrong { background: var(--err-bg); border-color: var(--err); color: var(--err); }
+.mc-opt.reveal-correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.mc-opt:disabled { cursor: default; }
+
+/* Wrong sentence highlight */
+.wrong-sentence {
+  background: var(--err-bg);
+  border: 1px solid var(--err-border);
+  border-radius: var(--r-md);
+  padding: 12px 16px;
+  font-size: 0.93rem;
+  color: var(--err);
+  margin-bottom: 14px;
+  font-style: italic;
+}
+
+/* Answer row */
+.answer-row {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  flex-wrap: wrap;
+}
+.answer-input {
+  flex: 1;
+  min-width: 160px;
+  padding: 10px 14px;
+  background: var(--bg-deep);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 1rem;
+  outline: none;
+  transition: all 0.2s;
+}
+.answer-input::placeholder { color: var(--ink-dim); }
+.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.answer-input.correct { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.answer-input.incorrect { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+
+/* Buttons */
+.btn-check {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 18px;
+  background: var(--accent-deep);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  white-space: nowrap;
+}
+.btn-check:hover { background: var(--accent); transform: translateY(-1px); }
+.btn-check:active { transform: scale(0.97); }
+.btn-hint {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 14px;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.8rem;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.btn-hint:hover { border-color: var(--warn); color: var(--warn); }
+
+/* Hint */
+.hint-box {
+  display: none;
+  margin-top: 12px;
+  padding: 12px 16px;
+  background: var(--warn-bg);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: var(--r-md);
+  font-size: 0.85rem;
+  color: var(--warn);
+  animation: slideIn 0.2s ease;
+}
+.hint-box.open { display: block; }
+
+/* Feedback */
+.fb-block {
+  margin-top: 12px;
+  padding: 10px 14px;
+  border-radius: var(--r-md);
+  font-size: 0.85rem;
+  display: none;
+  animation: slideIn 0.2s ease;
+}
+.fb-block.correct {
+  display: block;
+  background: var(--ok-bg);
+  color: var(--ok);
+  border: 1px solid var(--ok-border);
+}
+.fb-block.incorrect {
+  display: block;
+  background: var(--err-bg);
+  color: var(--err);
+  border: 1px solid var(--err-border);
+}
+
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+
+/* ══════════════════════════════════════════
+   COMPARE PAIRS (D1.2)
+   ══════════════════════════════════════════ */
+.compare-pair {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+.cp-header {
+  background: var(--bg-card);
+  padding: 10px 18px;
+  border-bottom: 1px solid var(--border);
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+}
+.cp-body {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+}
+.cp-wrong {
+  background: var(--err-bg);
+  border-right: 1px solid var(--border);
+  padding: 14px 18px;
+}
+.cp-correct {
+  background: var(--ok-bg);
+  padding: 14px 18px;
+}
+.cp-label {
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  margin-bottom: 6px;
+}
+.cp-wrong .cp-label { color: var(--err); }
+.cp-correct .cp-label { color: var(--ok); }
+.cp-text { font-size: 0.9rem; line-height: 1.5; }
+.cp-wrong .cp-text { color: #fca5a5; }
+.cp-correct .cp-text { color: #6ee7b7; }
+.cp-reason {
+  background: rgba(147, 51, 234, 0.08);
+  border-top: 1px solid var(--border);
+  padding: 12px 18px;
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  grid-column: 1 / -1;
+}
+.cp-reason strong { color: var(--accent-bright); }
+@media (max-width: 500px) {
+  .cp-body { grid-template-columns: 1fr; }
+  .cp-wrong { border-right: none; border-bottom: 1px solid var(--border); }
+}
+
+/* ══════════════════════════════════════════
+   SATZMUSTER CARDS (D1.3)
+   ══════════════════════════════════════════ */
+.muster-group { margin-bottom: 28px; }
+.muster-group-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 14px;
+  padding-bottom: 8px;
+  border-bottom: 1px solid var(--border-strong);
+}
+.muster-group-header h3 {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: var(--accent-bright);
+}
+.muster-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 16px 18px;
+  margin-bottom: 10px;
+  transition: border-color 0.3s;
+}
+.muster-card:hover { border-color: var(--border-strong); }
+.mc-label-m {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.08em;
+  color: var(--accent);
+  margin-bottom: 8px;
+}
+.mc-template {
+  background: var(--bg-card);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  font-size: 0.9rem;
+  color: var(--ink);
+  line-height: 1.7;
+  margin-bottom: 8px;
+  border-left: 3px solid var(--accent);
+}
+.mc-fill {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-style: italic;
+}
+.mc-example {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  font-style: italic;
+  padding-left: 4px;
+}
+
+/* ══════════════════════════════════════════
+   GLOSSAR (D1.1)
+   ══════════════════════════════════════════ */
+.glossar-search {
+  width: 100%;
+  padding: 10px 16px;
+  background: var(--bg-deep);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--font);
+  font-size: 0.93rem;
+  margin-bottom: 14px;
+  outline: none;
+}
+.glossar-search::placeholder { color: var(--ink-dim); }
+.glossar-search:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.cat-filter {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+  margin-bottom: 14px;
+}
+.cat-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  padding: 5px 14px;
+  border-radius: 100px;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.cat-btn:hover, .cat-btn.active {
+  background: var(--accent-deep);
+  color: #fff;
+  border-color: var(--accent);
+}
+.glossar-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  gap: 10px;
+}
+.glossar-item {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 14px 16px;
+  transition: border-color 0.2s;
+}
+.glossar-item:hover { border-color: var(--accent); box-shadow: var(--glow); }
+.gi-header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 6px;
+}
+.gi-term { font-weight: 700; color: var(--accent-bright); font-size: 0.95rem; }
+.gi-symbol {
+  font-size: 0.78rem;
+  background: rgba(147, 51, 234, 0.15);
+  color: var(--accent-bright);
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+.gi-def { font-size: 0.83rem; color: var(--ink-muted); line-height: 1.5; margin-bottom: 6px; }
+.gi-einheit {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-dim);
+  background: var(--bg-deep);
+  padding: 2px 8px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+  display: inline-block;
+}
+.gi-cat { font-size: 0.72rem; color: var(--ink-dim); margin-top: 4px; font-style: italic; }
+
+/* ══════════════════════════════════════════
+   AVOID BOX (D1.2)
+   ══════════════════════════════════════════ */
+.avoid-box {
+  background: rgba(147, 51, 234, 0.06);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 18px 20px;
+  margin-top: 16px;
+}
+.avoid-box h4 {
+  font-size: 0.85rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+  margin-bottom: 10px;
+}
+.avoid-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  font-size: 0.85rem;
+}
+.avoid-col {
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+}
+.avoid-col.bad { background: var(--err-bg); color: var(--err); }
+.avoid-col.good { background: var(--ok-bg); color: var(--ok); }
+.avoid-col strong { display: block; margin-bottom: 4px; }
+
+/* ══════════════════════════════════════════
+   CHECKLIST (D1.3)
+   ══════════════════════════════════════════ */
+.checklist-progress {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 14px 18px;
+  margin-bottom: 16px;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+.cl-score {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+}
+.cl-bar-wrap {
+  background: var(--bg-elevated);
+  border-radius: 100px;
+  height: 4px;
+  width: 140px;
+}
+.cl-bar {
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  border-radius: 100px;
+  height: 4px;
+  width: 0;
+  transition: width 0.4s;
+}
+.check-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 12px 14px;
+  margin-bottom: 8px;
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.check-item:hover { border-color: var(--border-strong); }
+.check-item.checked { background: var(--ok-bg); border-color: var(--ok-border); }
+.check-box {
+  width: 20px; height: 20px;
+  border: 2px solid var(--ink-dim);
+  border-radius: 4px;
+  flex-shrink: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-top: 2px;
+  transition: all 0.2s;
+  font-size: 0.85rem;
+  color: transparent;
+}
+.check-item.checked .check-box {
+  background: var(--ok);
+  border-color: var(--ok);
+  color: #fff;
+}
+.check-text {
+  font-size: 0.88rem;
+  color: var(--ink-muted);
+  line-height: 1.5;
+}
+.check-item.checked .check-text { color: var(--ok); }
+
+/* ══════════════════════════════════════════
+   EXTRA SECTION
+   ══════════════════════════════════════════ */
+.extra-section {
+  margin-top: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+.extra-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; cursor: pointer;
+  font-size: 0.92rem; font-weight: 600; color: var(--ink-muted);
+  list-style: none; transition: background 0.2s, color 0.2s; user-select: none;
+}
+.extra-toggle::-webkit-details-marker { display: none; }
+.extra-section[open] .extra-toggle { color: var(--ink); background: var(--bg-card); border-bottom: 1px solid var(--border); }
+.extra-icon {
+  font-size: 1.1rem; font-weight: 700; color: var(--accent);
+  transition: transform 0.2s; display: inline-block; width: 18px; text-align: center;
+}
+.extra-section[open] .extra-icon { transform: rotate(45deg); }
+.extra-count { font-size: 0.78rem; font-weight: 400; color: var(--ink-dim); margin-left: auto; }
+.extra-intro { padding: 12px 20px 4px; font-size: 0.85rem; color: var(--ink-muted); border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.extra-card { border-left: 3px solid var(--accent-deep); opacity: 0.95; }
+.extra-card .ex-num { background: var(--accent-deep); }
+.extra-tag { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+.extra-btn { background: var(--bg-card); border: 1px solid var(--border-strong); color: var(--ink-muted); }
+.extra-btn:hover { background: var(--accent-deep); color: var(--ink); }
+.solution-box { margin-top: 12px; padding: 14px 16px; background: var(--bg-elevated); border: 1px solid var(--border); border-radius: var(--r-sm); font-size: 0.88rem; color: var(--ink-muted); }
+.solution-title { font-weight: 700; color: var(--accent-bright); margin-bottom: 8px; font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; }
+.rubric { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.rubric-title { font-size: 0.78rem; color: var(--ink-dim); margin-bottom: 6px; }
+.rubric label { display: flex; align-items: center; gap: 8px; font-size: 0.83rem; color: var(--ink-muted); margin-bottom: 4px; cursor: pointer; }
+.answer-textarea { width: 100%; min-height: 80px; padding: 10px 14px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-sm); color: var(--ink); font-family: var(--font); font-size: 0.9rem; resize: vertical; margin-top: 10px; }
+.answer-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* ══════════════════════════════════════════
+   KI Feedback
+   ══════════════════════════════════════════ */
+.loading .spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--accent-bright);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+  margin-right: 8px; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* ══════════════════════════════════════════
+   MODAL
+   ══════════════════════════════════════════ */
+.modal-overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,0.7);
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+  z-index: 1000;
+  display: none;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.modal-overlay.open { display: flex; }
+.modal-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-xl);
+  padding: 40px;
+  max-width: 420px;
+  width: 100%;
+  text-align: center;
+  box-shadow: 0 24px 64px rgba(0,0,0,0.5);
+  animation: modalPop 0.35s cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+@keyframes modalPop {
+  from { opacity: 0; transform: scale(0.9) translateY(20px); }
+  to { opacity: 1; transform: scale(1) translateY(0); }
+}
+.modal-icon { font-size: 3.5rem; display: block; margin-bottom: 16px; }
+.modal-title { font-size: 1.5rem; font-weight: 800; color: #fff; margin-bottom: 8px; }
+.modal-score { font-family: var(--mono); font-size: 2.5rem; font-weight: 700; color: var(--accent-bright); margin: 16px 0; }
+.modal-msg { color: var(--ink-muted); margin-bottom: 24px; }
+.modal-actions { display: flex; gap: 10px; justify-content: center; flex-wrap: wrap; }
+.modal-btn {
+  padding: 10px 24px;
+  border-radius: var(--r-md);
+  font-family: var(--font);
+  font-size: 0.9rem;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s;
+  border: 1px solid var(--border);
+}
+.modal-btn.primary { background: var(--accent-deep); border-color: var(--accent); color: #fff; }
+.modal-btn.primary:hover { background: var(--accent); }
+.modal-btn.ghost { background: none; color: var(--ink-muted); }
+.modal-btn.ghost:hover { color: var(--accent); border-color: var(--accent); }
+
+/* Continue / Result buttons */
+.btn-continue {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; max-width: 320px; margin: 28px auto 0; padding: 14px 24px;
+  background: var(--bg-card); border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg); color: var(--accent-bright);
+  font-family: var(--font); font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; transition: all 0.25s;
+}
+.btn-continue:hover {
+  background: var(--accent-deep); border-color: var(--accent); color: #fff;
+  transform: translateY(-2px); box-shadow: 0 6px 20px rgba(147, 51, 234, 0.3);
+}
+.btn-result {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; max-width: 360px; margin: 32px auto 0; padding: 16px 28px;
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  border: none; border-radius: var(--r-lg); color: #fff;
+  font-family: var(--font); font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; transition: all 0.3s; letter-spacing: 0.02em;
+}
+.btn-result:hover { transform: translateY(-2px); box-shadow: 0 8px 30px rgba(147, 51, 234, 0.4); }
+
+/* ══════════════════════════════════════════
+   SCROLL REVEAL
+   ══════════════════════════════════════════ */
+.reveal {
+  opacity: 0;
+  transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible {
+  opacity: 1;
+  transform: translateY(0);
+}
+
+/* Separator */
+.sep {
+  border: none; height: 1px;
+  background: linear-gradient(90deg, transparent, var(--border-strong), transparent);
+  margin: 28px 0;
+}
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════ */
+@media (max-width: 640px) {
+  .hero { padding: 40px 0 28px; }
+  .hero h1 { font-size: 1.8rem; }
+  .glass { padding: 16px; }
+  .answer-row { flex-direction: column; align-items: stretch; }
+  .answer-input { min-width: 0; }
+  .glossar-grid { grid-template-columns: 1fr; }
+  .avoid-grid { grid-template-columns: 1fr; }
+}
+
+@media print {
+  body::before, body::after, .top-nav, .modal-overlay,
+  .btn-check, .btn-hint, #rain-canvas { display: none !important; }
+  body { background: white; color: #111; }
+  .glass, .exercise-card, .compare-pair, .muster-card, .glossar-item { background: white; border-color: #ddd; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     RAINING LETTERS CANVAS
+     ═══════════════════════════════════════════ -->
+<canvas id="rain-canvas"></canvas>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: LANDING
+     ═══════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">TRACK D1</div>
+      <div class="scramble-title" id="scramble-title">FACHSPRACHE</div>
+      <p class="landing-sub">Grundbegriffe, Richtig/Falsch und Satzmuster</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">3</span> Module</span>
+        <span class="l-meta"><span class="val">15</span> Aufgaben</span>
+        <span class="l-meta"><span class="val">~60 min</span> Dauer</span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track">
+          <div class="op-fill" id="overall-fill"></div>
+        </div>
+        <span class="op-label" id="overall-label">0 / 3</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card" id="card-0" onclick="openModule(0)">
+        <div class="mc-num">D1.1</div>
+        <div class="mc-title">Grundbegriffe der Mechanik</div>
+        <div class="mc-desc">20 Fachbegriffe sicher kennen und anwenden &mdash; von Kraft bis Impuls</div>
+        <div class="mc-footer">
+          <span class="mc-time">~20 min</span>
+          <span class="mc-status" id="status-0">Offen</span>
+        </div>
+      </div>
+      <div class="mod-card" id="card-1" onclick="openModule(1)">
+        <div class="mc-num">D1.2</div>
+        <div class="mc-title">Richtig vs. falsch formulieren</div>
+        <div class="mc-desc">Typische Sprachfehler erkennen und durch pr&auml;zise Fachsprache ersetzen</div>
+        <div class="mc-footer">
+          <span class="mc-time">~20 min</span>
+          <span class="mc-status" id="status-1">Offen</span>
+        </div>
+      </div>
+      <div class="mod-card" id="card-2" onclick="openModule(2)">
+        <div class="mc-num">D1.3</div>
+        <div class="mc-title">Satzmuster f&uuml;r Klausuren</div>
+        <div class="mc-desc">Klausurtaugliche Formulierungen sicher anwenden</div>
+        <div class="mc-footer">
+          <span class="mc-time">~20 min</span>
+          <span class="mc-status" id="status-2">Offen</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-footer">Track D1 &middot; v4</div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: MODULE 0 (D1.1 Grundbegriffe)
+     ═══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-0">
+  <div class="module-page">
+    <div class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="backToLanding()">&larr; &Uuml;bersicht</button>
+        <span class="nav-title">D1.1 &mdash; Grundbegriffe der Mechanik</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div>
+          <span class="nav-progress-text" id="prog-text-0">0 / 5</span>
+        </div>
+      </div>
+    </div>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">D1.1 &middot; Fachsprache</div>
+        <h1>Grundbegriffe<br>der Mechanik</h1>
+        <p class="hero-sub">20 Fachbegriffe sicher kennen und anwenden &mdash; von Kraft bis Impuls</p>
+        <div class="hero-meta">
+          <span class="meta-chip"><span class="val">D1.1</span> Modul</span>
+          <span class="meta-chip"><span class="val">Level 1</span> Grundlagen</span>
+          <span class="meta-chip"><span class="val">20 min</span> Dauer</span>
+        </div>
+        <div class="glass" style="text-align:left; margin-top:32px;">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:10px;">Kompetenzen</div>
+          <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:8px;">
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst 20 Grundbegriffe der Mechanik benennen und definieren</li>
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst Fachbegriffe den richtigen Einheiten zuordnen</li>
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst Formelsymbole korrekt verwenden (z.&nbsp;B. $F$, $m$, $v$, $a$)</li>
+          </ul>
+        </div>
+        <button class="btn-continue" onclick="unlockChapter(0,'ch0-flashcards')">Los geht's &darr;</button>
+      </section>
+
+      <!-- CH 1: Lernkarten -->
+      <section class="chapter locked" id="ch0-flashcards">
+        <div class="chapter-label">
+          <span class="chapter-num">01</span>
+          <h2 class="chapter-title">Lernkarten</h2>
+        </div>
+        <div class="info-box reveal">
+          <h4>Warum Fachsprache?</h4>
+          <p>In der Physik hat jedes Wort eine genaue Bedeutung. &bdquo;Kraft&ldquo; ist nicht gleich &bdquo;Energie&ldquo; &mdash; wer Fachbegriffe pr&auml;zise kennt, vermeidet typische Klausurfehler und kann physikalische Zusammenh&auml;nge klar erkl&auml;ren.</p>
+        </div>
+        <div class="flashcard-section reveal">
+          <div class="fc-header">
+            <h3>10 Schl&uuml;sselbegriffe</h3>
+            <span class="fc-counter"><span id="fc-num">1</span> / 10</span>
+          </div>
+          <div class="flashcard-area">
+            <div class="flashcard" id="flashcard" onclick="flipCard()">
+              <div class="flashcard-inner">
+                <div class="fc-front">
+                  <div class="fc-term" id="fc-term">Kraft</div>
+                  <div class="fc-symbol" id="fc-symbol">Symbol: $F$</div>
+                  <div class="fc-hint-text">Tippe zum Umdrehen</div>
+                </div>
+                <div class="fc-back">
+                  <div class="fc-def" id="fc-def">Gerichtete physikalische Gr&ouml;&szlig;e, die einen K&ouml;rper beschleunigt oder verformt</div>
+                  <div class="fc-einheit" id="fc-einheit">Einheit: Newton (N = kg&middot;m/s&sup2;)</div>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="fc-controls">
+            <button class="fc-btn" id="fc-prev" onclick="prevCard()" disabled>&larr; Zur&uuml;ck</button>
+            <div class="fc-progress-dots" id="fc-dots"></div>
+            <button class="fc-btn" id="fc-next" onclick="nextCard()">Weiter &rarr;</button>
+          </div>
+          <div style="text-align:center;margin-top:10px">
+            <button class="fc-flip-btn" onclick="flipCard()">Umdrehen</button>
+          </div>
+        </div>
+        <div class="info-box reveal" style="margin-top:18px">
+          <h4>Merkhilfe: Die 4 Grundgr&ouml;&szlig;en der Kinematik</h4>
+          <p><strong>Weg $s$</strong> (m) &rarr; <strong>Geschwindigkeit $v$</strong> (m/s) &rarr; <strong>Beschleunigung $a$</strong> (m/s&sup2;) &rarr; <strong>Zeit $t$</strong> (s)<br><br>Jede Gr&ouml;&szlig;e ist die zeitliche Ableitung der vorherigen: $v = \frac{s}{t}$ und $a = \frac{\Delta v}{\Delta t}$</p>
+        </div>
+        <button class="btn-continue" onclick="unlockChapter(0,'ch0-exercises')">Weiter zu den Aufgaben &darr;</button>
+      </section>
+
+      <!-- CH 2: Aufgaben -->
+      <section class="chapter locked" id="ch0-exercises">
+        <div class="chapter-label">
+          <span class="chapter-num">02</span>
+          <h2 class="chapter-title">&Uuml;bungsaufgaben</h2>
+        </div>
+
+        <div class="exercise-card reveal" id="ex0-0"><div class="ex-header"><span class="ex-num">1</span><span class="ex-title">SI-Einheit der Kraft</span><span class="ex-tag">Grundlagen</span></div><div class="ex-body"><p class="ex-question">Was ist die SI-Einheit der Kraft?</p><div class="mc-options"><button class="mc-opt" onclick="mcSelect(this,false,'Die Einheit der Kraft ist Newton (N), nicht Joule. Joule ist die Einheit der Energie.','0-0')">Joule (J)</button><button class="mc-opt" onclick="mcSelect(this,true,'Richtig! 1 N = 1 kg&middot;m/s&sup2;. Newton hei&szlig;t die Einheit zu Ehren von Isaac Newton.','0-0')">Newton (N)</button><button class="mc-opt" onclick="mcSelect(this,false,'Watt ist die Einheit der Leistung (P), nicht der Kraft.','0-0')">Watt (W)</button><button class="mc-opt" onclick="mcSelect(this,false,'Kilogramm ist die Einheit der Masse, nicht der Kraft.','0-0')">Kilogramm (kg)</button></div><div class="fb-block" id="fb-0-0"></div></div></div>
+
+        <div class="exercise-card reveal" id="ex0-1"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Tr&auml;gheit</span><span class="ex-tag">Grundlagen</span></div><div class="ex-body"><p class="ex-question">Welche Aussage beschreibt <strong>Tr&auml;gheit</strong> korrekt?</p><div class="mc-options"><button class="mc-opt" onclick="mcSelect(this,false,'Das ist die Definition von Beschleunigung, nicht von Tr&auml;gheit.','0-1')">Tr&auml;gheit ist die &Auml;nderung der Geschwindigkeit pro Zeiteinheit.</button><button class="mc-opt" onclick="mcSelect(this,false,'Das beschreibt Reibung, nicht Tr&auml;gheit.','0-1')">Tr&auml;gheit ist die Kraft, die Bewegung hemmt.</button><button class="mc-opt" onclick="mcSelect(this,true,'Genau! Tr&auml;gheit bedeutet: K&ouml;rper behalten ihren Bewegungszustand bei, solange keine &auml;u&szlig;ere Kraft wirkt. Das ist Newtons 1. Gesetz.','0-1')">Tr&auml;gheit ist die Eigenschaft von K&ouml;rpern, ihren Bewegungszustand ohne &auml;u&szlig;ere Kraft beizubehalten.</button><button class="mc-opt" onclick="mcSelect(this,false,'Das ist die Beschreibung von Masse als Ma&szlig; der Schwere, aber nicht von Tr&auml;gheit.','0-1')">Tr&auml;gheit ist die Anziehungskraft zwischen K&ouml;rpern.</button></div><div class="fb-block" id="fb-0-1"></div></div></div>
+
+        <div class="exercise-card reveal" id="ex0-2"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Formel Gewichtskraft</span><span class="ex-tag">Standard</span></div><div class="ex-body"><p class="ex-question">Wie lautet die Formel f&uuml;r die <strong>Gewichtskraft</strong> $F_G$?</p><div class="answer-row"><input class="answer-input" id="inp-0-2" placeholder="z. B. m*g" onkeydown="if(event.key==='Enter')checkEx('0-2')"><button class="btn-check" onclick="checkEx('0-2')">Pr&uuml;fen</button><button class="btn-hint" onclick="toggleHint('hint-0-2')">Tipp</button></div><div class="hint-box" id="hint-0-2">$F_G = m \cdot g$, wobei $g \approx 10\,\text{m/s}^2$ die Erdbeschleunigung ist.</div><div class="fb-block" id="fb-0-2"></div></div></div>
+
+        <div class="exercise-card reveal" id="ex0-3"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Einheit der Energie</span><span class="ex-tag">Standard</span></div><div class="ex-body"><p class="ex-question">Was ist die Einheit der <strong>Energie</strong>?</p><div class="answer-row"><input class="answer-input" id="inp-0-3" placeholder="Einheit eingeben ..." onkeydown="if(event.key==='Enter')checkEx('0-3')"><button class="btn-check" onclick="checkEx('0-3')">Pr&uuml;fen</button><button class="btn-hint" onclick="toggleHint('hint-0-3')">Tipp</button></div><div class="hint-box" id="hint-0-3">Energie wird in Joule (J) gemessen. 1 J = 1 N&middot;m = 1 kg&middot;m&sup2;/s&sup2;</div><div class="fb-block" id="fb-0-3"></div></div></div>
+
+        <div class="exercise-card reveal" id="ex0-4"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Physikalische Gr&ouml;&szlig;e erkennen</span><span class="ex-tag">Standard</span></div><div class="ex-body"><p class="ex-question">Welche Gr&ouml;&szlig;e beschreibt die <strong>&Auml;nderung der Geschwindigkeit pro Zeiteinheit</strong>?</p><div class="mc-options"><button class="mc-opt" onclick="mcSelect(this,false,'Geschwindigkeit $v$ ist der Weg pro Zeit ($v = s/t$), nicht die &Auml;nderung der Geschwindigkeit.','0-4')">Geschwindigkeit ($v$)</button><button class="mc-opt" onclick="mcSelect(this,false,'Impuls $p = m \\cdot v$ ist Masse mal Geschwindigkeit, keine &Auml;nderungsrate.','0-4')">Impuls ($p$)</button><button class="mc-opt" onclick="mcSelect(this,true,'Genau! Beschleunigung $a = \\frac{\\Delta v}{\\Delta t}$ &mdash; sie gibt an, wie schnell sich die Geschwindigkeit &auml;ndert. Einheit: m/s&sup2;','0-4')">Beschleunigung ($a$)</button><button class="mc-opt" onclick="mcSelect(this,false,'Leistung $P = W/t$ beschreibt Arbeit pro Zeit, nicht Geschwindigkeits&auml;nderung.','0-4')">Leistung ($P$)</button></div><div class="fb-block" id="fb-0-4"></div></div></div>
+
+        <button class="btn-continue" onclick="unlockChapter(0,'ch0-glossar')">Weiter zum Glossar &darr;</button>
+      </section>
+
+      <!-- CH 3: Glossar -->
+      <section class="chapter locked" id="ch0-glossar">
+        <div class="chapter-label">
+          <span class="chapter-num">03</span>
+          <h2 class="chapter-title">Glossar (20 Begriffe)</h2>
+        </div>
+        <div class="cat-filter">
+          <button class="cat-btn active" onclick="filterGlossar('alle',this)">Alle (20)</button>
+          <button class="cat-btn" onclick="filterGlossar('kinematik',this)">Kinematik</button>
+          <button class="cat-btn" onclick="filterGlossar('dynamik',this)">Dynamik</button>
+          <button class="cat-btn" onclick="filterGlossar('newton',this)">Newton</button>
+          <button class="cat-btn" onclick="filterGlossar('energie',this)">Energie</button>
+        </div>
+        <input class="glossar-search" type="text" placeholder="Begriff suchen ..." oninput="searchGlossar(this.value)">
+        <div class="glossar-grid" id="glossar-grid">
+          <div class="glossar-item" data-cat="kinematik"><div class="gi-header"><span class="gi-term">Weg / Strecke</span><span class="gi-symbol">$s$</span></div><div class="gi-def">Die zur&uuml;ckgelegte Entfernung eines K&ouml;rpers</div><span class="gi-einheit">Meter (m)</span><div class="gi-cat">Kinematik</div></div>
+          <div class="glossar-item" data-cat="kinematik"><div class="gi-header"><span class="gi-term">Zeit</span><span class="gi-symbol">$t$</span></div><div class="gi-def">Dauer eines Vorgangs oder eines Zeitintervalls</div><span class="gi-einheit">Sekunde (s)</span><div class="gi-cat">Kinematik</div></div>
+          <div class="glossar-item" data-cat="kinematik"><div class="gi-header"><span class="gi-term">Geschwindigkeit</span><span class="gi-symbol">$v$</span></div><div class="gi-def">Zur&uuml;ckgelegter Weg pro Zeiteinheit: $v = s/t$</div><span class="gi-einheit">m/s</span><div class="gi-cat">Kinematik</div></div>
+          <div class="glossar-item" data-cat="kinematik"><div class="gi-header"><span class="gi-term">Beschleunigung</span><span class="gi-symbol">$a$</span></div><div class="gi-def">&Auml;nderung der Geschwindigkeit pro Zeiteinheit: $a = \Delta v / \Delta t$</div><span class="gi-einheit">m/s&sup2;</span><div class="gi-cat">Kinematik</div></div>
+          <div class="glossar-item" data-cat="kinematik"><div class="gi-header"><span class="gi-term">Gleichf&ouml;rmige Bewegung</span><span class="gi-symbol">&mdash;</span></div><div class="gi-def">Konstante Geschwindigkeit, keine Beschleunigung: $s = v \cdot t$</div><span class="gi-einheit">&mdash;</span><div class="gi-cat">Kinematik</div></div>
+          <div class="glossar-item" data-cat="kinematik"><div class="gi-header"><span class="gi-term">Gleichm. beschl. Bewegung</span><span class="gi-symbol">&mdash;</span></div><div class="gi-def">Konstante Beschleunigung, wachsende Geschwindigkeit: $s = \frac{1}{2}at^2$</div><span class="gi-einheit">&mdash;</span><div class="gi-cat">Kinematik</div></div>
+          <div class="glossar-item" data-cat="kinematik"><div class="gi-header"><span class="gi-term">Freier Fall</span><span class="gi-symbol">$g$</span></div><div class="gi-def">Fallbewegung ohne Luftwiderstand, $g \approx 10\,\text{m/s}^2$</div><span class="gi-einheit">m/s&sup2;</span><div class="gi-cat">Kinematik</div></div>
+          <div class="glossar-item" data-cat="dynamik"><div class="gi-header"><span class="gi-term">Kraft</span><span class="gi-symbol">$F$</span></div><div class="gi-def">Gerichtete Gr&ouml;&szlig;e, bewirkt Beschleunigung oder Verformung</div><span class="gi-einheit">Newton (N)</span><div class="gi-cat">Dynamik</div></div>
+          <div class="glossar-item" data-cat="dynamik"><div class="gi-header"><span class="gi-term">Masse</span><span class="gi-symbol">$m$</span></div><div class="gi-def">Ma&szlig; f&uuml;r die Tr&auml;gheit eines K&ouml;rpers (unver&auml;nderlich)</div><span class="gi-einheit">Kilogramm (kg)</span><div class="gi-cat">Dynamik</div></div>
+          <div class="glossar-item" data-cat="dynamik"><div class="gi-header"><span class="gi-term">Gewichtskraft</span><span class="gi-symbol">$F_G$</span></div><div class="gi-def">Gravitationskraft der Erde auf einen K&ouml;rper: $F_G = m \cdot g$</div><span class="gi-einheit">Newton (N)</span><div class="gi-cat">Dynamik</div></div>
+          <div class="glossar-item" data-cat="dynamik"><div class="gi-header"><span class="gi-term">Normalkraft</span><span class="gi-symbol">$F_N$</span></div><div class="gi-def">Senkrechte St&uuml;tzkraft einer Fl&auml;che auf einen K&ouml;rper</div><span class="gi-einheit">Newton (N)</span><div class="gi-cat">Dynamik</div></div>
+          <div class="glossar-item" data-cat="dynamik"><div class="gi-header"><span class="gi-term">Reibungskraft</span><span class="gi-symbol">$F_R$</span></div><div class="gi-def">Kraft, die der Bewegung entgegenwirkt: $F_R = \mu \cdot F_N$</div><span class="gi-einheit">Newton (N)</span><div class="gi-cat">Dynamik</div></div>
+          <div class="glossar-item" data-cat="dynamik"><div class="gi-header"><span class="gi-term">Tr&auml;gheit</span><span class="gi-symbol">&mdash;</span></div><div class="gi-def">Eigenschaft von K&ouml;rpern, ihren Bewegungszustand ohne &auml;u&szlig;ere Kraft beizubehalten</div><span class="gi-einheit">&mdash;</span><div class="gi-cat">Dynamik</div></div>
+          <div class="glossar-item" data-cat="newton"><div class="gi-header"><span class="gi-term">Tr&auml;gheitssatz (1. Newton)</span><span class="gi-symbol">&mdash;</span></div><div class="gi-def">Ohne &auml;u&szlig;ere Kraft bleibt der Bewegungszustand konstant</div><span class="gi-einheit">&mdash;</span><div class="gi-cat">Newtonsche Gesetze</div></div>
+          <div class="glossar-item" data-cat="newton"><div class="gi-header"><span class="gi-term">Aktionsprinzip (2. Newton)</span><span class="gi-symbol">$F = m \cdot a$</span></div><div class="gi-def">Eine resultierende Kraft erzeugt eine Beschleunigung: $F = m \cdot a$</div><span class="gi-einheit">N = kg&middot;m/s&sup2;</span><div class="gi-cat">Newtonsche Gesetze</div></div>
+          <div class="glossar-item" data-cat="newton"><div class="gi-header"><span class="gi-term">Reaktionsprinzip (3. Newton)</span><span class="gi-symbol">&mdash;</span></div><div class="gi-def">Actio = Reactio: Kr&auml;fte treten immer paarweise auf</div><span class="gi-einheit">&mdash;</span><div class="gi-cat">Newtonsche Gesetze</div></div>
+          <div class="glossar-item" data-cat="energie"><div class="gi-header"><span class="gi-term">Arbeit</span><span class="gi-symbol">$W$</span></div><div class="gi-def">Kraft mal Weg in Kraftrichtung: $W = F \cdot s$</div><span class="gi-einheit">Joule (J)</span><div class="gi-cat">Energie &amp; Arbeit</div></div>
+          <div class="glossar-item" data-cat="energie"><div class="gi-header"><span class="gi-term">Energie</span><span class="gi-symbol">$E$</span></div><div class="gi-def">F&auml;higkeit, Arbeit zu verrichten; gespeicherte oder &uuml;bertragene Arbeit</div><span class="gi-einheit">Joule (J)</span><div class="gi-cat">Energie &amp; Arbeit</div></div>
+          <div class="glossar-item" data-cat="energie"><div class="gi-header"><span class="gi-term">Leistung</span><span class="gi-symbol">$P$</span></div><div class="gi-def">Arbeit pro Zeiteinheit: $P = W / t$</div><span class="gi-einheit">Watt (W)</span><div class="gi-cat">Energie &amp; Arbeit</div></div>
+          <div class="glossar-item" data-cat="energie"><div class="gi-header"><span class="gi-term">Impuls</span><span class="gi-symbol">$p$</span></div><div class="gi-def">Produkt aus Masse und Geschwindigkeit: $p = m \cdot v$</div><span class="gi-einheit">kg&middot;m/s</span><div class="gi-cat">Energie &amp; Arbeit</div></div>
+        </div>
+
+        <details class="extra-section"><summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? &mdash; Zus&auml;tzliche &Uuml;bungen<span class="extra-count">(2 weitere Aufgaben)</span></summary><div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong> &mdash; sie z&auml;hlen nicht zum Score.</p></div>
+          <div class="exercise-card extra-card"><div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">L&uuml;ckensatz: Gewichtskraft berechnen</span><span class="ex-tag extra-tag">Zusatz</span></div><div class="ex-body"><p class="ex-question">Ein K&ouml;rper hat die Masse $m = 5\,\text{kg}$. Erg&auml;nze: $F_G = m \cdot g = 5 \cdot 10 = $ _____ N.</p><div class="answer-row"><input class="answer-input" id="inp-extra-0-0" placeholder="Zahl eingeben"><button class="btn-check extra-btn" onclick="checkExtra('inp-extra-0-0','fb-extra-0-0','50|50.0|50,0')">Pr&uuml;fen</button></div><div class="fb-block" id="fb-extra-0-0"></div></div></div>
+          <div class="exercise-card extra-card"><div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Selbstcheck: Masse vs. Gewichtskraft</span><span class="ex-tag extra-tag">Zusatz</span></div><div class="ex-body"><p class="ex-question">Erkl&auml;re in 1&ndash;2 S&auml;tzen den Unterschied zwischen Masse und Gewichtskraft.</p><textarea class="answer-textarea" rows="3" placeholder="Schreibe hier ..."></textarea><button class="btn-check extra-btn" onclick="toggleSolution('sol-extra-0-1')" style="margin-top:10px;">Musterl&ouml;sung anzeigen</button><div class="solution-box" id="sol-extra-0-1" style="display:none;"><div class="solution-title">Musterl&ouml;sung</div><p>Die Masse $m$ ist eine unver&auml;nderliche Eigenschaft und wird in kg gemessen. Die Gewichtskraft $F_G = m \cdot g$ ist die Kraft, mit der die Erde den K&ouml;rper anzieht, und wird in Newton (N) angegeben.</p></div></div></div>
+        </details>
+
+        <button class="btn-result" onclick="finishModule(0)">Modul abschlie&szlig;en</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: MODULE 1 (D1.2 Richtig/Falsch)
+     ═══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-1">
+  <div class="module-page">
+    <div class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="backToLanding()">&larr; &Uuml;bersicht</button>
+        <span class="nav-title">D1.2 &mdash; Richtig vs. falsch formulieren</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div>
+          <span class="nav-progress-text" id="prog-text-1">0 / 5</span>
+        </div>
+      </div>
+    </div>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">D1.2 &middot; Fachsprache</div>
+        <h1>Richtig vs. falsch<br>formulieren</h1>
+        <p class="hero-sub">Typische Sprachfehler in der Physik erkennen und durch pr&auml;zise Fachsprache ersetzen</p>
+        <div class="hero-meta">
+          <span class="meta-chip"><span class="val">D1.2</span> Modul</span>
+          <span class="meta-chip"><span class="val">Level 1</span> Grundlagen</span>
+          <span class="meta-chip"><span class="val">20 min</span> Dauer</span>
+        </div>
+        <div class="glass" style="text-align:left; margin-top:32px;">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:10px;">Kompetenzen</div>
+          <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:8px;">
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst h&auml;ufige Sprachfehler in Physikaussagen erkennen</li>
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst Umgangssprache durch pr&auml;zise Fachsprache ersetzen</li>
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kennst Unterschiede: Masse &#8800; Gewicht, Kraft &#8800; Energie</li>
+          </ul>
+        </div>
+        <button class="btn-continue" onclick="unlockChapter(1,'ch1-examples')">Los geht's &darr;</button>
+      </section>
+
+      <!-- CH 1: Beispiele -->
+      <section class="chapter locked" id="ch1-examples">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Typische Fehler im Vergleich</h2></div>
+        <div class="glass"><p>In der Alltagssprache sind viele Physikbegriffe ungenau. &bdquo;Das Ding ist schwer&ldquo; sagt nichts Messbares. In der Physik brauchen wir pr&auml;zise Begriffe mit Einheiten und klaren Definitionen.</p></div>
+
+        <div class="compare-pair reveal"><div class="cp-header">Fehler 1 &ndash; Gewicht vs. Masse</div><div class="cp-body"><div class="cp-wrong"><div class="cp-label">Falsch</div><div class="cp-text">&bdquo;Das Gewicht des K&ouml;rpers betr&auml;gt 70 kg.&ldquo;</div></div><div class="cp-correct"><div class="cp-label">Richtig</div><div class="cp-text">&bdquo;Die Masse des K&ouml;rpers betr&auml;gt 70 kg.&ldquo; oder &bdquo;Die Gewichtskraft betr&auml;gt 700 N.&ldquo;</div></div><div class="cp-reason"><strong>Warum?</strong> Gewicht (Gewichtskraft) wird in Newton gemessen. Kilogramm ist die Einheit der Masse.</div></div></div>
+
+        <div class="compare-pair reveal"><div class="cp-header">Fehler 2 &ndash; Kraft vs. Energie</div><div class="cp-body"><div class="cp-wrong"><div class="cp-label">Falsch</div><div class="cp-text">&bdquo;Das Auto f&auml;hrt mit viel Kraft.&ldquo;</div></div><div class="cp-correct"><div class="cp-label">Richtig</div><div class="cp-text">&bdquo;Das Auto f&auml;hrt mit einer Geschwindigkeit von 120 km/h&ldquo; oder &bdquo;Der Motor erbringt eine Leistung von 100 kW.&ldquo;</div></div><div class="cp-reason"><strong>Warum?</strong> &bdquo;Viel Kraft&ldquo; ist keine messbare Aussage. Geschwindigkeit, Leistung oder Antriebskraft sind physikalisch pr&auml;zise Gr&ouml;&szlig;en.</div></div></div>
+
+        <div class="compare-pair reveal"><div class="cp-header">Fehler 3 &ndash; Energieerhaltung</div><div class="cp-body"><div class="cp-wrong"><div class="cp-label">Falsch</div><div class="cp-text">&bdquo;Durch die Reibung geht Energie verloren.&ldquo;</div></div><div class="cp-correct"><div class="cp-label">Richtig</div><div class="cp-text">&bdquo;Durch Reibung wird mechanische Energie in W&auml;rmeenergie umgewandelt.&ldquo;</div></div><div class="cp-reason"><strong>Warum?</strong> Energie kann nicht verschwinden (Energieerhaltungssatz). Sie wird immer in eine andere Form umgewandelt.</div></div></div>
+
+        <div class="compare-pair reveal"><div class="cp-header">Fehler 4 &ndash; Einheit der Beschleunigung</div><div class="cp-body"><div class="cp-wrong"><div class="cp-label">Falsch</div><div class="cp-text">&bdquo;Die Beschleunigung betr&auml;gt 9,8 m/s.&ldquo;</div></div><div class="cp-correct"><div class="cp-label">Richtig</div><div class="cp-text">&bdquo;Die Beschleunigung betr&auml;gt 9,8 m/s&sup2;.&ldquo;</div></div><div class="cp-reason"><strong>Warum?</strong> Beschleunigung ist $a = \frac{\Delta v}{\Delta t}$, also m/s&sup2;. m/s ist die Einheit der Geschwindigkeit.</div></div></div>
+
+        <div class="compare-pair reveal"><div class="cp-header">Fehler 5 &ndash; Kraft und Bewegung</div><div class="cp-body"><div class="cp-wrong"><div class="cp-label">Falsch</div><div class="cp-text">&bdquo;Ohne Kraft bewegt sich nichts.&ldquo;</div></div><div class="cp-correct"><div class="cp-label">Richtig</div><div class="cp-text">&bdquo;Ohne resultierende Kraft bleibt der Bewegungszustand konstant (Tr&auml;gheitssatz).&ldquo;</div></div><div class="cp-reason"><strong>Warum?</strong> Newtons 1. Gesetz: K&ouml;rper bewegen sich weiter, wenn keine Kraft wirkt.</div></div></div>
+
+        <button class="btn-continue" onclick="unlockChapter(1,'ch1-exercises')">Verstanden &ndash; weiter zu den Aufgaben &darr;</button>
+      </section>
+
+      <!-- CH 2: Aufgaben -->
+      <section class="chapter locked" id="ch1-exercises">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">&Uuml;bungsaufgaben</h2></div>
+
+        <div class="exercise-card" id="ex1-0"><div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Welche Aussage ist korrekt?</span><span class="ex-tag">Grundlagen</span></div><div class="ex-body"><p class="ex-question">Welche Aussage ist physikalisch <strong>korrekt</strong>?</p><div class="mc-options"><button class="mc-opt" onclick="mcSelect(this,false,'&bdquo;Gewicht&ldquo; wird in Newton gemessen, nicht in Kilogramm. Kilogramm ist die Einheit der Masse.','1-0')">&bdquo;Das Gewicht der Kugel betr&auml;gt 2 kg.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'Energie geht nicht verloren &ndash; sie wird in W&auml;rme umgewandelt.','1-0')">&bdquo;Durch Reibung geht Energie verloren.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,true,'Richtig! Die Masse ist die korrekte Gr&ouml;&szlig;e in kg.','1-0')">&bdquo;Die Masse der Kugel betr&auml;gt 2 kg.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'m/s ist die Einheit der Geschwindigkeit, nicht der Beschleunigung.','1-0')">&bdquo;Die Fallbeschleunigung betr&auml;gt 10 m/s.&ldquo;</button></div><div class="fb-block" id="fb-1-0"></div></div></div>
+
+        <div class="exercise-card" id="ex1-1"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Fehleranalyse</span><span class="ex-tag">Grundlagen</span></div><div class="ex-body"><p class="ex-question">Was ist am folgenden Satz falsch?</p><div class="wrong-sentence">&bdquo;Das Objekt hat keine Kraft mehr und bleibt deshalb stehen.&ldquo;</div><div class="mc-options"><button class="mc-opt" onclick="mcSelect(this,false,'Der Fehler liegt woanders.','1-1')">Die Einheit fehlt.</button><button class="mc-opt" onclick="mcSelect(this,true,'Richtig! Objekte &bdquo;haben&ldquo; keine Kraft &ndash; Kr&auml;fte wirken auf sie. Und ohne resultierende Kraft bleibt die Bewegung erhalten (Tr&auml;gheitssatz).','1-1')">Objekte &bdquo;haben&ldquo; keine Kraft; Kr&auml;fte wirken auf Objekte. Au&szlig;erdem widerspricht das dem Tr&auml;gheitssatz.</button><button class="mc-opt" onclick="mcSelect(this,false,'Der Satz enth&auml;lt keinen Grammatikfehler.','1-1')">Der Satz hat einen Grammatikfehler.</button><button class="mc-opt" onclick="mcSelect(this,false,'Es fehlt kein Vorzeichen.','1-1')">Das Vorzeichen fehlt.</button></div><div class="fb-block" id="fb-1-1"></div></div></div>
+
+        <div class="exercise-card" id="ex1-2"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Pr&auml;zise Klausursprache</span><span class="ex-tag">Standard</span></div><div class="ex-body"><p class="ex-question">Welche Formulierung ist f&uuml;r eine Physikklausur <strong>pr&auml;zise und korrekt</strong>?</p><div class="mc-options"><button class="mc-opt" onclick="mcSelect(this,false,'&bdquo;Schneller werden&ldquo; ist umgangssprachlich.','1-2')">&bdquo;Der Ball wird schneller, weil eine Kraft da ist.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,true,'Sehr gut! Resultierende Kraft, Richtung und $F = ma$ &ndash; das ist pr&auml;zise.','1-2')">&bdquo;Die resultierende Kraft in Bewegungsrichtung beschleunigt den K&ouml;rper gem&auml;&szlig; $F = m \cdot a$.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'&bdquo;Energie antreibt&ldquo; ist falsch &ndash; Energie ist keine Kraft.','1-2')">&bdquo;Die Energie treibt den K&ouml;rper an.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'&bdquo;Sehr stark&ldquo; ist keine pr&auml;zise Aussage.','1-2')">&bdquo;Die Gravitation ist sehr stark und zieht alles an.&ldquo;</button></div><div class="fb-block" id="fb-1-2"></div></div></div>
+
+        <div class="exercise-card" id="ex1-3"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Fachbegriff einsetzen</span><span class="ex-tag">Standard</span></div><div class="ex-body"><p class="ex-question">Verbessere den Satz physikalisch korrekt.</p><div class="wrong-sentence">&bdquo;Der Stein f&auml;llt wegen seiner Schwere.&ldquo;</div><p class="ex-question">Welche physikalische Gr&ouml;&szlig;e wirkt auf den Stein?</p><div class="answer-row"><input class="answer-input" id="inp-1-3" placeholder="Fachbegriff ..." onkeydown="if(event.key==='Enter')checkEx('1-3')"><button class="btn-check" onclick="checkEx('1-3')">Pr&uuml;fen</button><button class="btn-hint" onclick="toggleHint('hint-1-3')">Tipp</button></div><div class="hint-box" id="hint-1-3">Die Kraft, die die Erde auf K&ouml;rper aus&uuml;bt, hei&szlig;t ... (Symbol: $F_G$)</div><div class="fb-block" id="fb-1-3"></div></div></div>
+
+        <div class="exercise-card" id="ex1-4"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">L&uuml;cke f&uuml;llen</span><span class="ex-tag">Standard</span></div><div class="ex-body"><p class="ex-question">Welches Wort fehlt?</p><div class="wrong-sentence">&bdquo;Durch Reibung geht Energie verloren.&ldquo;</div><p class="ex-question">Richtig: &bdquo;Durch Reibung wird Energie ___________.&ldquo;</p><div class="answer-row"><input class="answer-input" id="inp-1-4" placeholder="Energie wird ..." onkeydown="if(event.key==='Enter')checkEx('1-4')"><button class="btn-check" onclick="checkEx('1-4')">Pr&uuml;fen</button><button class="btn-hint" onclick="toggleHint('hint-1-4')">Tipp</button></div><div class="hint-box" id="hint-1-4">Energie kann nicht verschwinden, sie wird immer in eine andere Form ...</div><div class="fb-block" id="fb-1-4"></div></div></div>
+
+        <button class="btn-continue" onclick="unlockChapter(1,'ch1-patterns')">Weiter zu den Satzmustern &darr;</button>
+      </section>
+
+      <!-- CH 3: Muster + Avoid-Box -->
+      <section class="chapter locked" id="ch1-patterns">
+        <div class="chapter-label"><span class="chapter-num">03</span><h2 class="chapter-title">Satzmuster f&uuml;r die Klausur</h2></div>
+        <div class="glass"><p>Diese Muster helfen dir, in der Klausur korrekt zu formulieren. Die kursiven Teile ersetzt du durch die konkreten Werte.</p></div>
+
+        <div class="muster-card reveal"><div class="mc-label-m">Kraft und Beschleunigung</div><div class="mc-template">&bdquo;Eine Nettokraft von <span class="mc-fill">[F]</span> N wirkt auf den K&ouml;rper der Masse <span class="mc-fill">[m]</span> kg und erzeugt eine Beschleunigung von <span class="mc-fill">[a]</span> m/s&sup2;.&ldquo;</div></div>
+        <div class="muster-card reveal"><div class="mc-label-m">Gewichtskraft</div><div class="mc-template">&bdquo;Die Gewichtskraft betr&auml;gt $F_G = m \cdot g = $ <span class="mc-fill">[m]</span> kg &middot; 10 m/s&sup2; = <span class="mc-fill">[FG]</span> N.&ldquo;</div></div>
+        <div class="muster-card reveal"><div class="mc-label-m">Gleichf&ouml;rmige Bewegung</div><div class="mc-template">&bdquo;Der K&ouml;rper bewegt sich mit konstanter Geschwindigkeit $v = $ <span class="mc-fill">[v]</span> m/s ($a = 0$).&ldquo;</div></div>
+        <div class="muster-card reveal"><div class="mc-label-m">Energieumwandlung</div><div class="mc-template">&bdquo;<span class="mc-fill">[Energieform 1]</span> wird durch <span class="mc-fill">[Prozess]</span> in <span class="mc-fill">[Energieform 2]</span> umgewandelt. Die Energie bleibt erhalten.&ldquo;</div></div>
+
+        <div class="avoid-box reveal">
+          <h4>W&ouml;rter vermeiden in der Physikklausur</h4>
+          <div class="avoid-grid">
+            <div class="avoid-col bad"><strong>Vermeiden:</strong>&bdquo;Das Ding&ldquo;, &bdquo;viel Kraft&ldquo;, &bdquo;stark&ldquo;, &bdquo;schnell&ldquo; (ohne Zahlenwert), &bdquo;Schwere&ldquo;, &bdquo;Energie geht verloren&ldquo;</div>
+            <div class="avoid-col good"><strong>Stattdessen:</strong>&bdquo;der K&ouml;rper&ldquo;, pr&auml;zise Gr&ouml;&szlig;e + Einheit, &bdquo;Gewichtskraft&ldquo;, &bdquo;kinetische Energie&ldquo;, &bdquo;Energie wird umgewandelt&ldquo;</div>
+          </div>
+        </div>
+
+        <details class="extra-section"><summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? &mdash; Zus&auml;tzliche &Uuml;bungen<span class="extra-count">(2 weitere Aufgaben)</span></summary><div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong> &mdash; sie z&auml;hlen nicht zum Score.</p></div>
+          <div class="exercise-card extra-card"><div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">L&uuml;ckensatz: Energieumwandlung</span><span class="ex-tag extra-tag">Zusatz</span></div><div class="ex-body"><p class="ex-question">Erg&auml;nze: &bdquo;Durch Reibung wird kinetische Energie in ________ umgewandelt.&ldquo;</p><div class="answer-row"><input class="answer-input" id="inp-extra-1-0" placeholder="Begriff eingeben"><button class="btn-check extra-btn" onclick="checkExtra('inp-extra-1-0','fb-extra-1-0','wärme|wärmeenergie|thermischeenergie')">Pr&uuml;fen</button></div><div class="fb-block" id="fb-extra-1-0"></div></div></div>
+          <div class="exercise-card extra-card"><div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Satz physikalisch korrekt umschreiben</span><span class="ex-tag extra-tag">Zusatz</span></div><div class="ex-body"><p class="ex-question">&bdquo;Das Gewicht der Kugel ist 2 kg.&ldquo; &mdash; Schreibe den Satz korrekt um.</p><textarea class="answer-textarea" rows="3" placeholder="Schreibe den korrigierten Satz ..."></textarea><button class="btn-check extra-btn" onclick="toggleSolution('sol-extra-1-1')" style="margin-top:10px;">Musterl&ouml;sung anzeigen</button><div class="solution-box" id="sol-extra-1-1" style="display:none;"><div class="solution-title">Musterl&ouml;sung</div><p>&bdquo;Die <strong>Masse</strong> der Kugel betr&auml;gt 2 kg.&ldquo; oder &bdquo;Die <strong>Gewichtskraft</strong> betr&auml;gt $F_G = 2 \cdot 10 = 20$ N.&ldquo;</p></div></div></div>
+        </details>
+
+        <button class="btn-result" onclick="finishModule(1)">Modul abschlie&szlig;en</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN: MODULE 2 (D1.3 Satzmuster)
+     ═══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-2">
+  <div class="module-page">
+    <div class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="backToLanding()">&larr; &Uuml;bersicht</button>
+        <span class="nav-title">D1.3 &mdash; Satzmuster f&uuml;r Klausuren</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-2"></div></div>
+          <span class="nav-progress-text" id="prog-text-2">0 / 5</span>
+        </div>
+      </div>
+    </div>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">D1.3 &middot; Fachsprache</div>
+        <h1>Satzmuster<br>f&uuml;r Klausuren</h1>
+        <p class="hero-sub">Klausurtaugliche Formulierungen sicher anwenden</p>
+        <div class="hero-meta">
+          <span class="meta-chip"><span class="val">D1.3</span> Modul</span>
+          <span class="meta-chip"><span class="val">Level 1</span> Grundlagen</span>
+          <span class="meta-chip"><span class="val">20 min</span> Dauer</span>
+        </div>
+        <div class="glass" style="text-align:left; margin-top:32px;">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:10px;">Kompetenzen</div>
+          <ul style="list-style:none; padding:0; display:flex; flex-direction:column; gap:8px;">
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kennst feste Satzmuster f&uuml;r typische Klausuraufgaben</li>
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst physikalische Gr&ouml;&szlig;en korrekt in Sätzen beschreiben</li>
+            <li style="display:flex; align-items:baseline; gap:8px; color:var(--ink);"><span style="color:var(--ok); font-weight:700;">&#10003;</span> Du kannst Diagramme und Formeln sprachlich pr&auml;zise auswerten</li>
+          </ul>
+        </div>
+        <button class="btn-continue" onclick="unlockChapter(2,'ch2-muster')">Los geht's &darr;</button>
+      </section>
+
+      <!-- CH 1: Satzmuster-Sammlung -->
+      <section class="chapter locked" id="ch2-muster">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Satzmuster-Sammlung</h2></div>
+
+        <div class="muster-group reveal"><div class="muster-group-header"><h3>Kr&auml;fte beschreiben</h3></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Gewichtskraft berechnen</div><div class="mc-template">&bdquo;Die Gewichtskraft des <span class="mc-fill">[K&ouml;rpers]</span> betr&auml;gt $F_G = m \cdot g = $ <span class="mc-fill">[m]</span> kg $ \cdot$ 10 m/s&sup2; $= $ <span class="mc-fill">[FG]</span> N.&ldquo;</div><div class="mc-example">&rarr; &bdquo;Die Gewichtskraft des Autos betr&auml;gt $F_G = 1500 \cdot 10 = 15\,000$ N.&ldquo;</div></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Beschleunigung aus Kraft</div><div class="mc-template">&bdquo;Die resultierende Kraft <span class="mc-fill">[F]</span> N erzeugt beim K&ouml;rper der Masse <span class="mc-fill">[m]</span> kg eine Beschleunigung von $a = F/m = $ <span class="mc-fill">[a]</span> m/s&sup2;.&ldquo;</div></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Kr&auml;ftegleichgewicht</div><div class="mc-template">&bdquo;Da alle Kr&auml;fte sich aufheben ($\Sigma F = 0$), bleibt der K&ouml;rper in <span class="mc-fill">[Ruhe / gleichf&ouml;rmiger Bewegung]</span>.&ldquo;</div></div>
+        </div>
+
+        <div class="muster-group reveal"><div class="muster-group-header"><h3>Bewegungen beschreiben</h3></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Gleichf&ouml;rmige Bewegung (s-t-Diagramm)</div><div class="mc-template">&bdquo;Das s-t-Diagramm zeigt eine Gerade mit der Steigung $v = \Delta s / \Delta t = $ <span class="mc-fill">[v]</span> m/s. Der K&ouml;rper bewegt sich gleichf&ouml;rmig.&ldquo;</div></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Beschleunigte Bewegung</div><div class="mc-template">&bdquo;Das s-t-Diagramm zeigt eine Parabel &rarr; die Geschwindigkeit w&auml;chst &rarr; der K&ouml;rper ist gleichm&auml;&szlig;ig beschleunigt. $a = 2k = $ <span class="mc-fill">[a]</span> m/s&sup2;.&ldquo;</div></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Weg aus v-t-Diagramm</div><div class="mc-template">&bdquo;Die Fl&auml;che unter dem v-t-Graphen entspricht dem Weg: $s = v \cdot t = $ <span class="mc-fill">[s]</span> m.&ldquo;</div></div>
+        </div>
+
+        <div class="muster-group reveal"><div class="muster-group-header"><h3>Energie &amp; Arbeit</h3></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Energieumwandlung</div><div class="mc-template">&bdquo;Beim <span class="mc-fill">[Vorgang]</span> wird <span class="mc-fill">[Energieform 1]</span> in <span class="mc-fill">[Energieform 2]</span> umgewandelt. $E_\text{ges} = \text{const}$.&ldquo;</div><div class="mc-example">&rarr; &bdquo;Beim Bremsen wird kinetische Energie in W&auml;rmeenergie umgewandelt.&ldquo;</div></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Arbeit berechnen</div><div class="mc-template">&bdquo;Die Arbeit betr&auml;gt $W = F \cdot s = $ <span class="mc-fill">[F]</span> N $ \cdot $ <span class="mc-fill">[s]</span> m $= $ <span class="mc-fill">[W]</span> J.&ldquo;</div></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Leistung</div><div class="mc-template">&bdquo;Die Leistung betr&auml;gt $P = W / t = $ <span class="mc-fill">[W]</span> J $/ $ <span class="mc-fill">[t]</span> s $= $ <span class="mc-fill">[P]</span> W.&ldquo;</div></div>
+        </div>
+
+        <div class="muster-group reveal"><div class="muster-group-header"><h3>Diagramme auswerten</h3></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Steigung ablesen</div><div class="mc-template">&bdquo;Die Steigung ergibt sich aus $k = \Delta y / \Delta x = $ <span class="mc-fill">[Wert]</span> <span class="mc-fill">[Einheit]</span>.&ldquo;</div></div>
+          <div class="muster-card"><div class="mc-label-m">Muster: Graphentyp benennen</div><div class="mc-template">&bdquo;Der Graph ist eine <span class="mc-fill">[Gerade / Parabel / Hyperbel]</span>, was auf eine <span class="mc-fill">[lineare / quadratische]</span> Abh&auml;ngigkeit hinweist.&ldquo;</div></div>
+        </div>
+
+        <button class="btn-continue" onclick="unlockChapter(2,'ch2-exercises')">Weiter zu den &Uuml;bungen &darr;</button>
+      </section>
+
+      <!-- CH 2: Übungen -->
+      <section class="chapter locked" id="ch2-exercises">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">&Uuml;bungsaufgaben</h2></div>
+
+        <div class="exercise-card" id="ex2-0"><div class="ex-header"><span class="ex-num">1</span><span class="ex-title">s-t-Diagramm auswerten</span><span class="ex-tag">Grundlagen</span></div><div class="ex-body"><p class="ex-question">Ein s-t-Diagramm zeigt eine Gerade. Welche Formulierung ist <strong>korrekt und vollst&auml;ndig</strong>?</p><div class="mc-options"><button class="mc-opt" onclick="mcSelect(this,false,'Gerade im s-t-Diagramm bedeutet gleichf&ouml;rmige Bewegung, keine Beschleunigung.','2-0')">&bdquo;Das s-t-Diagramm zeigt eine Gerade mit der Steigung $a = \Delta v / \Delta t = 3$ m/s&sup2;. Der K&ouml;rper wird gleichm&auml;&szlig;ig beschleunigt.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,true,'Richtig! Steigung = Geschwindigkeit, korrekte Einheit, Bewegungstyp benannt.','2-0')">&bdquo;Das s-t-Diagramm zeigt eine Gerade mit der Steigung $v = \Delta s / \Delta t = 3$ m/s. Der K&ouml;rper bewegt sich gleichf&ouml;rmig.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'Die Steigung hat die richtige Zahl, aber die Einheit ist falsch und es fehlt der Bewegungstyp.','2-0')">&bdquo;Das s-t-Diagramm zeigt eine Gerade mit der Steigung $F = \Delta s / \Delta t = 3$ N. Der K&ouml;rper erf&auml;hrt eine Kraft.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'Die Fl&auml;che unter dem s-t-Graphen hat keine physikalische Bedeutung &ndash; die Steigung schon.','2-0')">&bdquo;Das s-t-Diagramm zeigt eine Gerade. Die Fl&auml;che unter dem Graphen ergibt $s = 3$ m/s. Der K&ouml;rper ruht.&ldquo;</button></div><div class="fb-block" id="fb-2-0"></div></div></div>
+
+        <div class="exercise-card" id="ex2-1"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Gewichtskraft berechnen</span><span class="ex-tag">Grundlagen</span></div><div class="ex-body"><p class="ex-question">Vervollst&auml;ndige:</p><div class="scenario-box">Gegeben: $m = 5$ kg, $g = 10$ m/s&sup2;<br>&bdquo;$F_G = m \cdot g = 5 \cdot 10 = $ ___ N.&ldquo;</div><div class="answer-row"><input class="answer-input" id="inp-2-1" placeholder="Ergebnis in N" onkeydown="if(event.key==='Enter')checkEx('2-1')"><button class="btn-check" onclick="checkEx('2-1')">Pr&uuml;fen</button></div><div class="fb-block" id="fb-2-1"></div></div></div>
+
+        <div class="exercise-card" id="ex2-2"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">v-t-Diagramm interpretieren</span><span class="ex-tag">Standard</span></div><div class="ex-body"><p class="ex-question">Ein v-t-Diagramm zeigt eine horizontale Gerade. Welches Satzmuster passt?</p><div class="mc-options"><button class="mc-opt" onclick="mcSelect(this,false,'Die Fl&auml;che unter dem v-t-Graphen ergibt den Weg, nicht die Beschleunigung. Die Steigung ergibt die Beschleunigung.','2-2')">&bdquo;Die horizontale Gerade zeigt $v = $ const. Die Fl&auml;che unter dem Graphen ergibt die Beschleunigung $a = v \cdot t$.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'Die Steigung des v-t-Graphen ergibt die Beschleunigung $a$, nicht den Weg $s$.','2-2')">&bdquo;Die horizontale Gerade zeigt $v = $ const. Die Steigung des v-t-Graphen ergibt den Weg $s = \Delta v / \Delta t$.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,true,'Genau! Horizontale Gerade im v-t-Diagramm &rarr; $v$ = const &rarr; $a = 0$. Fl&auml;che = Weg.','2-2')">&bdquo;Die horizontale Gerade zeigt $v = $ const. Die Fl&auml;che unter dem Graphen ergibt den Weg $s = v \cdot t$.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'Bei einer Parabel im v-t-Diagramm w&auml;re die Beschleunigung nicht konstant. Hier ist es eine Gerade.','2-2')">&bdquo;Die horizontale Gerade zeigt eine Beschleunigung $a = $ const. Die Fl&auml;che ergibt die Kraft $F = m \cdot a$.&ldquo;</button></div><div class="fb-block" id="fb-2-2"></div></div></div>
+
+        <div class="exercise-card" id="ex2-3"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Fachbegriff erkennen</span><span class="ex-tag">Standard</span></div><div class="ex-body"><p class="ex-question">Welche Gr&ouml;&szlig;e ergibt sich aus der Steigung eines s-t-Diagramms?</p><div class="answer-row"><input class="answer-input" id="inp-2-3" placeholder="Fachbegriff ..." onkeydown="if(event.key==='Enter')checkEx('2-3')"><button class="btn-check" onclick="checkEx('2-3')">Pr&uuml;fen</button><button class="btn-hint" onclick="toggleHint('hint-2-3')">Tipp</button></div><div class="hint-box" id="hint-2-3">$v = \Delta s / \Delta t$ &ndash; das ist die Definition dieser Gr&ouml;&szlig;e.</div><div class="fb-block" id="fb-2-3"></div></div></div>
+
+        <div class="exercise-card" id="ex2-4"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Energieumwandlung beschreiben</span><span class="ex-tag">Standard</span></div><div class="ex-body"><p class="ex-question">Welcher Satz beschreibt eine <strong>Energieumwandlung</strong> korrekt?</p><div class="mc-options"><button class="mc-opt" onclick="mcSelect(this,false,'Energie geht nie verloren &ndash; sie wird immer in eine andere Form umgewandelt.','2-4')">&bdquo;Beim Bremsen geht kinetische Energie durch Reibung an der Fahrbahn verloren. Die Gesamtenergie nimmt ab.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'Hier wird eine Kraft beschrieben, aber keine Energieumwandlung.','2-4')">&bdquo;Beim Bremsen wirkt die Reibungskraft entgegen der Bewegungsrichtung mit $F_R = \mu \cdot F_N$. Der K&ouml;rper verz&ouml;gert.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,true,'Korrekt! Energieform benannt, Umwandlung erkl&auml;rt, Erhaltungssatz ber&uuml;cksichtigt.','2-4')">&bdquo;Beim Bremsen wird kinetische Energie durch Reibung in W&auml;rmeenergie umgewandelt. Die Gesamtenergie bleibt erhalten.&ldquo;</button><button class="mc-opt" onclick="mcSelect(this,false,'&bdquo;Verbraucht&ldquo; ist physikalisch falsch &ndash; Energie wird umgewandelt, nicht verbraucht.','2-4')">&bdquo;Beim Bremsen wird die kinetische Energie des K&ouml;rpers durch die Reibungskraft verbraucht. Die Energie ist danach weg.&ldquo;</button></div><div class="fb-block" id="fb-2-4"></div></div></div>
+
+        <button class="btn-continue" onclick="unlockChapter(2,'ch2-checklist')">Weiter zum Selbstcheck &darr;</button>
+      </section>
+
+      <!-- CH 3: Selbstcheck-Checkliste -->
+      <section class="chapter locked" id="ch2-checklist">
+        <div class="chapter-label"><span class="chapter-num">03</span><h2 class="chapter-title">Selbstcheck: Fachsprache</h2></div>
+        <div class="checklist-progress"><span class="cl-score" id="cl-score">0 / 10 erledigt</span><div class="cl-bar-wrap"><div class="cl-bar" id="cl-bar"></div></div></div>
+
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Ich kenne den Unterschied zwischen <strong>Masse</strong> (kg) und <strong>Gewichtskraft</strong> (N).</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Ich schreibe immer die <strong>Einheit</strong> mit an (z.&nbsp;B. 10 m/s&sup2;, nicht nur 10).</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Ich vermeide &bdquo;Energie geht verloren&ldquo; &rarr; &bdquo;Energie wird umgewandelt&ldquo;.</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Ich nutze: &bdquo;Die Steigung des s-t-Graphen ergibt $v = \Delta s / \Delta t$.&ldquo;</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Ich nutze: &bdquo;Die Fl&auml;che unter dem v-t-Graphen ergibt $s = v \cdot t$.&ldquo;</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Ich kann Kr&auml;fte korrekt beschreiben: &bdquo;Nettokraft $F$ erzeugt Beschleunigung $a = F/m$.&ldquo;</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Gerade im s-t-Diagramm = gleichf&ouml;rmig; Parabel = beschleunigt.</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Energieumwandlungen: &bdquo;[Energieform 1] wird in [Energieform 2] umgewandelt.&ldquo;</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Ich vermeide &bdquo;schnell&ldquo;, &bdquo;stark&ldquo;, &bdquo;viel Kraft&ldquo; und nenne Zahlenwerte.</div></div>
+        <div class="check-item" onclick="toggleCheck(this)"><div class="check-box">&#10003;</div><div class="check-text">Newtons 3. Gesetz: &bdquo;K&ouml;rper A &uuml;bt auf B die gleich gro&szlig;e, entgegengesetzte Kraft aus.&ldquo;</div></div>
+
+        <details class="extra-section"><summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? &mdash; Zus&auml;tzliche &Uuml;bungen<span class="extra-count">(2 weitere Aufgaben)</span></summary><div class="extra-intro"><p>Optional &mdash; z&auml;hlt nicht zum Score.</p></div>
+          <div class="exercise-card extra-card"><div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">L&uuml;ckensatz: Satzmuster anwenden</span><span class="ex-tag extra-tag">Zusatz</span></div><div class="ex-body"><p class="ex-question">Erg&auml;nze: &bdquo;Die resultierende Kraft ________ den K&ouml;rper gem&auml;&szlig; $F = m \cdot a$.&ldquo;</p><div class="answer-row"><input class="answer-input" id="inp-extra-2-0" placeholder="Verb eingeben"><button class="btn-check extra-btn" onclick="checkExtra('inp-extra-2-0','fb-extra-2-0','beschleunigt|verlangsamt')">Pr&uuml;fen</button></div><div class="fb-block" id="fb-extra-2-0"></div></div></div>
+          <div class="exercise-card extra-card"><div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Satzmuster adaptieren</span><span class="ex-tag extra-tag">Zusatz</span></div><div class="ex-body"><p class="ex-question">Schreibe einen Satz &uuml;ber die Energieumwandlung beim freien Fall nach dem Muster &bdquo;[Gr&ouml;&szlig;e] nimmt zu/ab, weil [Begr&uuml;ndung].&ldquo;</p><textarea class="answer-textarea" rows="3" placeholder="Schreibe deinen Satz ..."></textarea><button class="btn-check extra-btn" onclick="toggleSolution('sol-extra-2-1')" style="margin-top:10px;">Musterl&ouml;sung anzeigen</button><div class="solution-box" id="sol-extra-2-1" style="display:none;"><div class="solution-title">Musterl&ouml;sung</div><p>&bdquo;Die kinetische Energie nimmt zu, weil potenzielle Energie gem&auml;&szlig; dem Energieerhaltungssatz in kinetische Energie umgewandelt wird.&ldquo;</p></div></div></div>
+        </details>
+
+        <button class="btn-result" onclick="finishModule(2)">Modul abschlie&szlig;en</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODAL
+     ═══════════════════════════════════════════ -->
+<div class="modal-overlay" id="resultModal" onclick="this.classList.remove('open')">
+  <div class="modal-card" onclick="event.stopPropagation()">
+    <span class="modal-icon" id="modalIcon"></span>
+    <h2 class="modal-title" id="modalTitle">Modul abgeschlossen!</h2>
+    <div class="modal-score" id="modalScore">0 / 5</div>
+    <p class="modal-msg" id="modalMsg"></p>
+    <div class="modal-actions">
+      <button class="modal-btn primary" onclick="document.getElementById('resultModal').classList.remove('open')">Weiter &uuml;ben</button>
+      <button class="modal-btn ghost" onclick="document.getElementById('resultModal').classList.remove('open');backToLanding()">&larr; Zur&uuml;ck zur &Uuml;bersicht</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════ -->
+<script>
+// ══════════════════════════════════════════
+// SCORM 1.2 API WRAPPER
+// ══════════════════════════════════════════
+const SCORM = (() => {
+  let api = null;
+  let initialized = false;
+
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) { win = win.parent; }
+      else if (win.opener) { win = win.opener; }
+      else break;
+    }
+    return win ? win.API : null;
+  }
+
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.moduleStates) moduleStates = saved.moduleStates;
+            if (saved.exerciseStates) exerciseStates = saved.exerciseStates;
+          } catch(e) {}
+        }
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
+        }
+      }
+    } catch(e) {
+      console.log('SCORM init:', e);
+    }
+  }
+
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      const data = { moduleStates, exerciseStates };
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify(data));
+
+      let total = 0, solved = 0;
+      for (const key in exerciseStates) {
+        total++;
+        if (exerciseStates[key]) solved++;
+      }
+      const score = total > 0 ? Math.round((solved / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+
+      const allComplete = moduleStates.every(s => s);
+      if (allComplete) {
+        api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      }
+      api.LMSCommit('');
+    } catch(e) {
+      console.log('SCORM save:', e);
+    }
+  }
+
+  function finish() {
+    if (!api || !initialized) return;
+    try {
+      save();
+      api.LMSFinish('');
+    } catch(e) {}
+  }
+
+  return { init, save, finish };
+})();
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let moduleStates = [false, false, false];
+let exerciseStates = {};
+let currentScreen = 'landing';
+
+const WEBHOOK_URL = "https://hook.eu2.make.com/ucp5woga4t7shqejvtys8vfm94ikf411";
+
+// Exercise definitions per module
+const exercises = {
+  // Module 0 (D1.1): MC, MC, text, text, MC
+  '0-0': { type: 'mc' },
+  '0-1': { type: 'mc' },
+  '0-2': { answers: 'm*g|m·g|mg|fg=mg|f_g=m*g|f_g=mg|g*m|g·m|gm', ok: 'Richtig! $F_G = m \\cdot g$' },
+  '0-3': { answers: 'j|joule', ok: 'Richtig! Joule (J)' },
+  '0-4': { type: 'mc' },
+  // Module 1 (D1.2): MC, MC, MC, text, text
+  '1-0': { type: 'mc' },
+  '1-1': { type: 'mc' },
+  '1-2': { type: 'mc' },
+  '1-3': { answers: 'gewichtskraft|gravitationskraft|fg|schwerkraft|erdanziehungskraft|erdanziehung|gravitation|die gewichtskraft|die gravitationskraft|die schwerkraft', ok: 'Richtig! Die Gewichtskraft $F_G$' },
+  '1-4': { answers: 'umgewandelt|umgesetzt|umgeformt|verwandelt', ok: 'Richtig! Energie wird umgewandelt.' },
+  // Module 2 (D1.3): MC, text, MC, text, MC
+  '2-0': { type: 'mc' },
+  '2-1': { answers: '50|50.0|50n', ok: 'Richtig! $F_G = 5 \\cdot 10 = 50$ N' },
+  '2-2': { type: 'mc' },
+  '2-3': { answers: 'geschwindigkeit|v|velocity', ok: 'Richtig! Die Geschwindigkeit $v$' },
+  '2-4': { type: 'mc' },
+};
+
+const exCounts = [5, 5, 5];
+
+// ══════════════════════════════════════════
+// NORMALIZE
+// ══════════════════════════════════════════
+function normalize(v) {
+  return v.trim().replace(/\s+/g, '').toLowerCase().replace(/,/g, '.').replace(/[·×]/g, '*').replace(/([a-z])\./g, '$1*');
+}
+
+// ══════════════════════════════════════════
+// MC SELECT
+// ══════════════════════════════════════════
+function mcSelect(el, isCorrect, explanation, key) {
+  if (exerciseStates[key] !== undefined) return;
+  const card = document.getElementById('ex' + key);
+  const fb = document.getElementById('fb-' + key);
+  const opts = el.closest('.mc-options').querySelectorAll('.mc-opt');
+  opts.forEach(o => o.style.pointerEvents = 'none');
+
+  if (isCorrect) {
+    el.classList.add('selected-correct');
+    fb.className = 'fb-block correct';
+    fb.innerHTML = explanation;
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    el.classList.add('selected-wrong');
+    opts.forEach(o => {
+      if (o.getAttribute('onclick') && o.getAttribute('onclick').indexOf(',true,') !== -1) {
+        o.classList.add('reveal-correct');
+      }
+    });
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = explanation;
+    card.classList.add('wrong-state');
+    exerciseStates[key] = false;
+  }
+
+  const mod = parseInt(key.split('-')[0]);
+  updateModuleProgress(mod);
+  SCORM.save();
+  if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) MathJax.typesetPromise([fb]);
+}
+
+// ══════════════════════════════════════════
+// TEXT CHECK
+// ══════════════════════════════════════════
+function checkEx(key) {
+  if (exerciseStates[key] !== undefined) return;
+  const def = exercises[key];
+  if (!def || !def.answers) return;
+
+  const inp = document.getElementById('inp-' + key);
+  const fb = document.getElementById('fb-' + key);
+  const card = document.getElementById('ex' + key);
+  const val = normalize(inp.value);
+  if (!val) return;
+
+  const accepted = def.answers.split('|').map(normalize);
+  const correct = accepted.some(a => val === a);
+
+  if (correct) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = def.ok || 'Richtig!';
+    inp.classList.add('correct');
+    inp.disabled = true;
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = 'Nicht ganz &mdash; nutze den Tipp.';
+    inp.classList.add('incorrect');
+    card.classList.add('wrong-state');
+    exerciseStates[key] = false;
+  }
+
+  const mod = parseInt(key.split('-')[0]);
+  updateModuleProgress(mod);
+  SCORM.save();
+  if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) MathJax.typesetPromise([fb]);
+}
+
+// ══════════════════════════════════════════
+// EXTRA (no score)
+// ══════════════════════════════════════════
+function checkExtra(inputId, fbId, patterns) {
+  const inp = document.getElementById(inputId);
+  const fb = document.getElementById(fbId);
+  if (!inp || !fb) return;
+  const val = normalize(inp.value);
+  const ok = patterns.toLowerCase().split('|').some(p => val === normalize(p));
+  if (ok) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    inp.classList.add('correct');
+    inp.disabled = true;
+  } else if (val.length > 0) {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Noch nicht ganz.';
+    inp.classList.add('incorrect');
+  }
+}
+
+function toggleSolution(id) {
+  const el = document.getElementById(id);
+  if (el) el.style.display = (el.style.display === 'none' || !el.style.display) ? 'block' : 'none';
+}
+
+function toggleHint(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ══════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════
+function updateModuleProgress(mod) {
+  let solved = 0;
+  for (let i = 0; i < exCounts[mod]; i++) {
+    if (exerciseStates[mod + '-' + i] === true) solved++;
+  }
+  const pct = Math.round((solved / exCounts[mod]) * 100);
+  const fill = document.getElementById('prog-fill-' + mod);
+  const text = document.getElementById('prog-text-' + mod);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = solved + ' / ' + exCounts[mod];
+}
+
+function updateOverallProgress() {
+  const done = moduleStates.filter(s => s).length;
+  const fill = document.getElementById('overall-fill');
+  const label = document.getElementById('overall-label');
+  if (fill) fill.style.width = (done / 3 * 100) + '%';
+  if (label) label.textContent = done + ' / 3';
+
+  for (let i = 0; i < 3; i++) {
+    const card = document.getElementById('card-' + i);
+    const status = document.getElementById('status-' + i);
+    if (moduleStates[i]) {
+      card.classList.add('completed');
+      status.textContent = 'Erledigt';
+      status.classList.add('done');
+    }
+  }
+}
+
+// ══════════════════════════════════════════
+// SCREEN MANAGEMENT
+// ══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+
+  const canvas = document.getElementById('rain-canvas');
+  if (id === 'screen-landing') {
+    canvas.classList.remove('dimmed', 'hidden');
+  } else {
+    canvas.classList.add('hidden');
+  }
+}
+
+function openModule(idx) {
+  currentScreen = 'mod-' + idx;
+  showScreen('screen-mod-' + idx);
+  updateModuleProgress(idx);
+  if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+    MathJax.typesetPromise([document.getElementById('screen-mod-' + idx)]);
+  }
+}
+
+function backToLanding() {
+  currentScreen = 'landing';
+  showScreen('screen-landing');
+  updateOverallProgress();
+}
+
+function finishModule(idx) {
+  moduleStates[idx] = true;
+  SCORM.save();
+
+  // Count solved exercises for this module
+  let solved = 0;
+  for (let i = 0; i < exCounts[idx]; i++) {
+    if (exerciseStates[idx + '-' + i] === true) solved++;
+  }
+  const total = exCounts[idx];
+  const icons = ['\ud83d\ude15','\ud83d\ude42','\ud83d\ude0a','\ud83d\ude0a','\ud83c\udf89','\ud83c\udf89'];
+  const msgs = [
+    'Noch nicht alle richtig \u2014 wiederhole die Lernkarten.',
+    'Ein guter Anfang!',
+    'Gut gemacht!',
+    'Gut gemacht! Fast alles richtig.',
+    'Sehr gut!',
+    'Perfekt! Alle Aufgaben gel\u00f6st!'
+  ];
+
+  document.getElementById('modalIcon').textContent = icons[solved] || '\ud83c\udfc1';
+  document.getElementById('modalScore').textContent = solved + ' / ' + total;
+  document.getElementById('modalMsg').textContent = msgs[solved] || 'Weiter so!';
+  document.getElementById('modalTitle').textContent = solved === total ? 'Modul abgeschlossen!' : 'Zwischenstand';
+  document.getElementById('resultModal').classList.add('open');
+}
+
+// ══════════════════════════════════════════
+// CHAPTER UNLOCK
+// ══════════════════════════════════════════
+function unlockChapter(mod, chapterId) {
+  const chapter = document.getElementById(chapterId);
+  if (!chapter || !chapter.classList.contains('locked')) return;
+  chapter.classList.remove('locked');
+  chapter.classList.add('unlocking');
+  setTimeout(() => {
+    chapter.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    chapter.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+    if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) MathJax.typesetPromise([chapter]);
+  }, 100);
+}
+
+// ══════════════════════════════════════════
+// SCROLL REVEAL
+// ══════════════════════════════════════════
+const revealObserver = new IntersectionObserver(entries => {
+  entries.forEach(e => {
+    if (e.isIntersecting) e.target.classList.add('visible');
+  });
+}, { threshold: 0.15 });
+document.querySelectorAll('.reveal').forEach(el => revealObserver.observe(el));
+
+// ══════════════════════════════════════════
+// FLASHCARDS (D1.1)
+// ══════════════════════════════════════════
+const fcCards = [
+  { term:'Kraft', symbol:'$F$', def:'Gerichtete physikalische Gr\u00f6\u00dfe, die einen K\u00f6rper beschleunigt oder verformt', einheit:'Newton (N = kg\u00b7m/s\u00b2)' },
+  { term:'Masse', symbol:'$m$', def:'Ma\u00df f\u00fcr die Tr\u00e4gheit eines K\u00f6rpers \u2013 unver\u00e4nderlich', einheit:'Kilogramm (kg)' },
+  { term:'Geschwindigkeit', symbol:'$v$', def:'Zur\u00fcckgelegter Weg pro Zeiteinheit: $v = s/t$', einheit:'m/s' },
+  { term:'Beschleunigung', symbol:'$a$', def:'\u00c4nderung der Geschwindigkeit pro Zeiteinheit: $a = \\Delta v / \\Delta t$', einheit:'m/s\u00b2' },
+  { term:'Gewichtskraft', symbol:'$F_G$', def:'Kraft, mit der die Erde einen K\u00f6rper anzieht: $F_G = m \\cdot g$', einheit:'Newton (N)' },
+  { term:'Tr\u00e4gheit', symbol:'\u2014', def:'Eigenschaft von K\u00f6rpern, ihren Bewegungszustand ohne \u00e4u\u00dfere Kraft beizubehalten', einheit:'(Eigenschaft, keine Einheit)' },
+  { term:'Arbeit', symbol:'$W$', def:'Kraft mal Weg in Kraftrichtung: $W = F \\cdot s$', einheit:'Joule (J)' },
+  { term:'Energie', symbol:'$E$', def:'F\u00e4higkeit eines Systems, Arbeit zu verrichten', einheit:'Joule (J)' },
+  { term:'Leistung', symbol:'$P$', def:'Arbeit pro Zeiteinheit: $P = W/t$', einheit:'Watt (W)' },
+  { term:'Impuls', symbol:'$p$', def:'Produkt aus Masse und Geschwindigkeit: $p = m \\cdot v$', einheit:'kg\u00b7m/s' }
+];
+let currentCard = 0;
+let cardFlipped = false;
+const seen = new Set();
+
+function buildDots() {
+  const c = document.getElementById('fc-dots');
+  c.innerHTML = '';
+  fcCards.forEach((_, i) => {
+    const d = document.createElement('div');
+    d.className = 'fc-dot' + (i === currentCard ? ' active' : '') + (seen.has(i) && i !== currentCard ? ' done' : '');
+    c.appendChild(d);
+  });
+}
+
+function showCard(n) {
+  cardFlipped = false;
+  document.getElementById('flashcard').classList.remove('flipped');
+  currentCard = n;
+  seen.add(n);
+  document.getElementById('fc-term').textContent = fcCards[n].term;
+  document.getElementById('fc-symbol').innerHTML = fcCards[n].symbol;
+  document.getElementById('fc-def').innerHTML = fcCards[n].def;
+  document.getElementById('fc-einheit').textContent = 'Einheit: ' + fcCards[n].einheit;
+  document.getElementById('fc-num').textContent = n + 1;
+  document.getElementById('fc-prev').disabled = n === 0;
+  document.getElementById('fc-next').disabled = n === fcCards.length - 1;
+  buildDots();
+  if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) MathJax.typesetPromise([document.getElementById('flashcard')]);
+}
+
+function flipCard() {
+  cardFlipped = !cardFlipped;
+  document.getElementById('flashcard').classList.toggle('flipped', cardFlipped);
+}
+function nextCard() { if (currentCard < fcCards.length - 1) showCard(currentCard + 1); }
+function prevCard() { if (currentCard > 0) showCard(currentCard - 1); }
+
+// ══════════════════════════════════════════
+// GLOSSAR (D1.1)
+// ══════════════════════════════════════════
+function filterGlossar(cat, btn) {
+  document.querySelectorAll('.cat-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
+  document.querySelectorAll('.glossar-item').forEach(item => {
+    item.style.display = (cat === 'alle' || item.dataset.cat === cat) ? '' : 'none';
+  });
+}
+function searchGlossar(q) {
+  q = q.toLowerCase();
+  document.querySelectorAll('.glossar-item').forEach(item => {
+    item.style.display = item.textContent.toLowerCase().includes(q) ? '' : 'none';
+  });
+}
+
+// ══════════════════════════════════════════
+// CHECKLIST (D1.3)
+// ══════════════════════════════════════════
+let checkedCount = 0;
+const TOTAL_CHECKS = 10;
+function toggleCheck(item) {
+  item.classList.toggle('checked');
+  checkedCount += item.classList.contains('checked') ? 1 : -1;
+  document.getElementById('cl-score').textContent = checkedCount + ' / ' + TOTAL_CHECKS + ' erledigt';
+  document.getElementById('cl-bar').style.width = (checkedCount / TOTAL_CHECKS * 100) + '%';
+}
+
+// ══════════════════════════════════════════
+// RAINING LETTERS ANIMATION
+// ══════════════════════════════════════════
+(() => {
+  const canvas = document.getElementById('rain-canvas');
+  const ctx = canvas.getContext('2d');
+  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789$=+*/<>{}[]()#@!?';
+  const drops = [];
+  const TOTAL_DROPS = 200;
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+  }
+  resize();
+  window.addEventListener('resize', resize);
+
+  for (let i = 0; i < TOTAL_DROPS; i++) {
+    drops.push({
+      x: Math.random() * canvas.width,
+      y: Math.random() * canvas.height,
+      speed: 0.3 + Math.random() * 1.2,
+      char: chars[Math.floor(Math.random() * chars.length)],
+      size: 14 + Math.random() * 8,
+      opacity: 0.08 + Math.random() * 0.25
+    });
+  }
+
+  let frame = 0;
+  function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    frame++;
+
+    drops.forEach((d, i) => {
+      d.y += d.speed;
+      if (d.y > canvas.height + 20) {
+        d.y = -20;
+        d.x = Math.random() * canvas.width;
+        d.char = chars[Math.floor(Math.random() * chars.length)];
+      }
+
+      // Occasional green glow
+      const glow = (frame + i * 7) % 180 < 8;
+      if (glow) {
+        ctx.fillStyle = '#00ff00';
+        ctx.shadowColor = '#00ff00';
+        ctx.shadowBlur = 12;
+        ctx.globalAlpha = 0.7;
+      } else {
+        ctx.fillStyle = '#6b7280';
+        ctx.shadowBlur = 0;
+        ctx.globalAlpha = d.opacity;
+      }
+
+      ctx.font = d.size + 'px "IBM Plex Mono", monospace';
+      ctx.fillText(d.char, d.x, d.y);
+      ctx.shadowBlur = 0;
+    });
+
+    ctx.globalAlpha = 1;
+    requestAnimationFrame(animate);
+  }
+  animate();
+})();
+
+// ══════════════════════════════════════════
+// TEXT SCRAMBLE TITLE
+// ══════════════════════════════════════════
+class TextScramble {
+  constructor(el) {
+    this.el = el;
+    this.chars = '!<>-_\\/[]{}=+*^?#';
+    this.frame = 0;
+    this.queue = [];
+    this.resolve = null;
+    this.frameRequest = null;
+  }
+
+  setText(newText) {
+    const oldText = this.el.innerText;
+    const length = Math.max(oldText.length, newText.length);
+    const promise = new Promise(r => this.resolve = r);
+    this.queue = [];
+    for (let i = 0; i < length; i++) {
+      const from = oldText[i] || '';
+      const to = newText[i] || '';
+      const start = Math.floor(Math.random() * 20);
+      const end = start + Math.floor(Math.random() * 20);
+      this.queue.push({ from, to, start, end });
+    }
+    cancelAnimationFrame(this.frameRequest);
+    this.frame = 0;
+    this.update();
+    return promise;
+  }
+
+  update() {
+    let output = '';
+    let complete = 0;
+    for (let i = 0; i < this.queue.length; i++) {
+      const { from, to, start, end } = this.queue[i];
+      let char;
+      if (this.frame >= end) {
+        complete++;
+        char = to;
+      } else if (this.frame >= start) {
+        char = this.chars[Math.floor(Math.random() * this.chars.length)];
+        char = '<span class="dud">' + char + '</span>';
+      } else {
+        char = from;
+      }
+      output += char;
+    }
+    this.el.innerHTML = output;
+    if (complete === this.queue.length) {
+      if (this.resolve) this.resolve();
+    } else {
+      this.frameRequest = requestAnimationFrame(() => this.update());
+      this.frame++;
+    }
+  }
+}
+
+const phrases = [
+  'FACHSPRACHE',
+  'Physik verstehen',
+  'Begriffe beherrschen',
+  'Pr\u00e4zise formulieren',
+  'Klausur bestehen'
+];
+
+const scrambleEl = document.getElementById('scramble-title');
+if (scrambleEl) {
+  const fx = new TextScramble(scrambleEl);
+  let counter = 0;
+  const nextPhrase = () => {
+    fx.setText(phrases[counter]).then(() => {
+      setTimeout(nextPhrase, 2500);
+    });
+    counter = (counter + 1) % phrases.length;
+  };
+  setTimeout(nextPhrase, 1500);
+}
+
+// ══════════════════════════════════════════
+// KI FEEDBACK
+// ══════════════════════════════════════════
+async function getKIFeedback(textareaId, feedbackDivId, systemPrompt) {
+  const ta = document.getElementById(textareaId);
+  const fb = document.getElementById(feedbackDivId);
+  const text = ta.value.trim();
+  if (!text) { fb.innerHTML = '<span style="color:#f59e0b">Bitte schreibe zuerst deinen Text.</span>'; return; }
+  fb.innerHTML = '<span class="loading"><span class="spinner"></span> Die KI denkt nach...</span>';
+  try {
+    const res = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ system_prompt: systemPrompt, user_text: text })
+    });
+    const raw = await res.text();
+    let feedbackText = '';
+    try {
+      const json = JSON.parse(raw);
+      feedbackText = json.choices?.[0]?.message?.content || json.content || raw;
+    } catch(e) { feedbackText = raw; }
+    fb.innerHTML = '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:16px;line-height:1.7;white-space:pre-wrap;color:#e2e8f0">' + feedbackText + '</div>';
+  } catch(err) {
+    fb.innerHTML = '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:16px;color:#fca5a5">Fehler: ' + err.message + '</div>';
+  }
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('DOMContentLoaded', () => {
+  SCORM.init();
+  showCard(0);
+  updateOverallProgress();
+  // Restore exercise states in UI
+  for (const key in exerciseStates) {
+    if (exerciseStates[key] === true) {
+      const card = document.getElementById('ex' + key);
+      if (card) card.classList.add('solved');
+      const inp = document.getElementById('inp-' + key);
+      if (inp) { inp.disabled = true; inp.classList.add('correct'); }
+    }
+    const mod = parseInt(key.split('-')[0]);
+    updateModuleProgress(mod);
+  }
+  if (typeof MathJax !== 'undefined' && MathJax.typesetPromise) {
+    MathJax.typesetPromise();
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  SCORM.finish();
+});
+</script>
+</body>
+</html>

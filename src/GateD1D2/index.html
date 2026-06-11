@@ -1,0 +1,464 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gate-Test D1→D2 | Physik-Bootcamp</title>
+<script>MathJax={tex:{inlineMath:[['$','$']]},startup:{typeset:false}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+/* ── iOS-Kompatibilität ─────────────────────────────────────── */
+/* font-size 16px verhindert Auto-Zoom beim Tippen auf iPhone */
+input, textarea, select { font-size: 16px; }
+/* dvh-Fallback: Safari-Adressleiste nicht in Viewport einrechnen */
+html { height: 100%; }
+body { min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
+/* Touch-Action für alle klickbaren Elemente */
+button, [onclick], .tab-btn, .exercise, .drag-item, .drop-zone {
+  touch-action: manipulation;
+}
+/* Momentum-Scrolling für iOS */
+.tab-content, .scrollable-area, .modal-body {
+  -webkit-overflow-scrolling: touch;
+  overflow-y: auto;
+}
+/* backdrop-filter mit webkit-Präfix */
+.modal-overlay, .blur-bg {
+  -webkit-backdrop-filter: blur(8px);
+  backdrop-filter: blur(8px);
+}
+/* ── Ende iOS-Kompatibilität ────────────────────────────────── */
+/* Touch-Geräte: Hover-States nicht kleben lassen */
+@media (hover: none) and (pointer: coarse) {
+  .mc-opt:hover, .mc-option:hover, .btn-primary:hover, .btn-ghost:hover,
+  .tab-btn:hover, .check-btn:hover, .opt-label:hover, .drag-item:hover,
+  .sym-btn:hover, .btn-check:hover, .op-btn:hover, .cl-item:hover,
+  .check-item:hover, .flashcard:hover, .graph-choice:hover {
+    /* Reset to base state on touch */
+    filter: none;
+    transform: none;
+  }
+}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;min-height:100vh min-height:100dvh;}
+.header{background:linear-gradient(135deg,#7e22ce,#9333ea);color:#fff;padding:20px max(16px,calc(50% - 364px))}
+.header-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.track-badge{background:rgba(255,255,255,.2);color:#fff}
+.gate-badge{background:#fff;color:#7e22ce}
+.header h1{font-size:1.4rem;font-weight:700;margin-top:8px}
+.header p{font-size:.9rem;opacity:.9;margin-top:4px}
+.threshold{display:inline-block;background:rgba(255,255,255,.15);border:1px solid rgba(255,255,255,.3);border-radius:8px;padding:6px 14px;font-size:.85rem;margin-top:10px}
+.section-divider{background:#faf5ff;border-radius:10px;padding:12px 16px;margin:20px 0 12px;border-left:4px solid #9333ea}
+.section-divider h3{font-size:.95rem;font-weight:700;color:#7e22ce}
+.section-divider p{font-size:.82rem;color:#6b21a8;margin-top:4px}
+.container{max-width:760px;margin:0 auto;padding:24px 16px}
+.q-card{background:#fff;border-radius:12px;padding:20px;margin-bottom:16px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #e2e8f0;transition:border-color .2s}
+.q-card.answered{border-left-color:#9333ea}
+.q-num{font-size:.8rem;font-weight:700;color:#7e22ce;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.q-text{font-size:1rem;line-height:1.6;margin-bottom:14px}
+.options{display:flex;flex-direction:column;gap:8px}
+.opt{display:flex;align-items:flex-start;gap:10px;padding:10px 14px;border-radius:8px;border:1px solid #e2e8f0;cursor:pointer;transition:all .15s;font-size:.95rem;line-height:1.5}
+.opt:hover{background:#faf5ff;border-color:#c084fc}
+.opt input[type=radio]{accent-color:#9333ea;width:16px;height:16px;flex-shrink:0;margin-top:2px}
+.opt.selected{background:#faf5ff;border-color:#9333ea}
+.text-input-area{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:10px 14px;font-size:.95rem;font-family:inherit;outline:none;resize:vertical;min-height:80px}
+.text-input-area:focus{border-color:#9333ea;box-shadow:0 0 0 3px rgba(147,51,234,.1)}
+.hint-text{font-size:.82rem;color:#64748b;margin-top:6px}
+.submit-area{text-align:center;padding:16px 0 32px}
+.btn-submit{background:#7e22ce;color:#fff;border:none;border-radius:10px;padding:14px 40px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(126,34,206,.3)}
+.btn-submit:hover{background:#6b21a8;transform:translateY(-1px)}
+.btn-submit:disabled{background:#94a3b8;cursor:not-allowed;transform:none;box-shadow:none}
+.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;margin:16px 0 24px;overflow:hidden}
+.progress-fill{height:100%;background:#9333ea;border-radius:3px;transition:width .3s}
+.progress-info{font-size:.85rem;color:#64748b;text-align:right;margin-top:-20px;margin-bottom:20px}
+.modal-overlay{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:100;align-items:center;justify-content:center;padding:16px}
+.modal-overlay.show{display:flex}
+.modal{background:#fff;border-radius:16px;padding:32px;max-width:500px;width:100%;text-align:center;box-shadow:0 8px 32px rgba(0,0,0,.15);animation:popIn .3s ease;max-height:90vh;max-height:90dvh;overflow-y:auto}
+@keyframes popIn{from{transform:scale(.85);opacity:0}to{transform:scale(1);opacity:1}}
+.score-big{font-size:3rem;font-weight:800;margin:12px 0 4px}
+.score-label{font-size:.9rem;color:#64748b;margin-bottom:16px}
+.result-badge{display:inline-block;padding:8px 24px;border-radius:24px;font-size:1rem;font-weight:700;margin-bottom:16px}
+.pass{background:#dcfce7;color:#166534}
+.fail{background:#fee2e2;color:#991b1b}
+.result-text{font-size:.95rem;color:#475569;line-height:1.6;margin-bottom:16px}
+.btn-retry{background:#f1f5f9;color:#475569;border:none;border-radius:8px;padding:10px 24px;font-size:.95rem;font-weight:600;cursor:pointer}
+.answers-review{margin-top:16px;text-align:left}
+.review-item{padding:8px 12px;margin-bottom:6px;border-radius:8px;font-size:.88rem;display:flex;align-items:flex-start;gap:8px}
+.review-item.correct{background:#f0fdf4;border-left:3px solid #22c55e}
+.review-item.wrong{background:#fef2f2;border-left:3px solid #ef4444}
+.version-footer{text-align:center;padding:12px;font-size:.75rem;color:#94a3b8}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <span class="badge track-badge">Track D – Fachsprache</span>
+    <span class="badge gate-badge">Gate-Test</span>
+  </div>
+  <h1>Gate-Test: Level 1 → Level 2</h1>
+  <p>Grundbegriffe der Mechanik &amp; präzise Formulierungen</p>
+  <div class="threshold">🎯 Ziel: mindestens <strong>11 von 15 Punkten</strong> (70 %)</div>
+</div>
+
+<div class="container">
+  <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+  <div class="progress-info" id="progInfo">0 von 15 beantwortet</div>
+
+  <div class="section-divider">
+    <h3>📚 Teil 1: Begriffe-Quiz (Aufgaben 1–12)</h3>
+    <p>Wähle die beste Definition oder Erklärung.</p>
+  </div>
+
+  <!-- Q1 -->
+  <div class="q-card" id="qc1">
+    <div class="q-num">Aufgabe 1</div>
+    <div class="q-text">Was ist die physikalische Definition von <strong>Geschwindigkeit</strong>?</div>
+    <div class="options" id="opts1">
+      <label class="opt"><input type="radio" name="q1" value="0" onchange="pick(1,0)"> Kraft pro Masse: $v = F / m$ (in N/kg)</label>
+      <label class="opt"><input type="radio" name="q1" value="1" onchange="pick(1,1)"> Weg mal Zeit: $v = s \cdot t$ (in m·s)</label>
+      <label class="opt"><input type="radio" name="q1" value="2" onchange="pick(1,2)"> Weg pro Zeit: $v = s / t$ (in m/s)</label>
+      <label class="opt"><input type="radio" name="q1" value="3" onchange="pick(1,3)"> Impuls pro Weg: $v = p / s$ (in kg/s)</label>
+    </div>
+  </div>
+
+  <!-- Q2 -->
+  <div class="q-card" id="qc2">
+    <div class="q-num">Aufgabe 2</div>
+    <div class="q-text">Was bedeutet <strong>Beschleunigung</strong>?</div>
+    <div class="options" id="opts2">
+      <label class="opt"><input type="radio" name="q2" value="0" onchange="pick(2,0)"> Änderung des Weges pro Zeiteinheit: $a = \Delta s / \Delta t$ (in m/s)</label>
+      <label class="opt"><input type="radio" name="q2" value="1" onchange="pick(2,1)"> Änderung der Geschwindigkeit pro Zeiteinheit: $a = \Delta v / \Delta t$ (in m/s²)</label>
+      <label class="opt"><input type="radio" name="q2" value="2" onchange="pick(2,2)"> Produkt aus Masse und Geschwindigkeit: $a = m \cdot v$ (in kg·m/s)</label>
+      <label class="opt"><input type="radio" name="q2" value="3" onchange="pick(2,3)"> Quotient aus Kraft und Geschwindigkeit: $a = F / v$ (in kg/s)</label>
+    </div>
+  </div>
+
+  <!-- Q3 -->
+  <div class="q-card" id="qc3">
+    <div class="q-num">Aufgabe 3</div>
+    <div class="q-text">Was beschreibt <strong>gleichförmige Bewegung</strong>?</div>
+    <div class="options" id="opts3">
+      <label class="opt"><input type="radio" name="q3" value="0" onchange="pick(3,0)"> Beschleunigung konstant und positiv, $a > 0$</label>
+      <label class="opt"><input type="radio" name="q3" value="1" onchange="pick(3,1)"> Geschwindigkeit nimmt linear zu, $v = a \cdot t$</label>
+      <label class="opt"><input type="radio" name="q3" value="2" onchange="pick(3,2)"> Geschwindigkeit konstant, $a = 0$</label>
+      <label class="opt"><input type="radio" name="q3" value="3" onchange="pick(3,3)"> Weg konstant, $v = 0$ und $a = 0$</label>
+    </div>
+  </div>
+
+  <!-- Q4 -->
+  <div class="q-card" id="qc4">
+    <div class="q-num">Aufgabe 4</div>
+    <div class="q-text">Was ist <strong>Masse</strong> in der Physik?</div>
+    <div class="options" id="opts4">
+      <label class="opt"><input type="radio" name="q4" value="0" onchange="pick(4,0)"> Gewichtskraft des Körpers – SI-Einheit: Newton (N)</label>
+      <label class="opt"><input type="radio" name="q4" value="1" onchange="pick(4,1)"> Maß für Trägheit eines Körpers – SI-Einheit: Kilogramm (kg)</label>
+      <label class="opt"><input type="radio" name="q4" value="2" onchange="pick(4,2)"> Widerstand gegen Reibung – SI-Einheit: Pascal (Pa)</label>
+      <label class="opt"><input type="radio" name="q4" value="3" onchange="pick(4,3)"> Energieinhalt eines Körpers – SI-Einheit: Joule (J)</label>
+    </div>
+  </div>
+
+  <!-- Q5 -->
+  <div class="q-card" id="qc5">
+    <div class="q-num">Aufgabe 5</div>
+    <div class="q-text">Was ist der Unterschied zwischen <strong>Masse</strong> und <strong>Gewichtskraft</strong>?</div>
+    <div class="options" id="opts5">
+      <label class="opt"><input type="radio" name="q5" value="0" onchange="pick(5,0)"> Masse in Newton, Gewichtskraft in kg: $F_G = m / g$</label>
+      <label class="opt"><input type="radio" name="q5" value="1" onchange="pick(5,1)"> Masse in kg, Gewichtskraft in Newton: $F_G = m \cdot g$</label>
+      <label class="opt"><input type="radio" name="q5" value="2" onchange="pick(5,2)"> Kein Unterschied – beide in kg: $F_G = m$</label>
+      <label class="opt"><input type="radio" name="q5" value="3" onchange="pick(5,3)"> Masse ortsabhängig, Gewichtskraft überall gleich: $m = F_G \cdot g$</label>
+    </div>
+  </div>
+
+  <!-- Q6 -->
+  <div class="q-card" id="qc6">
+    <div class="q-num">Aufgabe 6</div>
+    <div class="q-text">Was bedeutet <strong>Trägheit</strong>?</div>
+    <div class="options" id="opts6">
+      <label class="opt"><input type="radio" name="q6" value="0" onchange="pick(6,0)"> Kraft, die der Bewegungsrichtung eines Körpers entgegenwirkt</label>
+      <label class="opt"><input type="radio" name="q6" value="1" onchange="pick(6,1)"> Eigenschaft eines Körpers, Änderungen seines Bewegungszustands zu widerstehen</label>
+      <label class="opt"><input type="radio" name="q6" value="2" onchange="pick(6,2)"> Energieform eines ruhenden Körpers im Gravitationsfeld</label>
+      <label class="opt"><input type="radio" name="q6" value="3" onchange="pick(6,3)"> Beschleunigung eines Körpers bei konstanter Krafteinwirkung</label>
+    </div>
+  </div>
+
+  <!-- Q7 -->
+  <div class="q-card" id="qc7">
+    <div class="q-num">Aufgabe 7</div>
+    <div class="q-text">Welche Einheit hat die Kraft?</div>
+    <div class="options" id="opts7">
+      <label class="opt"><input type="radio" name="q7" value="0" onchange="pick(7,0)"> Joule (J) = kg·m²/s²</label>
+      <label class="opt"><input type="radio" name="q7" value="1" onchange="pick(7,1)"> Watt (W) = kg·m²/s³</label>
+      <label class="opt"><input type="radio" name="q7" value="2" onchange="pick(7,2)"> Newton (N) = kg·m/s²</label>
+      <label class="opt"><input type="radio" name="q7" value="3" onchange="pick(7,3)"> Pascal (Pa) = kg/(m·s²)</label>
+    </div>
+  </div>
+
+  <!-- Q8 -->
+  <div class="q-card" id="qc8">
+    <div class="q-num">Aufgabe 8</div>
+    <div class="q-text">Was ist <strong>Impuls</strong>?</div>
+    <div class="options" id="opts8">
+      <label class="opt"><input type="radio" name="q8" value="0" onchange="pick(8,0)"> Produkt aus Masse und Beschleunigung: $p = m \cdot a$ (in kg·m/s²)</label>
+      <label class="opt"><input type="radio" name="q8" value="1" onchange="pick(8,1)"> Produkt aus Masse und Geschwindigkeit: $p = m \cdot v$ (in kg·m/s)</label>
+      <label class="opt"><input type="radio" name="q8" value="2" onchange="pick(8,2)"> Quotient aus Energie und Zeit: $p = E / t$ (in J/s)</label>
+      <label class="opt"><input type="radio" name="q8" value="3" onchange="pick(8,3)"> Produkt aus Kraft und Zeit: $p = F \cdot t$ (in N·s)</label>
+    </div>
+  </div>
+
+  <!-- Q9 -->
+  <div class="q-card" id="qc9">
+    <div class="q-num">Aufgabe 9</div>
+    <div class="q-text">Was ist <strong>kinetische Energie</strong>?</div>
+    <div class="options" id="opts9">
+      <label class="opt"><input type="radio" name="q9" value="0" onchange="pick(9,0)"> Lageenergie: $E_{kin} = m \cdot g \cdot h$</label>
+      <label class="opt"><input type="radio" name="q9" value="1" onchange="pick(9,1)"> Wärmeenergie: $E_{kin} = c \cdot m \cdot \Delta T$</label>
+      <label class="opt"><input type="radio" name="q9" value="2" onchange="pick(9,2)"> Bewegungsenergie: $E_{kin} = \frac{1}{2}mv^2$</label>
+      <label class="opt"><input type="radio" name="q9" value="3" onchange="pick(9,3)"> Spannenergie: $E_{kin} = \frac{1}{2} D \cdot x^2$</label>
+    </div>
+  </div>
+
+  <!-- Q10 -->
+  <div class="q-card" id="qc10">
+    <div class="q-num">Aufgabe 10</div>
+    <div class="q-text">Was ist <strong>Reibungskraft</strong>?</div>
+    <div class="options" id="opts10">
+      <label class="opt"><input type="radio" name="q10" value="0" onchange="pick(10,0)"> Resultierende Kraft in Bewegungsrichtung eines beschleunigten Körpers</label>
+      <label class="opt"><input type="radio" name="q10" value="1" onchange="pick(10,1)"> Normalkraft senkrecht zur Kontaktfläche zwischen zwei Körpern</label>
+      <label class="opt"><input type="radio" name="q10" value="2" onchange="pick(10,2)"> Kontaktkraft, die der Relativbewegung zweier Flächen entgegenwirkt</label>
+      <label class="opt"><input type="radio" name="q10" value="3" onchange="pick(10,3)"> Gravitationskraft zwischen einem Körper und der Erdoberfläche</label>
+    </div>
+  </div>
+
+  <!-- Q11 -->
+  <div class="q-card" id="qc11">
+    <div class="q-num">Aufgabe 11</div>
+    <div class="q-text">Was bedeutet <strong>gleichmäßig beschleunigte Bewegung</strong>?</div>
+    <div class="options" id="opts11">
+      <label class="opt"><input type="radio" name="q11" value="0" onchange="pick(11,0)"> Geschwindigkeit konstant, $v = \text{const}$, $a = 0$</label>
+      <label class="opt"><input type="radio" name="q11" value="1" onchange="pick(11,1)"> Beschleunigung konstant, $a = \text{const}$, $a \neq 0$</label>
+      <label class="opt"><input type="radio" name="q11" value="2" onchange="pick(11,2)"> Weg proportional zur Zeit, $s \sim t$, $v = \text{const}$</label>
+      <label class="opt"><input type="radio" name="q11" value="3" onchange="pick(11,3)"> Kraft nimmt linear zu, $F \sim t$, $a \sim t$</label>
+    </div>
+  </div>
+
+  <!-- Q12 -->
+  <div class="q-card" id="qc12">
+    <div class="q-num">Aufgabe 12</div>
+    <div class="q-text">Was ist <strong>Potenzielle Energie</strong> (Lageenergie)?</div>
+    <div class="options" id="opts12">
+      <label class="opt"><input type="radio" name="q12" value="0" onchange="pick(12,0)"> Bewegungsenergie: $E_{pot} = \frac{1}{2} m v^2$</label>
+      <label class="opt"><input type="radio" name="q12" value="1" onchange="pick(12,1)"> Lageenergie: $E_{pot} = m \cdot g \cdot h$</label>
+      <label class="opt"><input type="radio" name="q12" value="2" onchange="pick(12,2)"> Wärmeenergie: $E_{pot} = c \cdot m \cdot \Delta T$</label>
+      <label class="opt"><input type="radio" name="q12" value="3" onchange="pick(12,3)"> Arbeit: $E_{pot} = F \cdot s$</label>
+    </div>
+  </div>
+
+  <div class="section-divider">
+    <h3>✍️ Teil 2: Satz-Präzision (Aufgaben 13–15)</h3>
+    <p>Wähle die physikalisch präzisere Formulierung.</p>
+  </div>
+
+  <!-- Q13 -->
+  <div class="q-card" id="qc13">
+    <div class="q-num">Aufgabe 13</div>
+    <div class="q-text">Welcher Satz ist physikalisch präzise?</div>
+    <div class="options" id="opts13">
+      <label class="opt"><input type="radio" name="q13" value="0" onchange="pick(13,0)"> „Das Auto hat eine Kraft von $F = 3\,\text{m/s}$ und wird dadurch schneller."</label>
+      <label class="opt"><input type="radio" name="q13" value="1" onchange="pick(13,1)"> „Das Auto beschleunigt gleichmäßig mit $a = 3\,\text{m/s}^2$."</label>
+      <label class="opt"><input type="radio" name="q13" value="2" onchange="pick(13,2)"> „Das Auto bewegt sich mit einer Energie von $E = 3\,\text{m/s}^2$ vorwärts."</label>
+      <label class="opt"><input type="radio" name="q13" value="3" onchange="pick(13,3)"> „Das Auto erreicht eine Leistung von $v = 3\,\text{kW}$ auf der Straße."</label>
+    </div>
+  </div>
+
+  <!-- Q14 -->
+  <div class="q-card" id="qc14">
+    <div class="q-num">Aufgabe 14</div>
+    <div class="q-text">Welcher Satz beschreibt das zweite Newtonsche Gesetz korrekt und präzise?</div>
+    <div class="options" id="opts14">
+      <label class="opt"><input type="radio" name="q14" value="0" onchange="pick(14,0)"> „Die Kraft ist gleich dem Produkt aus Masse und Geschwindigkeit: $F = m \cdot v$."</label>
+      <label class="opt"><input type="radio" name="q14" value="1" onchange="pick(14,1)"> „Die Kraft ist gleich dem Quotienten aus Masse und Beschleunigung: $F = m / a$."</label>
+      <label class="opt"><input type="radio" name="q14" value="2" onchange="pick(14,2)"> „Die Nettokraft ist gleich dem Produkt aus Masse und Beschleunigung: $F = m \cdot a$."</label>
+      <label class="opt"><input type="radio" name="q14" value="3" onchange="pick(14,3)"> „Die Kraft ist gleich dem Produkt aus Masse und Weg: $F = m \cdot s$."</label>
+    </div>
+  </div>
+
+  <!-- Q15 -->
+  <div class="q-card" id="qc15">
+    <div class="q-num">Aufgabe 15</div>
+    <div class="q-text">Welcher Satz beschreibt gleichförmige Bewegung korrekt?</div>
+    <div class="options" id="opts15">
+      <label class="opt"><input type="radio" name="q15" value="0" onchange="pick(15,0)"> „Beschleunigung konstant und positiv, Geschwindigkeit nimmt linear zu."</label>
+      <label class="opt"><input type="radio" name="q15" value="1" onchange="pick(15,1)"> „Resultierende Kraft ist positiv, $F_{res} > 0$, der Körper bewegt sich."</label>
+      <label class="opt"><input type="radio" name="q15" value="2" onchange="pick(15,2)"> „Geschwindigkeit konstant, Beschleunigung gleich null."</label>
+      <label class="opt"><input type="radio" name="q15" value="3" onchange="pick(15,3)"> „Geschwindigkeit proportional zur Zeit, $v = a \cdot t$ mit $a > 0$."</label>
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <button class="btn-submit" id="btnSubmit" onclick="submitTest()" disabled>Test auswerten</button>
+    <p style="font-size:.82rem;color:#94a3b8;margin-top:8px">Beantworte alle 15 Aufgaben, um auszuwerten.</p>
+  </div>
+</div>
+
+<div class="modal-overlay" id="modal">
+  <div class="modal">
+    <div style="font-size:2.5rem" id="modalIcon">🎉</div>
+    <div class="score-big" id="scoreDisplay">0/15</div>
+    <div class="score-label">Punkte erreicht</div>
+    <div class="result-badge" id="resultBadge">Bestanden ✓</div>
+    <div class="result-text" id="resultText"></div>
+    <div class="answers-review" id="reviewList"></div>
+    <div style="margin-top:16px"><button class="btn-retry" onclick="retryTest()">🔄 Nochmal versuchen</button></div>
+  </div>
+</div>
+
+<div class="version-footer">Gate-Test D1→D2 · v4</div>
+
+<script>
+/* ── SCORM 1.2 API Wrapper ──────────────────────────────────── */
+const SCORM = {
+  api: null,
+  findAPI(win) {
+    let attempts = 0;
+    while (win && !win.API && attempts < 10) {
+      if (win.parent && win.parent !== win) { win = win.parent; }
+      else if (win.opener) { win = win.opener; }
+      else { break; }
+      attempts++;
+    }
+    return win && win.API ? win.API : null;
+  },
+  init() {
+    this.api = this.findAPI(window);
+    if (this.api) {
+      this.api.LMSInitialize('');
+      // Restore bookmark
+      const loc = this.api.LMSGetValue('cmi.core.lesson_location');
+      if (loc) {
+        try {
+          const saved = JSON.parse(loc);
+          if (saved && saved.a) {
+            for (let i = 0; i < TOTAL; i++) { answers[i] = saved.a[i] !== undefined ? saved.a[i] : null; }
+            restoreUI();
+          }
+        } catch(e) {}
+      }
+    }
+  },
+  save(score, max, passed) {
+    if (!this.api) return;
+    this.api.LMSSetValue('cmi.core.score.raw', String(score));
+    this.api.LMSSetValue('cmi.core.score.max', String(max));
+    this.api.LMSSetValue('cmi.core.score.min', '0');
+    this.api.LMSSetValue('cmi.core.lesson_status', passed ? 'passed' : 'failed');
+    // Save bookmark
+    this.api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({a: answers}));
+    this.api.LMSCommit('');
+  },
+  setInteraction(index, id, type, response, correct, result) {
+    if (!this.api) return;
+    const pre = 'cmi.interactions.' + index;
+    this.api.LMSSetValue(pre + '.id', id);
+    this.api.LMSSetValue(pre + '.type', type);
+    this.api.LMSSetValue(pre + '.student_response', response);
+    this.api.LMSSetValue(pre + '.correct_responses.0.pattern', correct);
+    this.api.LMSSetValue(pre + '.result', result);
+  },
+  finish() {
+    if (!this.api) return;
+    // Save bookmark before leaving
+    this.api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({a: answers}));
+    this.api.LMSCommit('');
+    this.api.LMSFinish('');
+  }
+};
+
+/* ── Quiz Logic ─────────────────────────────────────────────── */
+const CORRECT=[2,1,2,1,1,1,2,1,2,2,1,1,1,2,2];
+const THRESHOLD=11;const TOTAL=15;
+const answers=new Array(TOTAL).fill(null);
+
+function pick(q,val){
+  answers[q-1]=val;
+  document.querySelectorAll(`#opts${q} .opt`).forEach((o,i)=>o.classList.toggle('selected',i===val));
+  document.getElementById('qc'+q).classList.add('answered');
+  updateProgress();
+  // Save bookmark on each pick
+  if (SCORM.api) {
+    SCORM.api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({a: answers}));
+    SCORM.api.LMSCommit('');
+  }
+}
+
+function updateProgress(){
+  const done=answers.filter(a=>a!==null).length;
+  document.getElementById('progFill').style.width=(done/TOTAL*100)+'%';
+  document.getElementById('progInfo').textContent=done+' von '+TOTAL+' beantwortet';
+  document.getElementById('btnSubmit').disabled=done<TOTAL;
+}
+
+function restoreUI() {
+  for (let i = 0; i < TOTAL; i++) {
+    if (answers[i] !== null) {
+      const opts = document.querySelectorAll(`#opts${i+1} .opt`);
+      if (opts[answers[i]]) {
+        opts[answers[i]].querySelector('input').checked = true;
+        opts[answers[i]].classList.add('selected');
+      }
+      document.getElementById('qc'+(i+1)).classList.add('answered');
+    }
+  }
+  updateProgress();
+}
+
+function submitTest(){
+  let score=0;
+  const LABELS=['Geschwindigkeit definieren','Beschleunigung definieren','Gleichförmige Bewegung','Masse definieren','Masse vs. Gewichtskraft','Trägheit definieren','Einheit Kraft','Impuls definieren','Kinetische Energie','Reibungskraft','Gleichmäßig beschleunigt','Potenzielle Energie','Präziser Satz: Beschleunigung','2. Newtonsches Gesetz','Gleichförmige Bewegung formulieren'];
+  const results=[];
+  for(let i=0;i<TOTAL;i++){
+    const ok=answers[i]===CORRECT[i];
+    if(ok)score++;
+    results.push({ok,label:LABELS[i]});
+  }
+  const passed=score>=THRESHOLD;
+
+  // SCORM: track interactions and save score
+  results.forEach((r, i) => {
+    SCORM.setInteraction(i, `gate-d1d2-q${i+1}`, 'choice',
+      String(answers[i]), String(CORRECT[i]), r.ok ? 'correct' : 'wrong');
+  });
+  SCORM.save(score, TOTAL, passed);
+
+  document.getElementById('scoreDisplay').textContent=score+'/'+TOTAL;
+  document.getElementById('modalIcon').textContent=passed?'🎉':'💪';
+  document.getElementById('resultBadge').textContent=passed?'Bestanden ✓':'Noch nicht bestanden';
+  document.getElementById('resultBadge').className='result-badge '+(passed?'pass':'fail');
+  document.getElementById('resultText').textContent=passed
+    ?'Gut gemacht! Du beherrschst die Grundbegriffe der Mechanik und kannst präzise formulieren. Weiter zu Level 2!'
+    :'Du hast '+score+' von '+THRESHOLD+' benötigten Punkten. Wiederhole die Begriffe aus Level 1 – schau besonders auf die Definitionen!';
+  const rl=document.getElementById('reviewList');
+  rl.innerHTML=results.map(r=>`<div class="review-item ${r.ok?'correct':'wrong'}">${r.ok?'✅':'❌'} ${r.label}</div>`).join('');
+  document.getElementById('modal').classList.add('show');
+  MathJax.typesetPromise([rl]);
+}
+
+function retryTest(){
+  answers.fill(null);
+  document.querySelectorAll('input[type=radio]').forEach(r=>r.checked=false);
+  document.querySelectorAll('.opt').forEach(o=>o.classList.remove('selected'));
+  document.querySelectorAll('.q-card').forEach(c=>c.classList.remove('answered'));
+  document.getElementById('progFill').style.width='0%';
+  document.getElementById('progInfo').textContent='0 von 15 beantwortet';
+  document.getElementById('btnSubmit').disabled=true;
+  document.getElementById('modal').classList.remove('show');
+  window.scrollTo(0,0);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  MathJax.startup.promise.then(() => MathJax.typesetPromise());
+  SCORM.init();
+});
+window.addEventListener('beforeunload', () => SCORM.finish());
+</script>
+</body>
+</html>

@@ -1,0 +1,2504 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Physik Bootcamp — Track A1: Formeln umstellen</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #6668a0;
+
+  --accent: #818cf8;
+  --accent-bright: #a5b4fc;
+  --accent-glow: rgba(129, 140, 248, 0.35);
+  --accent-deep: #4f46e5;
+  --accent-subtle: rgba(99, 102, 241, 0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-glow: rgba(52, 211, 153, 0.25);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(129, 140, 248, 0.15);
+  --border-strong: rgba(129, 140, 248, 0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px;
+  --r-md: 14px;
+  --r-lg: 20px;
+  --r-xl: 28px;
+  --r-full: 100px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+  min-height: 100vh;
+  min-height: 100dvh;
+}
+input, textarea, select { font-size: 16px; }
+button, [onclick] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ══════════════════════════════════════════
+   SHADER CANVAS
+   ══════════════════════════════════════════ */
+#shader-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+#shader-canvas.dimmed { opacity: 0.15; }
+#shader-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREEN SYSTEM
+   ══════════════════════════════════════════ */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.screen.active {
+  display: block;
+  animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   LANDING PAGE
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+}
+
+.landing-header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(79, 70, 229, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: var(--r-full);
+  margin-bottom: 24px;
+}
+
+.landing-title {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-bright) 50%, #c084fc 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+  text-shadow: none;
+}
+
+.landing-sub {
+  color: var(--ink-muted);
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+
+.landing-meta {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.l-meta {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+.l-meta .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* Overall progress */
+.overall-progress {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+.op-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.op-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.op-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), #c084fc);
+  border-radius: var(--r-full);
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.op-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Module cards grid */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 920px;
+}
+
+.mod-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.mod-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--r-lg);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+.mod-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--glow);
+}
+.mod-card:hover::before { opacity: 1; }
+
+.mod-card.completed {
+  border-color: var(--ok-border);
+}
+.mod-card.completed::after {
+  content: '✓';
+  position: absolute;
+  top: 16px;
+  right: 16px;
+  width: 28px;
+  height: 28px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0c0c1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+
+.mc-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.mc-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.mc-desc {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.mc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mc-time {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+}
+.mc-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--accent-subtle);
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+.mc-status.done {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: var(--ok-border);
+}
+
+/* Staggered card entrance */
+.mod-card:nth-child(1) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+.mod-card:nth-child(2) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+.mod-card:nth-child(3) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+.mod-card:nth-child(4) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.8s both; }
+.mod-card:nth-child(5) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.9s both; }
+
+/* ══════════════════════════════════════════
+   MODULE PAGE LAYOUT
+   ══════════════════════════════════════════ */
+.module-page {
+  background: var(--bg-deep);
+  position: relative;
+}
+
+/* Grid bg */
+.module-page::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(99,102,241,0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+  pointer-events: none;
+  z-index: 0;
+}
+
+/* Top navbar */
+.top-nav {
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+}
+.top-nav-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+}
+.btn-back {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.nav-title {
+  font-size: 0.85rem;
+  font-weight: 600;
+  color: var(--ink);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.nav-progress {
+  margin-left: auto;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex-shrink: 0;
+}
+.nav-progress-track {
+  width: 80px;
+  height: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.nav-progress-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  border-radius: var(--r-full);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-progress-text {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Module content area */
+.mod-content {
+  position: relative;
+  z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px 100px;
+}
+
+/* ── HERO ── */
+.hero {
+  padding: 52px 0 36px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  margin-bottom: 18px;
+  border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  font-weight: 900;
+  line-height: 1.1;
+  letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero-sub {
+  color: var(--ink-muted);
+  font-size: 1rem;
+  max-width: 480px;
+  margin: 0 auto 20px;
+}
+.hero-meta {
+  display: flex;
+  justify-content: center;
+  gap: 20px;
+  flex-wrap: wrap;
+}
+.meta-chip {
+  font-size: 0.78rem;
+  color: var(--ink-muted);
+  font-weight: 500;
+}
+.meta-chip .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* Hero formula card */
+.hero-formula {
+  margin: 32px auto 0;
+  max-width: 320px;
+  background: var(--bg-surface);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-xl);
+  padding: 24px 28px;
+  position: relative;
+  overflow: hidden;
+}
+.hero-formula::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--r-xl);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 60%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  pointer-events: none;
+}
+.formula-tag {
+  position: absolute;
+  top: 8px;
+  right: 12px;
+  font-family: var(--mono);
+  font-size: 0.6rem;
+  color: var(--ink-dim);
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+}
+.hero-formula .MathJax { font-size: 1.5rem; }
+
+/* ── CHAPTER ── */
+.chapter {
+  margin-top: 52px;
+  scroll-margin-top: 72px;
+}
+.chapter-label {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin-bottom: 18px;
+}
+.chapter-num {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  background: var(--accent-subtle);
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+  border: 1px solid var(--border);
+}
+.chapter-title {
+  font-size: 1.4rem;
+  font-weight: 800;
+  color: #fff;
+  letter-spacing: -0.02em;
+}
+
+/* ── GLASS CARD ── */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: border-color 0.3s;
+}
+.glass:hover { border-color: var(--border-strong); }
+.glass p { color: var(--ink); }
+.glass p + p { margin-top: 10px; }
+.glass strong { color: #fff; font-weight: 700; }
+
+/* ── VARIABLE GRID ── */
+.var-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  margin: 18px 0;
+}
+@media (max-width: 500px) { .var-grid { grid-template-columns: 1fr; } }
+.var-tile {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 16px;
+  text-align: center;
+  transition: all 0.3s;
+}
+.var-tile:hover {
+  border-color: var(--accent);
+  box-shadow: var(--glow);
+  transform: translateY(-2px);
+}
+.var-tile .sym {
+  font-size: 1.7rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+  display: block;
+  margin-bottom: 4px;
+}
+.var-tile .name {
+  font-size: 0.82rem;
+  color: var(--ink);
+  font-weight: 600;
+}
+.var-tile .unit {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--ink-dim);
+  margin-top: 2px;
+}
+
+/* ── WALKTHROUGH ── */
+.wt-container {
+  border-radius: var(--r-lg);
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  overflow: hidden;
+}
+.wt-progress-dots {
+  display: flex;
+  justify-content: center;
+  gap: 8px;
+  padding: 14px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.wt-dot {
+  width: 8px; height: 8px;
+  border-radius: 50%;
+  background: var(--ink-dim);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+}
+.wt-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 10px var(--accent-glow);
+  width: 24px;
+  border-radius: var(--r-full);
+}
+.wt-slide { display: none; padding: 28px; animation: slideIn 0.35s ease; }
+.wt-slide.active { display: block; }
+@keyframes slideIn {
+  from { opacity: 0; transform: translateX(20px); }
+  to { opacity: 1; transform: translateX(0); }
+}
+.wt-slide-tag {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 10px;
+}
+.wt-slide h3 {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+}
+.wt-slide p { color: var(--ink-muted); margin-bottom: 8px; }
+.wt-formula-box {
+  background: var(--bg-deep);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  padding: 18px;
+  text-align: center;
+  margin: 14px 0;
+  position: relative;
+}
+.wt-formula-box::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 20%; right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.wt-nav-bar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 14px 28px;
+  background: var(--bg-card);
+  border-top: 1px solid var(--border);
+}
+.wt-arrow {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 8px 16px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+}
+.wt-arrow:hover { border-color: var(--accent); color: var(--accent); }
+.wt-arrow:disabled { opacity: 0.3; cursor: not-allowed; }
+.wt-arrow.primary {
+  background: var(--accent-deep);
+  border-color: var(--accent);
+  color: #fff;
+}
+.wt-counter {
+  font-family: var(--mono);
+  font-size: 0.68rem;
+  color: var(--ink-dim);
+}
+
+/* ── CALLOUTS ── */
+.callout {
+  display: flex;
+  gap: 10px;
+  border-radius: var(--r-md);
+  padding: 14px;
+  margin: 14px 0;
+}
+.callout.warn {
+  background: var(--warn-bg);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+.callout.warn .text { color: var(--warn); font-size: 0.85rem; }
+.callout.warn .text strong { color: #fcd34d; }
+.callout.success {
+  background: var(--ok-bg);
+  border: 1px solid rgba(52, 211, 153, 0.2);
+}
+.callout.success .text { color: var(--ok); font-size: 0.85rem; }
+.callout.success .text strong { color: #6ee7b7; }
+.callout.info {
+  background: var(--accent-subtle);
+  border: 1px solid var(--border);
+}
+.callout.info .text { color: var(--accent-bright); font-size: 0.85rem; }
+.callout .icon { font-size: 1.1rem; flex-shrink: 0; }
+
+/* ── EXERCISE ── */
+.exercise {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+  transition: border-color 0.3s;
+}
+.exercise.correct { border-color: var(--ok-border); }
+.exercise.wrong { border-color: var(--err-border); }
+.ex-label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  color: var(--accent);
+  text-transform: uppercase;
+  letter-spacing: 0.15em;
+  margin-bottom: 8px;
+}
+.ex-question {
+  font-size: 1rem;
+  font-weight: 600;
+  color: #fff;
+  margin-bottom: 14px;
+}
+.ex-input-row {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.ex-input {
+  flex: 1;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 10px 14px;
+  color: var(--ink);
+  font-family: var(--mono);
+  font-size: 0.9rem;
+  outline: none;
+  transition: border-color 0.2s;
+}
+.ex-input:focus { border-color: var(--accent); }
+.ex-input::placeholder { color: var(--ink-dim); }
+.ex-unit {
+  font-family: var(--mono);
+  font-size: 0.85rem;
+  color: var(--ink-dim);
+  flex-shrink: 0;
+}
+.ex-btn {
+  background: var(--accent-deep);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 0.8rem;
+  font-weight: 700;
+  padding: 10px 20px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.ex-btn:hover { background: var(--accent); }
+.ex-btn:disabled { opacity: 0.4; cursor: not-allowed; }
+.ex-feedback {
+  margin-top: 10px;
+  padding: 10px 14px;
+  border-radius: var(--r-sm);
+  font-size: 0.82rem;
+  font-weight: 500;
+  display: none;
+}
+.ex-feedback.show { display: block; }
+.ex-feedback.ok {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border: 1px solid var(--ok-border);
+}
+.ex-feedback.err {
+  background: var(--err-bg);
+  color: var(--err);
+  border: 1px solid var(--err-border);
+}
+.ex-hint {
+  margin-top: 8px;
+  font-size: 0.78rem;
+  color: var(--ink-dim);
+  display: none;
+  cursor: pointer;
+}
+.ex-hint.show { display: block; }
+.ex-hint::before { content: '💡 '; }
+
+/* ── ERROR DISPLAY (A1.5) ── */
+.error-demo {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+}
+.error-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.error-comparison {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 14px 0;
+}
+@media (max-width: 500px) { .error-comparison { grid-template-columns: 1fr; } }
+.error-box {
+  padding: 16px;
+  border-radius: var(--r-md);
+  text-align: center;
+}
+.error-box.wrong-box {
+  background: var(--err-bg);
+  border: 1px solid var(--err-border);
+}
+.error-box.right-box {
+  background: var(--ok-bg);
+  border: 1px solid var(--ok-border);
+}
+.error-box .label {
+  font-family: var(--mono);
+  font-size: 0.62rem;
+  text-transform: uppercase;
+  letter-spacing: 0.12em;
+  margin-bottom: 6px;
+}
+.wrong-box .label { color: var(--err); }
+.right-box .label { color: var(--ok); }
+.error-box .formula { font-size: 1.1rem; margin-top: 4px; }
+.error-explanation {
+  font-size: 0.85rem;
+  color: var(--ink-muted);
+  margin-top: 12px;
+  line-height: 1.6;
+}
+
+/* ── SCALE VISUALIZATION (A1.2) ── */
+.scale-vis {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 20px;
+  padding: 28px;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin: 16px 0;
+}
+.scale-side {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  padding: 18px 28px;
+  text-align: center;
+  min-width: 100px;
+  font-size: 1.2rem;
+  font-weight: 700;
+  color: var(--accent-bright);
+  transition: all 0.3s;
+}
+.scale-eq {
+  font-size: 2rem;
+  font-weight: 900;
+  color: var(--accent);
+  text-shadow: 0 0 20px var(--accent-glow);
+}
+
+/* ── OPERATIONS GRID (A1.2) ── */
+.ops-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 12px;
+  margin: 16px 0;
+}
+@media (max-width: 500px) { .ops-grid { grid-template-columns: 1fr; } }
+.op-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  padding: 20px;
+  transition: all 0.3s;
+}
+.op-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-2px);
+}
+.op-icon {
+  font-size: 1.4rem;
+  margin-bottom: 8px;
+}
+.op-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+}
+.op-desc {
+  font-size: 0.8rem;
+  color: var(--ink-muted);
+  margin-bottom: 10px;
+}
+.op-example {
+  font-family: var(--mono);
+  font-size: 0.78rem;
+  color: var(--accent-bright);
+  background: var(--bg-deep);
+  padding: 8px 12px;
+  border-radius: var(--r-sm);
+  border: 1px solid var(--border);
+}
+
+/* ── STRATEGY TABLE ── */
+.strat-table {
+  width: 100%;
+  border-collapse: separate;
+  border-spacing: 0;
+  margin: 16px 0;
+  font-size: 0.85rem;
+}
+.strat-table th {
+  background: var(--bg-card);
+  color: var(--accent-bright);
+  font-weight: 700;
+  padding: 10px 14px;
+  text-align: left;
+  border-bottom: 1px solid var(--border);
+}
+.strat-table th:first-child { border-radius: var(--r-md) 0 0 0; }
+.strat-table th:last-child { border-radius: 0 var(--r-md) 0 0; }
+.strat-table td {
+  padding: 10px 14px;
+  border-bottom: 1px solid var(--border);
+  color: var(--ink);
+}
+.strat-table tr:last-child td { border-bottom: none; }
+.strat-table tr:last-child td:first-child { border-radius: 0 0 0 var(--r-md); }
+.strat-table tr:last-child td:last-child { border-radius: 0 0 var(--r-md) 0; }
+.strat-table code {
+  font-family: var(--mono);
+  font-size: 0.8rem;
+  color: var(--accent-bright);
+}
+
+/* ── COMPETENCY CHECK ── */
+.competencies {
+  margin-top: 48px;
+  padding: 28px;
+  background: linear-gradient(135deg, rgba(79, 70, 229, 0.1) 0%, rgba(52, 211, 153, 0.05) 100%);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-xl);
+}
+.comp-title {
+  font-size: 1.1rem;
+  font-weight: 800;
+  color: #fff;
+  margin-bottom: 16px;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.comp-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 8px 0;
+}
+.comp-check {
+  width: 20px; height: 20px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0c0c1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 0.65rem;
+  font-weight: 800;
+  flex-shrink: 0;
+  margin-top: 2px;
+}
+.comp-text {
+  font-size: 0.88rem;
+  color: var(--ink);
+}
+
+/* ── MODULE COMPLETE BUTTON ── */
+.module-complete-section {
+  text-align: center;
+  margin-top: 40px;
+  padding: 32px;
+}
+.btn-complete {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: linear-gradient(135deg, var(--accent-deep), #7c3aed);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-family: var(--font);
+  font-size: 1rem;
+  font-weight: 700;
+  padding: 14px 32px;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  transition: all 0.3s;
+  box-shadow: 0 4px 20px rgba(79, 70, 229, 0.4);
+}
+.btn-complete:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 30px rgba(79, 70, 229, 0.6);
+}
+.btn-next {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.85rem;
+  font-weight: 600;
+  padding: 10px 20px;
+  border-radius: var(--r-full);
+  cursor: pointer;
+  margin-top: 12px;
+  transition: all 0.2s;
+}
+.btn-next:hover { border-color: var(--accent); color: var(--accent); }
+
+/* ── FORMULA STEPS (A1.4) ── */
+.formula-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+.formula-card .fc-icon { font-size: 1.6rem; margin-bottom: 8px; }
+.formula-card .fc-name {
+  font-size: 0.95rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 12px;
+}
+.formula-card .fc-formula {
+  font-size: 1.2rem;
+  margin-bottom: 12px;
+}
+.formula-card .fc-transforms {
+  display: flex;
+  gap: 8px;
+  justify-content: center;
+  flex-wrap: wrap;
+}
+.fc-chip {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  background: var(--bg-deep);
+  border: 1px solid var(--border);
+  padding: 4px 12px;
+  border-radius: var(--r-full);
+  color: var(--accent-bright);
+}
+
+/* ── FLOATING SIDE NAV ── */
+.float-nav {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  z-index: 100;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
+.nav-dot {
+  width: 10px; height: 10px;
+  border-radius: 50%;
+  background: var(--ink-dim);
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s;
+  position: relative;
+}
+.nav-dot.active {
+  background: var(--accent);
+  box-shadow: 0 0 12px var(--accent-glow);
+  transform: scale(1.4);
+}
+.nav-dot::after {
+  content: attr(data-label);
+  position: absolute;
+  right: 20px;
+  top: 50%;
+  transform: translateY(-50%);
+  background: var(--bg-card);
+  color: var(--ink);
+  font-size: 0.68rem;
+  font-weight: 500;
+  padding: 3px 10px;
+  border-radius: var(--r-sm);
+  white-space: nowrap;
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 0.2s;
+  border: 1px solid var(--border);
+}
+.nav-dot:hover::after { opacity: 1; }
+@media (max-width: 900px) { .float-nav { display: none; } }
+
+/* ══════════════════════════════════════════
+   RESPONSIVE
+   ══════════════════════════════════════════ */
+@media (max-width: 600px) {
+  .landing { padding: 24px 16px; }
+  .module-grid { grid-template-columns: 1fr; }
+  .landing-meta { gap: 16px; }
+  .mod-content { padding: 0 16px 80px; }
+  .top-nav-inner { gap: 10px; }
+  .nav-progress-track { width: 50px; }
+}
+</style>
+</head>
+<body>
+
+<!-- ═══════════════════════════════════════════
+     SHADER CANVAS
+     ═══════════════════════════════════════════ -->
+<canvas id="shader-canvas"></canvas>
+
+<!-- ═══════════════════════════════════════════
+     SCREEN 0: LANDING PAGE
+     ═══════════════════════════════════════════ -->
+<div id="screen-landing" class="screen active">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">⚛ Physik Bootcamp · Track A</div>
+      <h1 class="landing-title">Formeln<br>umstellen</h1>
+      <p class="landing-sub">Lerne Schritt für Schritt, wie du physikalische Formeln sicher umstellst — von der Grundidee bis zur Fehleranalyse.</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">5</span> Module</span>
+        <span class="l-meta">Level <span class="val">1</span> Grundlagen</span>
+        <span class="l-meta">~<span class="val">90</span> Minuten</span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track"><div class="op-fill" id="overall-fill"></div></div>
+        <span class="op-label" id="overall-label">0 / 5</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card" onclick="openModule(0)">
+        <div class="mc-num">A1.1</div>
+        <div class="mc-title">Einfache Formeln umstellen</div>
+        <div class="mc-desc">Geschwindigkeit, Weg, Zeit — und wie du jede Größe freistellen kannst</div>
+        <div class="mc-footer">
+          <span class="mc-time">⏱ 15 min</span>
+          <span class="mc-status" id="status-0">Offen</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(1)">
+        <div class="mc-num">A1.2</div>
+        <div class="mc-title">Das Gleichgewichtsprinzip</div>
+        <div class="mc-desc">Warum man bei Gleichungen immer beide Seiten gleich behandeln muss</div>
+        <div class="mc-footer">
+          <span class="mc-time">⏱ 12 min</span>
+          <span class="mc-status" id="status-1">Offen</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(2)">
+        <div class="mc-num">A1.3</div>
+        <div class="mc-title">Die Einheit verrät die Formel</div>
+        <div class="mc-desc">Vorwissen aus der Mittelstufe nutzen und weiterdenken</div>
+        <div class="mc-footer">
+          <span class="mc-time">⏱ 20 min</span>
+          <span class="mc-status" id="status-2">Offen</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(3)">
+        <div class="mc-num">A1.4</div>
+        <div class="mc-title">Übungsrunde</div>
+        <div class="mc-desc">Drei Formeln, sechs Aufgaben — von leicht bis anspruchsvoll</div>
+        <div class="mc-footer">
+          <span class="mc-time">⏱ 25 min</span>
+          <span class="mc-status" id="status-3">Offen</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(4)">
+        <div class="mc-num">A1.5</div>
+        <div class="mc-title">Fehler-Analyse</div>
+        <div class="mc-desc">Typische Umstellungsfehler erkennen und korrigieren</div>
+        <div class="mc-footer">
+          <span class="mc-time">⏱ 20 min</span>
+          <span class="mc-status" id="status-4">Offen</span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE A1.1: Einfache Formeln umstellen
+     ═══════════════════════════════════════════ -->
+<div id="screen-mod-0" class="screen module-page">
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">← Übersicht</button>
+      <span class="nav-title">A1.1 — Einfache Formeln umstellen</span>
+      <div class="nav-progress">
+        <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div>
+        <span class="nav-progress-text" id="prog-text-0">0 / 3</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mod-content">
+    <div class="hero">
+      <div class="hero-badge">📐 Track A · Formeln umstellen</div>
+      <h1>Einfache Formeln umstellen</h1>
+      <p class="hero-sub">Geschwindigkeit, Weg, Zeit — und wie du jede Größe freistellen kannst</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="val">A1.1</span>&nbsp;Modul</span>
+        <span class="meta-chip">Level <span class="val">1</span></span>
+        <span class="meta-chip"><span class="val">15</span>&nbsp;min</span>
+      </div>
+      <div class="hero-formula">
+        <span class="formula-tag">Grundformel</span>
+        <div>$$v = \frac{s}{t}$$</div>
+      </div>
+    </div>
+
+    <!-- Ch1: Was ist Formelumstellung? -->
+    <div class="chapter" id="m0-ch1">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 01</span>
+        <span class="chapter-title">Was ist Formelumstellung?</span>
+      </div>
+      <div class="glass">
+        <p>Eine Formel ist eine Gleichung zwischen physikalischen Größen. Die Formel $v = \frac{s}{t}$ beschreibt den Zusammenhang zwischen <strong>Geschwindigkeit</strong>, <strong>Weg</strong> und <strong>Zeit</strong>.</p>
+        <p>Manchmal wissen wir $v$ und $t$, suchen aber $s$ — dann müssen wir <strong>umstellen</strong>.</p>
+        <p>Wir nutzen dafür <strong>Äquivalenzumformungen</strong>: Was auf der einen Seite der Gleichung passiert, muss auch auf der anderen passieren.</p>
+      </div>
+      <div class="var-grid">
+        <div class="var-tile"><span class="sym">v</span><span class="name">Geschwindigkeit</span><span class="unit">m/s</span></div>
+        <div class="var-tile"><span class="sym">s</span><span class="name">Weg (Strecke)</span><span class="unit">m</span></div>
+        <div class="var-tile"><span class="sym">t</span><span class="name">Zeit</span><span class="unit">s</span></div>
+      </div>
+    </div>
+
+    <!-- Ch2: Walkthrough -->
+    <div class="chapter" id="m0-ch2">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 02</span>
+        <span class="chapter-title">Schritt für Schritt</span>
+      </div>
+      <div class="wt-container" id="wt-0">
+        <div class="wt-progress-dots">
+          <button class="wt-dot active" onclick="wtGo('wt-0',0)"></button>
+          <button class="wt-dot" onclick="wtGo('wt-0',1)"></button>
+          <button class="wt-dot" onclick="wtGo('wt-0',2)"></button>
+          <button class="wt-dot" onclick="wtGo('wt-0',3)"></button>
+        </div>
+        <div class="wt-slide-area">
+          <div class="wt-slide active">
+            <div class="wt-slide-tag">Schritt 1 / 4</div>
+            <h3>Ausgangssituation</h3>
+            <p>Wir haben die Formel $v = \frac{s}{t}$ und suchen <strong>s</strong>.</p>
+            <p>Das $s$ steckt im Zähler des Bruchs — wir müssen es „befreien".</p>
+            <div class="wt-formula-box">$$v = \frac{s}{t} \quad \Rightarrow \quad s = \;?$$</div>
+          </div>
+          <div class="wt-slide">
+            <div class="wt-slide-tag">Schritt 2 / 4</div>
+            <h3>Beide Seiten mit t multiplizieren</h3>
+            <p>Um den Bruch aufzulösen, multiplizieren wir <strong>beide Seiten</strong> mit $t$:</p>
+            <div class="wt-formula-box">$$v \cdot t = \frac{s}{t} \cdot t$$</div>
+            <div class="callout warn"><span class="icon">⚠️</span><span class="text"><strong>Wichtig:</strong> Immer beide Seiten gleich behandeln — sonst kippt die Gleichung!</span></div>
+          </div>
+          <div class="wt-slide">
+            <div class="wt-slide-tag">Schritt 3 / 4</div>
+            <h3>Kürzen</h3>
+            <p>Auf der rechten Seite kürzt sich $t$:</p>
+            <div class="wt-formula-box">$$v \cdot t = \frac{s \cdot \cancel{t}}{\cancel{t}} = s$$</div>
+            <div class="callout success"><span class="icon">✅</span><span class="text"><strong>Ergebnis:</strong> $s = v \cdot t$</span></div>
+          </div>
+          <div class="wt-slide">
+            <div class="wt-slide-tag">Schritt 4 / 4</div>
+            <h3>Zusammenfassung</h3>
+            <p>Aus einer Formel lassen sich alle drei Varianten ableiten:</p>
+            <div class="wt-formula-box">
+              $$v = \frac{s}{t} \qquad s = v \cdot t \qquad t = \frac{s}{v}$$
+            </div>
+          </div>
+        </div>
+        <div class="wt-nav-bar">
+          <button class="wt-arrow" onclick="wtPrev('wt-0')" disabled>← Zurück</button>
+          <span class="wt-counter">1 / 4</span>
+          <button class="wt-arrow primary" onclick="wtNext('wt-0')">Weiter →</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Ch3: Exercises -->
+    <div class="chapter" id="m0-ch3">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 03</span>
+        <span class="chapter-title">Übungsaufgaben</span>
+      </div>
+
+      <div class="exercise" id="ex-0-0">
+        <div class="ex-label">Aufgabe 1</div>
+        <div class="ex-question">Stelle $v = \frac{s}{t}$ nach $s$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">s =</span>
+          <input class="ex-input" id="inp-0-0" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(0,0)">
+          <button class="ex-btn" onclick="checkEx(0,0)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-0-0"></div>
+        <div class="ex-hint" id="hint-0-0" onclick="this.innerHTML='💡 Multipliziere beide Seiten mit t. Was passiert mit dem Bruch?'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-0-1">
+        <div class="ex-label">Aufgabe 2</div>
+        <div class="ex-question">Stelle $v = \frac{s}{t}$ nach $t$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">t =</span>
+          <input class="ex-input" id="inp-0-1" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(0,1)">
+          <button class="ex-btn" onclick="checkEx(0,1)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-0-1"></div>
+        <div class="ex-hint" id="hint-0-1" onclick="this.innerHTML='💡 Erst nach s umstellen (s = v·t), dann beide Seiten durch v dividieren.'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-0-2">
+        <div class="ex-label">Aufgabe 3</div>
+        <div class="ex-question">Ein Auto fährt mit $v = 20\;\text{m/s}$ für $t = 5\;\text{s}$. Welchen Weg $s$ legt es zurück?</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">s =</span>
+          <input class="ex-input" id="inp-0-2" placeholder="Zahlenwert…" onkeydown="if(event.key==='Enter')checkEx(0,2)">
+          <span class="ex-unit">m</span>
+          <button class="ex-btn" onclick="checkEx(0,2)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-0-2"></div>
+        <div class="ex-hint" id="hint-0-2" onclick="this.innerHTML='💡 s = v · t = 20 · 5 = ?'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-0-3">
+        <div class="ex-label">Aufgabe 4</div>
+        <div class="ex-question">Stelle $F = m \cdot a$ nach $a$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">a =</span>
+          <input class="ex-input" id="inp-0-3" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(0,3)">
+          <button class="ex-btn" onclick="checkEx(0,3)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-0-3"></div>
+        <div class="ex-hint" id="hint-0-3" onclick="this.innerHTML='💡 a wird mit m multipliziert — teile also beide Seiten durch m.'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-0-4">
+        <div class="ex-label">Aufgabe 5</div>
+        <div class="ex-question">Stelle $P = \frac{W}{t}$ nach $W$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">W =</span>
+          <input class="ex-input" id="inp-0-4" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(0,4)">
+          <button class="ex-btn" onclick="checkEx(0,4)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-0-4"></div>
+        <div class="ex-hint" id="hint-0-4" onclick="this.innerHTML='💡 Vergleiche mit v=s/t nach s: dort war es s=v·t. Ersetze s→W, v→P.'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-0-5">
+        <div class="ex-label">Aufgabe 6</div>
+        <div class="ex-question">Ein Auto fährt 600 m in 60 s. Berechne die Geschwindigkeit in m/s.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">v =</span>
+          <input class="ex-input" id="inp-0-5" placeholder="Zahlenwert…" onkeydown="if(event.key==='Enter')checkEx(0,5)">
+          <span class="ex-unit">m/s</span>
+          <button class="ex-btn" onclick="checkEx(0,5)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-0-5"></div>
+        <div class="ex-hint" id="hint-0-5" onclick="this.innerHTML='💡 v = s/t = 600/60 = ?'">💡 Tipp anzeigen</div>
+      </div>
+    </div>
+
+    <div class="competencies">
+      <div class="comp-title">🎯 Kompetenzen dieses Moduls</div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kannst $v = \frac{s}{t}$ nach $s$ und $t$ umstellen</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kennst die 3 Äquivalenzumformungen (Multiplizieren, Dividieren, Addieren/Subtrahieren)</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du erkennst, welche Größe „gesucht" ist und führst die richtige Umformung durch</span></div>
+    </div>
+
+    <div class="module-complete-section">
+      <button class="btn-complete" onclick="completeModule(0)">✓ Modul abschließen</button><br>
+      <button class="btn-next" onclick="openModule(1)">Weiter zu A1.2 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE A1.2: Das Gleichgewichtsprinzip
+     ═══════════════════════════════════════════ -->
+<div id="screen-mod-1" class="screen module-page">
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">← Übersicht</button>
+      <span class="nav-title">A1.2 — Das Gleichgewichtsprinzip</span>
+      <div class="nav-progress">
+        <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div>
+        <span class="nav-progress-text" id="prog-text-1">0 / 4</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mod-content">
+    <div class="hero">
+      <div class="hero-badge">⚖️ Track A · Formeln umstellen</div>
+      <h1>Das Gleichgewichtsprinzip</h1>
+      <p class="hero-sub">Warum man bei Gleichungen immer beide Seiten gleich behandeln muss</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="val">A1.2</span>&nbsp;Modul</span>
+        <span class="meta-chip">Level <span class="val">1</span></span>
+        <span class="meta-chip"><span class="val">12</span>&nbsp;min</span>
+      </div>
+      <div class="hero-formula">
+        <span class="formula-tag">Kernidee</span>
+        <div>$$v \cdot t = s$$</div>
+      </div>
+    </div>
+
+    <div class="chapter" id="m1-ch1">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 01</span>
+        <span class="chapter-title">Eine Gleichung ist eine Waage</span>
+      </div>
+      <div class="glass">
+        <p>Formeln umstellen bedeutet: Eine Gleichung so umformen, dass eine Variable <strong>alleine steht</strong>.</p>
+        <p>Stell dir eine Gleichung wie eine <strong>Waage im Gleichgewicht</strong> vor. Solange du auf <strong>beiden Seiten dasselbe tust</strong>, bleibt die Waage im Gleichgewicht.</p>
+      </div>
+
+      <div class="scale-vis">
+        <div class="scale-side">v · t</div>
+        <div class="scale-eq">=</div>
+        <div class="scale-side">s</div>
+      </div>
+
+      <div class="callout warn">
+        <span class="icon">⚠️</span>
+        <span class="text"><strong>Goldene Regel:</strong> Was du auf einer Seite tust, musst du auf der anderen auch tun. Erlaubt: + − × ÷ — immer auf <strong>beiden</strong> Seiten gleichzeitig.</span>
+      </div>
+    </div>
+
+    <div class="chapter" id="m1-ch2">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 02</span>
+        <span class="chapter-title">Die 4 erlaubten Umformungen</span>
+      </div>
+
+      <div class="ops-grid">
+        <div class="op-card">
+          <div class="op-icon">➕</div>
+          <div class="op-name">Addieren</div>
+          <div class="op-desc">Gleiche Zahl auf beiden Seiten addieren</div>
+          <div class="op-example">x − 3 = 7 → (+3) → x = 10</div>
+        </div>
+        <div class="op-card">
+          <div class="op-icon">➖</div>
+          <div class="op-name">Subtrahieren</div>
+          <div class="op-desc">Gleiche Zahl auf beiden Seiten subtrahieren</div>
+          <div class="op-example">x + 5 = 12 → (−5) → x = 7</div>
+        </div>
+        <div class="op-card">
+          <div class="op-icon">✖️</div>
+          <div class="op-name">Multiplizieren</div>
+          <div class="op-desc">Mit gleicher Zahl (≠ 0) multiplizieren</div>
+          <div class="op-example">x/4 = 3 → (×4) → x = 12</div>
+        </div>
+        <div class="op-card">
+          <div class="op-icon">➗</div>
+          <div class="op-name">Dividieren</div>
+          <div class="op-desc">Durch gleiche Zahl (≠ 0) dividieren</div>
+          <div class="op-example">4x = 20 → (÷4) → x = 5</div>
+        </div>
+      </div>
+
+      <div class="glass" style="margin-top:16px;">
+        <p><strong>Strategie:</strong> Welche Umformung brauche ich?</p>
+        <table class="strat-table">
+          <thead><tr><th>Situation</th><th>Beispiel</th><th>Umformung</th></tr></thead>
+          <tbody>
+            <tr><td>Variable ist addiert</td><td><code>x + 3 = 7</code></td><td>Subtrahieren (−3)</td></tr>
+            <tr><td>Variable ist subtrahiert</td><td><code>x − 5 = 10</code></td><td>Addieren (+5)</td></tr>
+            <tr><td>Variable ist multipliziert</td><td><code>3·s = 15</code></td><td>Dividieren (÷3)</td></tr>
+            <tr><td>Variable im Nenner</td><td><code>s/4 = 2</code></td><td>Multiplizieren (×4)</td></tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="chapter" id="m1-ch3">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 03</span>
+        <span class="chapter-title">Übungsaufgaben</span>
+      </div>
+
+      <div class="exercise" id="ex-1-0">
+        <div class="ex-label">Aufgabe 1</div>
+        <div class="ex-question">In $3 \cdot s = 15$ ist $s$ mit Multiplikation „gefangen". Welche Operation befreit $s$?</div>
+        <div class="ex-input-row">
+          <input class="ex-input" id="inp-1-0" placeholder="Antwort…" onkeydown="if(event.key==='Enter')checkEx(1,0)">
+          <button class="ex-btn" onclick="checkEx(1,0)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-1-0"></div>
+        <div class="ex-hint" id="hint-1-0" onclick="this.innerHTML='💡 Was ist das Gegenteil von Multiplizieren?'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-1-1">
+        <div class="ex-label">Aufgabe 2</div>
+        <div class="ex-question">Ist diese Umformung korrekt? „Aus $v = \frac{s}{t}$ wird $v + t = s$, weil ich $t$ auf beide Seiten addiert habe."</div>
+        <div class="ex-input-row">
+          <input class="ex-input" id="inp-1-1" placeholder="ja oder nein?" onkeydown="if(event.key==='Enter')checkEx(1,1)">
+          <button class="ex-btn" onclick="checkEx(1,1)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-1-1"></div>
+        <div class="ex-hint" id="hint-1-1" onclick="this.innerHTML='💡 t steht im Nenner des Bruchs. Addieren löst keinen Bruch auf — was wäre die richtige Operation?'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-1-2">
+        <div class="ex-label">Aufgabe 3</div>
+        <div class="ex-question">Stelle $4 \cdot a = 20$ nach $a$ um. Was ist $a$?</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">a =</span>
+          <input class="ex-input" id="inp-1-2" placeholder="Zahlenwert…" onkeydown="if(event.key==='Enter')checkEx(1,2)">
+          <button class="ex-btn" onclick="checkEx(1,2)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-1-2"></div>
+        <div class="ex-hint" id="hint-1-2" onclick="this.innerHTML='💡 a ist mit 4 multipliziert. Teile also beide Seiten durch 4.'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-1-3">
+        <div class="ex-label">Aufgabe 4</div>
+        <div class="ex-question">Stelle $\frac{F}{m} = a$ nach $F$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">F =</span>
+          <input class="ex-input" id="inp-1-3" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(1,3)">
+          <button class="ex-btn" onclick="checkEx(1,3)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-1-3"></div>
+        <div class="ex-hint" id="hint-1-3" onclick="this.innerHTML='💡 F steckt im Zähler — der Nenner ist m. Multipliziere beide Seiten mit m.'">💡 Tipp anzeigen</div>
+      </div>
+    </div>
+
+    <div class="competencies">
+      <div class="comp-title">🎯 Kompetenzen dieses Moduls</div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du verstehst, warum eine Gleichung wie eine Waage funktioniert</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kannst erklären, was „gleichartige Umformung" bedeutet</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du erkennst, welche Umformungen erlaubt sind — und welche nicht</span></div>
+    </div>
+
+    <div class="module-complete-section">
+      <button class="btn-complete" onclick="completeModule(1)">✓ Modul abschließen</button><br>
+      <button class="btn-next" onclick="openModule(2)">Weiter zu A1.3 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE A1.3: Die Einheit verrät die Formel
+     ═══════════════════════════════════════════ -->
+<div id="screen-mod-2" class="screen module-page">
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">← Übersicht</button>
+      <span class="nav-title">A1.3 — Die Einheit verrät die Formel</span>
+      <div class="nav-progress">
+        <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-2"></div></div>
+        <span class="nav-progress-text" id="prog-text-2">0 / 3</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mod-content">
+    <div class="hero">
+      <div class="hero-badge">📐 Track A · Formeln umstellen</div>
+      <h1>Die Einheit verrät die Formel</h1>
+      <p class="hero-sub">Vorwissen aus der Mittelstufe nutzen und weiterdenken</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="val">A1.3</span>&nbsp;Modul</span>
+        <span class="meta-chip">Level <span class="val">1</span></span>
+        <span class="meta-chip"><span class="val">20</span>&nbsp;min</span>
+      </div>
+      <div class="hero-formula">
+        <span class="formula-tag">Schlüsselidee</span>
+        <div>$$\frac{\text{m}}{\text{s}} \;\Rightarrow\; v = \frac{s}{t}$$</div>
+      </div>
+    </div>
+
+    <div class="chapter" id="m2-ch1">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 01</span>
+        <span class="chapter-title">Was ihr schon wisst</span>
+      </div>
+      <div class="glass">
+        <p>Aus der Mittelstufe kennt ihr: Wenn ein Auto in 2 Stunden 120 km zurücklegt, fährt es <strong>60 km/h</strong>.</p>
+        <p>Das Wort <strong>„pro"</strong> bedeutet immer <strong>geteilt durch</strong>:</p>
+        <p style="text-align:center;font-size:1.2rem;color:var(--accent-bright);margin:16px 0;">Kilometer <strong>pro</strong> Stunde = Kilometer <strong>÷</strong> Stunden</p>
+      </div>
+
+      <div class="callout info">
+        <span class="icon">💡</span>
+        <span class="text"><strong>Die Einheit ist die Formel!</strong><br>
+        Einheit der Geschwindigkeit: m/s → Geschwindigkeit = Strecke ÷ Zeit → $v = \frac{s}{t}$</span>
+      </div>
+
+      <div class="var-grid">
+        <div class="var-tile"><span class="sym">v</span><span class="name">Geschwindigkeit</span><span class="unit">m/s</span></div>
+        <div class="var-tile"><span class="sym">s</span><span class="name">Strecke</span><span class="unit">m</span></div>
+        <div class="var-tile"><span class="sym">t</span><span class="name">Zeit</span><span class="unit">s</span></div>
+      </div>
+    </div>
+
+    <div class="chapter" id="m2-ch2">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 02</span>
+        <span class="chapter-title">Übungsaufgaben</span>
+      </div>
+
+      <div class="exercise" id="ex-2-0">
+        <div class="ex-label">Aufgabe 1</div>
+        <div class="ex-question">Die Einheit der Dichte ist $\frac{\text{kg}}{\text{m}^3}$. Wie lautet die Formel für die Dichte $\rho$?</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">ρ =</span>
+          <input class="ex-input" id="inp-2-0" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(2,0)">
+          <button class="ex-btn" onclick="checkEx(2,0)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-2-0"></div>
+        <div class="ex-hint" id="hint-2-0" onclick="this.innerHTML='💡 kg steht oben (Masse m), m³ steht unten (Volumen V). Also ρ = …'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-2-1">
+        <div class="ex-label">Aufgabe 2</div>
+        <div class="ex-question">Die Einheit der Leistung ist $\frac{\text{J}}{\text{s}}$ (Joule pro Sekunde). Stelle die Formel $P = \frac{W}{t}$ nach $W$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">W =</span>
+          <input class="ex-input" id="inp-2-1" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(2,1)">
+          <button class="ex-btn" onclick="checkEx(2,1)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-2-1"></div>
+        <div class="ex-hint" id="hint-2-1" onclick="this.innerHTML='💡 Multipliziere beide Seiten mit t.'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-2-2">
+        <div class="ex-label">Aufgabe 3</div>
+        <div class="ex-question">Die Einheit des Drucks ist $\frac{\text{N}}{\text{m}^2}$. Wie lautet die Formel für den Druck $p$?</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">p =</span>
+          <input class="ex-input" id="inp-2-2" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(2,2)">
+          <button class="ex-btn" onclick="checkEx(2,2)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-2-2"></div>
+        <div class="ex-hint" id="hint-2-2" onclick="this.innerHTML='💡 N steht oben (Kraft F), m² steht unten (Fläche A). Also p = …'">💡 Tipp anzeigen</div>
+      </div>
+    </div>
+
+    <div class="competencies">
+      <div class="comp-title">🎯 Kompetenzen dieses Moduls</div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du erkennst, dass die Einheit m/s die Formel $v = \frac{s}{t}$ direkt enthält</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kannst aus einer Einheit die passende Formel ableiten</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kannst die drei Umformungen sicher anwenden</span></div>
+    </div>
+
+    <div class="module-complete-section">
+      <button class="btn-complete" onclick="completeModule(2)">✓ Modul abschließen</button><br>
+      <button class="btn-next" onclick="openModule(3)">Weiter zu A1.4 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE A1.4: Übungsrunde
+     ═══════════════════════════════════════════ -->
+<div id="screen-mod-3" class="screen module-page">
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">← Übersicht</button>
+      <span class="nav-title">A1.4 — Übungsrunde</span>
+      <div class="nav-progress">
+        <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-3"></div></div>
+        <span class="nav-progress-text" id="prog-text-3">0 / 6</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mod-content">
+    <div class="hero">
+      <div class="hero-badge">⚗️ Track A · Formeln umstellen</div>
+      <h1>Übungsrunde</h1>
+      <p class="hero-sub">Drei Formeln, sechs Aufgaben — von leicht bis anspruchsvoll</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="val">A1.4</span>&nbsp;Modul</span>
+        <span class="meta-chip">Level <span class="val">1</span></span>
+        <span class="meta-chip"><span class="val">25</span>&nbsp;min</span>
+      </div>
+    </div>
+
+    <div class="chapter" id="m3-ch1">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 01</span>
+        <span class="chapter-title">Die drei Formeln dieser Runde</span>
+      </div>
+
+      <div style="display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;">
+        <div class="formula-card">
+          <div class="fc-icon">🚴</div>
+          <div class="fc-name">Geschwindigkeit</div>
+          <div class="fc-formula">$v = \frac{s}{t}$</div>
+          <div class="fc-transforms"><span class="fc-chip">s = v·t</span><span class="fc-chip">t = s/v</span></div>
+        </div>
+        <div class="formula-card">
+          <div class="fc-icon">🧊</div>
+          <div class="fc-name">Dichte</div>
+          <div class="fc-formula">$\rho = \frac{m}{V}$</div>
+          <div class="fc-transforms"><span class="fc-chip">m = ρ·V</span><span class="fc-chip">V = m/ρ</span></div>
+        </div>
+        <div class="formula-card">
+          <div class="fc-icon">⚡</div>
+          <div class="fc-name">Leistung</div>
+          <div class="fc-formula">$P = \frac{W}{t}$</div>
+          <div class="fc-transforms"><span class="fc-chip">W = P·t</span><span class="fc-chip">t = W/P</span></div>
+        </div>
+      </div>
+
+      <div class="callout info" style="margin-top:16px;">
+        <span class="icon">💡</span>
+        <span class="text">Alle drei Formeln haben <strong>dieselbe Struktur</strong>: eine Größe = eine andere Größe ÷ dritte Größe. Das Umstellen funktioniert jedes Mal nach demselben Prinzip!</span>
+      </div>
+    </div>
+
+    <div class="chapter" id="m3-ch2">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 02</span>
+        <span class="chapter-title">Stufe 1 — Direkt umstellen</span>
+      </div>
+
+      <div class="exercise" id="ex-3-0">
+        <div class="ex-label">Aufgabe 1 — Geschwindigkeit</div>
+        <div class="ex-question">Stelle $v = \frac{s}{t}$ nach $s$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">s =</span>
+          <input class="ex-input" id="inp-3-0" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(3,0)">
+          <button class="ex-btn" onclick="checkEx(3,0)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-0"></div>
+      </div>
+
+      <div class="exercise" id="ex-3-1">
+        <div class="ex-label">Aufgabe 2 — Dichte</div>
+        <div class="ex-question">Stelle $\rho = \frac{m}{V}$ nach $m$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">m =</span>
+          <input class="ex-input" id="inp-3-1" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(3,1)">
+          <button class="ex-btn" onclick="checkEx(3,1)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-1"></div>
+      </div>
+
+      <div class="exercise" id="ex-3-2">
+        <div class="ex-label">Aufgabe 3 — Leistung</div>
+        <div class="ex-question">Stelle $P = \frac{W}{t}$ nach $W$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">W =</span>
+          <input class="ex-input" id="inp-3-2" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(3,2)">
+          <button class="ex-btn" onclick="checkEx(3,2)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-2"></div>
+      </div>
+    </div>
+
+    <div class="chapter" id="m3-ch3">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 03</span>
+        <span class="chapter-title">Stufe 2 — Zwei-Schritt-Umstellungen</span>
+      </div>
+
+      <div class="exercise" id="ex-3-3">
+        <div class="ex-label">Aufgabe 4</div>
+        <div class="ex-question">Stelle $v = \frac{s}{t}$ nach $t$ um (zwei Schritte nötig).</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">t =</span>
+          <input class="ex-input" id="inp-3-3" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(3,3)">
+          <button class="ex-btn" onclick="checkEx(3,3)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-3"></div>
+        <div class="ex-hint" id="hint-3-3" onclick="this.innerHTML='💡 Erst ×t, dann ÷v → t = s/v'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-3-4">
+        <div class="ex-label">Aufgabe 5</div>
+        <div class="ex-question">Stelle $\rho = \frac{m}{V}$ nach $V$ um.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">V =</span>
+          <input class="ex-input" id="inp-3-4" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(3,4)">
+          <button class="ex-btn" onclick="checkEx(3,4)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-4"></div>
+        <div class="ex-hint" id="hint-3-4" onclick="this.innerHTML='💡 Erst ×V, dann ÷ρ → V = m/ρ'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-3-5">
+        <div class="ex-label">Aufgabe 6 — Praxisaufgabe</div>
+        <div class="ex-question">Ein Roboter hat die Dichte $\rho = 1200\;\text{kg/m}^3$ und das Volumen $V = 0{,}5\;\text{m}^3$. Berechne seine Masse $m$.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">m =</span>
+          <input class="ex-input" id="inp-3-5" placeholder="Zahlenwert…" onkeydown="if(event.key==='Enter')checkEx(3,5)">
+          <span class="ex-unit">kg</span>
+          <button class="ex-btn" onclick="checkEx(3,5)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-3-5"></div>
+        <div class="ex-hint" id="hint-3-5" onclick="this.innerHTML='💡 m = ρ · V = 1200 · 0,5 = ?'">💡 Tipp anzeigen</div>
+      </div>
+    </div>
+
+    <div class="competencies">
+      <div class="comp-title">🎯 Kompetenzen dieses Moduls</div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kannst $v = s/t$ und $\rho = m/V$ sicher nach allen Variablen umstellen</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kannst das Umstellungsprinzip auf eine neue Formel ($P = W/t$) übertragen</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kannst den richtigen Umformungsweg selbstständig wählen</span></div>
+    </div>
+
+    <div class="module-complete-section">
+      <button class="btn-complete" onclick="completeModule(3)">✓ Modul abschließen</button><br>
+      <button class="btn-next" onclick="openModule(4)">Weiter zu A1.5 →</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     MODULE A1.5: Fehler-Analyse
+     ═══════════════════════════════════════════ -->
+<div id="screen-mod-4" class="screen module-page">
+  <nav class="top-nav">
+    <div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">← Übersicht</button>
+      <span class="nav-title">A1.5 — Fehler-Analyse</span>
+      <div class="nav-progress">
+        <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-4"></div></div>
+        <span class="nav-progress-text" id="prog-text-4">0 / 3</span>
+      </div>
+    </div>
+  </nav>
+
+  <div class="mod-content">
+    <div class="hero">
+      <div class="hero-badge">🔍 Track A · Formeln umstellen</div>
+      <h1>Fehler-Analyse</h1>
+      <p class="hero-sub">Typische Umstellungsfehler erkennen und korrigieren</p>
+      <div class="hero-meta">
+        <span class="meta-chip"><span class="val">A1.5</span>&nbsp;Modul</span>
+        <span class="meta-chip">Level <span class="val">1</span> · Modul 5/5</span>
+        <span class="meta-chip"><span class="val">20</span>&nbsp;min</span>
+      </div>
+    </div>
+
+    <div class="chapter" id="m4-ch1">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 01</span>
+        <span class="chapter-title">Die drei häufigsten Fehler</span>
+      </div>
+
+      <!-- Error 1 -->
+      <div class="error-demo">
+        <div class="error-title">⚡ Fehler 1: Falsche Operation</div>
+        <div class="glass" style="margin-bottom:12px;">
+          <p>Situation: $v = \frac{s}{t}$ soll nach $s$ umgestellt werden.</p>
+        </div>
+        <div class="error-comparison">
+          <div class="error-box wrong-box">
+            <div class="label">✗ Falsch</div>
+            <div class="formula">$s = v + t$</div>
+          </div>
+          <div class="error-box right-box">
+            <div class="label">✓ Richtig</div>
+            <div class="formula">$s = v \cdot t$</div>
+          </div>
+        </div>
+        <div class="error-explanation">$s$ steckt im Zähler eines Bruchs. Der Nenner $t$ ist mit $s$ durch <strong>Division</strong> verbunden. Um $s$ freizustellen, muss man beide Seiten mit $t$ <strong>multiplizieren</strong>, nicht addieren.</div>
+      </div>
+
+      <!-- Error 2 -->
+      <div class="error-demo">
+        <div class="error-title">⚙️ Fehler 2: Nur eine Seite umgeformt</div>
+        <div class="glass" style="margin-bottom:12px;">
+          <p>Situation: $\rho = \frac{m}{V}$ soll nach $m$ umgestellt werden.</p>
+        </div>
+        <div class="error-comparison">
+          <div class="error-box wrong-box">
+            <div class="label">✗ Falsch</div>
+            <div class="formula">$m = \frac{m}{V} \cdot V$</div>
+          </div>
+          <div class="error-box right-box">
+            <div class="label">✓ Richtig</div>
+            <div class="formula">$m = \rho \cdot V$</div>
+          </div>
+        </div>
+        <div class="error-explanation">Linke Seite ($\rho$) wurde vergessen! <strong>Gleichgewichtsprinzip:</strong> Was auf einer Seite passiert, muss auf der anderen genauso passieren. Beide Seiten × V: links $\rho \cdot V$, rechts $\frac{m}{V} \cdot V = m$.</div>
+      </div>
+
+      <!-- Error 3 -->
+      <div class="error-demo">
+        <div class="error-title">🔐 Fehler 3: Werte zu früh eingesetzt</div>
+        <div class="glass" style="margin-bottom:12px;">
+          <p>$P = \frac{W}{t}$ nach $t$ umstellen. Gegeben: $P = 60\;\text{W}$, $W = 300\;\text{J}$</p>
+        </div>
+        <div class="error-comparison">
+          <div class="error-box wrong-box">
+            <div class="label">✗ Werte zuerst</div>
+            <div class="formula" style="font-size:0.85rem;">$60 = 300/t$<br>$t = 5$ ← <em>Einheit?</em></div>
+          </div>
+          <div class="error-box right-box">
+            <div class="label">✓ Erst umstellen</div>
+            <div class="formula" style="font-size:0.85rem;">$t = W/P$<br>$t = 300/60 = 5\;\text{s}$ ✓</div>
+          </div>
+        </div>
+        <div class="error-explanation"><strong>Richtige Reihenfolge:</strong> 1. Formel symbolisch umstellen. 2. Werte <strong>inklusive Einheiten</strong> einsetzen. 3. Ergebnis ausrechnen — die Einheit ergibt sich automatisch.</div>
+      </div>
+    </div>
+
+    <div class="chapter" id="m4-ch2">
+      <div class="chapter-label">
+        <span class="chapter-num">Kapitel 02</span>
+        <span class="chapter-title">Fehler erkennen & korrigieren</span>
+      </div>
+
+      <div class="exercise" id="ex-4-0">
+        <div class="ex-label">Aufgabe 1</div>
+        <div class="ex-question">Jemand schreibt: „Aus $F = m \cdot a$ folgt $a = F + m$." Ist das korrekt? (ja/nein)</div>
+        <div class="ex-input-row">
+          <input class="ex-input" id="inp-4-0" placeholder="ja oder nein?" onkeydown="if(event.key==='Enter')checkEx(4,0)">
+          <button class="ex-btn" onclick="checkEx(4,0)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-4-0"></div>
+        <div class="ex-hint" id="hint-4-0" onclick="this.innerHTML='💡 a ist mit m multipliziert. Welche Operation löst das?'">💡 Tipp anzeigen</div>
+      </div>
+
+      <div class="exercise" id="ex-4-1">
+        <div class="ex-label">Aufgabe 2</div>
+        <div class="ex-question">Korrigiere: Aus $v = \frac{s}{t}$ soll $s$ berechnet werden. Die falsche Lösung war $s = v + t$. Wie lautet die richtige Formel?</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">s =</span>
+          <input class="ex-input" id="inp-4-1" placeholder="Korrektur…" onkeydown="if(event.key==='Enter')checkEx(4,1)">
+          <button class="ex-btn" onclick="checkEx(4,1)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-4-1"></div>
+      </div>
+
+      <div class="exercise" id="ex-4-2">
+        <div class="ex-label">Aufgabe 3</div>
+        <div class="ex-question">Stelle $P = \frac{W}{t}$ nach $t$ um. Schreibe die fertige Formel.</div>
+        <div class="ex-input-row">
+          <span style="color:var(--ink-muted);font-weight:600;">t =</span>
+          <input class="ex-input" id="inp-4-2" placeholder="Formel eingeben…" onkeydown="if(event.key==='Enter')checkEx(4,2)">
+          <button class="ex-btn" onclick="checkEx(4,2)">Prüfen</button>
+        </div>
+        <div class="ex-feedback" id="fb-4-2"></div>
+        <div class="ex-hint" id="hint-4-2" onclick="this.innerHTML='💡 Zwei Schritte: erst ×t, dann ÷P.'">💡 Tipp anzeigen</div>
+      </div>
+    </div>
+
+    <div class="competencies">
+      <div class="comp-title">🎯 Kompetenzen dieses Moduls</div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kennst die drei häufigsten Fehler beim Umstellen und kannst sie benennen</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kannst falsche Umformungen als solche erkennen</span></div>
+      <div class="comp-item"><div class="comp-check">✓</div><span class="comp-text">Du kannst fehlerhafte Formeln eigenständig korrigieren</span></div>
+    </div>
+
+    <div class="module-complete-section">
+      <button class="btn-complete" onclick="completeModule(4)">✓ Track A1 abschließen 🎉</button><br>
+      <button class="btn-next" onclick="goLanding()">← Zurück zur Übersicht</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════
+     JAVASCRIPT
+     ═══════════════════════════════════════════ -->
+<script>
+// ══════════════════════════════════════════
+// SCORM 1.2 API WRAPPER
+// ══════════════════════════════════════════
+const SCORM = (() => {
+  let api = null;
+  let initialized = false;
+
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) { win = win.parent; }
+      else if (win.opener) { win = win.opener; }
+      else break;
+    }
+    return win ? win.API : null;
+  }
+
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        // Restore bookmark
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.moduleStates) moduleStates = saved.moduleStates;
+            if (saved.exerciseStates) exerciseStates = saved.exerciseStates;
+          } catch(e) {}
+        }
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
+        }
+      }
+    } catch(e) {
+      console.log('SCORM init:', e);
+    }
+  }
+
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      const data = { moduleStates, exerciseStates };
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify(data));
+
+      // Calculate score
+      let total = 0, solved = 0;
+      for (const key in exerciseStates) {
+        total++;
+        if (exerciseStates[key]) solved++;
+      }
+      const score = total > 0 ? Math.round((solved / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+
+      // Check completion
+      const allComplete = moduleStates.every(s => s);
+      if (allComplete) {
+        api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      }
+
+      api.LMSCommit('');
+    } catch(e) {
+      console.log('SCORM save:', e);
+    }
+  }
+
+  function finish() {
+    if (!api || !initialized) return;
+    try {
+      save();
+      api.LMSFinish('');
+    } catch(e) {}
+  }
+
+  return { init, save, finish };
+})();
+
+// ══════════════════════════════════════════
+// STATE
+// ══════════════════════════════════════════
+let moduleStates = [false, false, false, false, false];
+let exerciseStates = {};
+let currentScreen = 'landing';
+
+// Exercise definitions: [moduleIdx][exIdx] = { answers, okMsg, errMsg }
+const exercises = {
+  '0-0': { answers: 'v·t|v*t|vt|t*v|t·v|tv|v⋅t|t⋅v', ok: 'Richtig! s = v · t', err: 'Multipliziere beide Seiten mit t' },
+  '0-1': { answers: 's/v|s÷v', ok: 'Richtig! t = s/v', err: 'Erst ×t, dann ÷v' },
+  '0-2': { answers: '100|100.0', ok: 'Richtig! s = 20 · 5 = 100 m', err: 's = v · t — setze die Werte ein' },
+  '0-3': { answers: 'f/m|F/m|f÷m|F÷m', ok: 'Richtig! a = F/m', err: 'a wird mit m multipliziert — teile beide Seiten durch m' },
+  '0-4': { answers: 'p·t|p*t|pt|t·p|t*p|tp|P·t|P*t|Pt|t·P|t*P|tP|p⋅t|t⋅p|P⋅t|t⋅P', ok: 'Richtig! W = P · t', err: 'Multipliziere beide Seiten mit t' },
+  '0-5': { answers: '10|10.0', ok: 'Richtig! v = 600/60 = 10 m/s', err: 'v = s/t = 600/60 = ?' },
+
+  '1-0': { answers: 'dividieren|division|teilen|÷|/', ok: 'Richtig! Dividieren ist das Gegenteil von Multiplizieren', err: 'Was ist das Gegenteil von Multiplizieren?' },
+  '1-1': { answers: 'nein|falsch|no|n', ok: 'Richtig! t steht im Nenner — man muss multiplizieren, nicht addieren', err: 't steht im Nenner des Bruchs. Addieren löst keinen Bruch auf!' },
+  '1-2': { answers: '5|5.0', ok: 'Richtig! a = 20/4 = 5', err: '20 ÷ 4 = ?' },
+  '1-3': { answers: 'm·a|m*a|ma|a·m|a*m|am|m⋅a|a⋅m', ok: 'Richtig! F = m · a', err: 'Multipliziere beide Seiten mit m' },
+
+  '2-0': { answers: 'm/v|m/V|m÷v|m÷V', ok: 'Richtig! ρ = m/V — die Einheit hat es verraten!', err: 'kg steht oben (m), m³ steht unten (V)' },
+  '2-1': { answers: 'p·t|p*t|pt|t·p|t*p|tp|P·t|P*t|Pt|t·P|t*P|tP|p⋅t|t⋅p|P⋅t|t⋅P', ok: 'Richtig! W = P · t', err: 'Multipliziere beide Seiten mit t' },
+  '2-2': { answers: 'f/a|F/A|f÷a|F÷A|f/A|F/a', ok: 'Richtig! p = F/A', err: 'N steht oben (Kraft F), m² steht unten (Fläche A)' },
+
+  '3-0': { answers: 'v·t|v*t|vt|t*v|t·v|tv|v⋅t|t⋅v', ok: 'Richtig!', err: 'Multipliziere beide Seiten mit t' },
+  '3-1': { answers: 'ρ·v|ρ*v|ρv|v·ρ|v*ρ|vρ|ρ·V|ρ*V|ρV|V·ρ|V*ρ|Vρ|ρ⋅v|v⋅ρ|ρ⋅V|V⋅ρ', ok: 'Richtig! m = ρ · V', err: 'Multipliziere beide Seiten mit V' },
+  '3-2': { answers: 'p·t|p*t|pt|t·p|t*p|tp|P·t|P*t|Pt|t·P|t*P|tP|p⋅t|t⋅p|P⋅t|t⋅P', ok: 'Richtig!', err: 'Multipliziere beide Seiten mit t' },
+  '3-3': { answers: 's/v|s÷v', ok: 'Richtig! t = s/v', err: 'Erst ×t, dann ÷v' },
+  '3-4': { answers: 'm/ρ|m÷ρ|m/p|m÷p', ok: 'Richtig! V = m/ρ', err: 'Erst ×V, dann ÷ρ' },
+  '3-5': { answers: '600|600.0', ok: 'Richtig! m = 1200 · 0,5 = 600 kg', err: 'm = ρ · V = 1200 · 0,5 = ?' },
+
+  '4-0': { answers: 'nein|falsch|no|n', ok: 'Richtig! a ist mit m multipliziert — man muss dividieren: a = F/m', err: 'Welche Operation löst eine Multiplikation auf?' },
+  '4-1': { answers: 'v·t|v*t|vt|t*v|t·v|tv|v⋅t|t⋅v', ok: 'Richtig! s = v · t', err: 'Multipliziere beide Seiten mit t' },
+  '4-2': { answers: 'w/p|W/P|w÷p|W÷P|w/P|W/p', ok: 'Richtig! t = W/P', err: 'Erst ×t, dann ÷P' },
+};
+
+// Exercise counts per module
+const exCounts = [6, 4, 3, 6, 3];
+
+// ══════════════════════════════════════════
+// NORMALIZE
+// ══════════════════════════════════════════
+function normalize(v) {
+  return v.trim()
+    .replace(/\s+/g, '')
+    .toLowerCase()
+    .replace(/×/g, '*')
+    .replace(/·/g, '*')
+    .replace(/÷/g, '/')
+    .replace(/⋅/g, '*');
+}
+
+// ══════════════════════════════════════════
+// EXERCISE CHECK
+// ══════════════════════════════════════════
+function checkEx(mod, ex) {
+  const key = mod + '-' + ex;
+  const inp = document.getElementById('inp-' + key);
+  const fb = document.getElementById('fb-' + key);
+  const hint = document.getElementById('hint-' + key);
+  const card = document.getElementById('ex-' + key);
+  const def = exercises[key];
+  if (!inp || !fb || !def) return;
+
+  const val = normalize(inp.value);
+  if (!val) return;
+
+  const accepted = def.answers.split('|').map(normalize);
+  const correct = accepted.some(a => val === a);
+
+  fb.className = 'ex-feedback show ' + (correct ? 'ok' : 'err');
+  fb.textContent = correct ? def.ok : def.err;
+  card.className = 'exercise ' + (correct ? 'correct' : 'wrong');
+
+  if (correct) {
+    exerciseStates[key] = true;
+    inp.disabled = true;
+    inp.style.borderColor = 'var(--ok-border)';
+    card.querySelector('.ex-btn').disabled = true;
+    if (hint) hint.style.display = 'none';
+    updateModuleProgress(mod);
+    SCORM.save();
+  } else {
+    if (hint) hint.classList.add('show');
+  }
+}
+
+// ══════════════════════════════════════════
+// PROGRESS
+// ══════════════════════════════════════════
+function updateModuleProgress(mod) {
+  let solved = 0;
+  for (let i = 0; i < exCounts[mod]; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const pct = Math.round((solved / exCounts[mod]) * 100);
+  const fill = document.getElementById('prog-fill-' + mod);
+  const text = document.getElementById('prog-text-' + mod);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = solved + ' / ' + exCounts[mod];
+}
+
+function updateOverallProgress() {
+  const done = moduleStates.filter(s => s).length;
+  const fill = document.getElementById('overall-fill');
+  const label = document.getElementById('overall-label');
+  if (fill) fill.style.width = (done / 5 * 100) + '%';
+  if (label) label.textContent = done + ' / 5';
+
+  for (let i = 0; i < 5; i++) {
+    const status = document.getElementById('status-' + i);
+    const card = document.querySelector(`.mod-card:nth-child(${i + 1})`);
+    if (moduleStates[i]) {
+      if (status) { status.textContent = 'Fertig ✓'; status.className = 'mc-status done'; }
+      if (card) card.classList.add('completed');
+    }
+  }
+}
+
+function completeModule(idx) {
+  moduleStates[idx] = true;
+  SCORM.save();
+  goLanding();
+}
+
+// ══════════════════════════════════════════
+// NAVIGATION
+// ══════════════════════════════════════════
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const el = document.getElementById(id);
+  if (el) el.classList.add('active');
+  window.scrollTo(0, 0);
+}
+
+function openModule(idx) {
+  const canvas = document.getElementById('shader-canvas');
+  canvas.classList.add('hidden');
+  showScreen('screen-mod-' + idx);
+  currentScreen = 'mod-' + idx;
+  updateModuleProgress(idx);
+  // Re-render MathJax for this module
+  if (window.MathJax && MathJax.typesetPromise) {
+    MathJax.typesetPromise();
+  }
+}
+
+function goLanding() {
+  const canvas = document.getElementById('shader-canvas');
+  canvas.classList.remove('hidden');
+  canvas.classList.remove('dimmed');
+  showScreen('screen-landing');
+  currentScreen = 'landing';
+  updateOverallProgress();
+}
+
+// ══════════════════════════════════════════
+// WALKTHROUGH SLIDER
+// ══════════════════════════════════════════
+const wtState = {};
+
+function wtGo(id, idx) {
+  const container = document.getElementById(id);
+  if (!container) return;
+  const slides = container.querySelectorAll('.wt-slide');
+  const dots = container.querySelectorAll('.wt-dot');
+  const counter = container.querySelector('.wt-counter');
+  const prevBtn = container.querySelector('.wt-arrow:first-child');
+  const nextBtn = container.querySelector('.wt-arrow.primary, .wt-arrow:last-child');
+
+  slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+  dots.forEach((d, i) => d.classList.toggle('active', i === idx));
+  if (counter) counter.textContent = (idx + 1) + ' / ' + slides.length;
+  if (prevBtn) prevBtn.disabled = idx === 0;
+  if (nextBtn) nextBtn.disabled = idx === slides.length - 1;
+  wtState[id] = idx;
+}
+
+function wtNext(id) {
+  const idx = (wtState[id] || 0) + 1;
+  const container = document.getElementById(id);
+  const max = container.querySelectorAll('.wt-slide').length - 1;
+  if (idx <= max) wtGo(id, idx);
+}
+
+function wtPrev(id) {
+  const idx = (wtState[id] || 0) - 1;
+  if (idx >= 0) wtGo(id, idx);
+}
+
+// ══════════════════════════════════════════
+// WEBGL SHADER
+// ══════════════════════════════════════════
+function initShader() {
+  const canvas = document.getElementById('shader-canvas');
+  const gl = canvas.getContext('webgl');
+  if (!gl) {
+    canvas.style.background = 'linear-gradient(135deg, #0c0c1d 0%, #1a1a3e 50%, #0c0c1d 100%)';
+    return;
+  }
+
+  const vsSource = `
+    attribute vec4 aVertexPosition;
+    void main() { gl_Position = aVertexPosition; }
+  `;
+
+  const fsSource = `
+    precision highp float;
+    uniform vec2 iResolution;
+    uniform float iTime;
+
+    const float overallSpeed = 0.2;
+    const float gridSmoothWidth = 0.015;
+    const float axisWidth = 0.05;
+    const float majorLineWidth = 0.025;
+    const float minorLineWidth = 0.0125;
+    const float majorLineFrequency = 5.0;
+    const float minorLineFrequency = 1.0;
+    const vec4 gridColor = vec4(0.5);
+    const float scale = 5.0;
+    const vec4 lineColor = vec4(0.4, 0.2, 0.8, 1.0);
+    const float minLineWidth = 0.01;
+    const float maxLineWidth = 0.2;
+    const float lineSpeed = 1.0 * overallSpeed;
+    const float lineAmplitude = 1.0;
+    const float lineFrequency = 0.2;
+    const float warpSpeed = 0.2 * overallSpeed;
+    const float warpFrequency = 0.5;
+    const float warpAmplitude = 1.0;
+    const float offsetFrequency = 0.5;
+    const float offsetSpeed = 1.33 * overallSpeed;
+    const float minOffsetSpread = 0.6;
+    const float maxOffsetSpread = 2.0;
+    const int linesPerGroup = 16;
+
+    #define drawSmoothLine(pos, halfWidth, t) smoothstep(halfWidth, 0.0, abs(pos - (t)))
+    #define drawCrispLine(pos, halfWidth, t) smoothstep(halfWidth + gridSmoothWidth, halfWidth, abs(pos - (t)))
+    #define drawCircle(pos, radius, coord) smoothstep(radius + gridSmoothWidth, radius, length(coord - (pos)))
+
+    float random(float t) {
+      return (cos(t) + cos(t * 1.3 + 1.3) + cos(t * 1.4 + 1.4)) / 3.0;
+    }
+
+    float getPlasmaY(float x, float horizontalFade, float offset) {
+      return random(x * lineFrequency + iTime * lineSpeed) * horizontalFade * lineAmplitude + offset;
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / iResolution.xy;
+      vec2 space = (gl_FragCoord.xy - iResolution.xy / 2.0) / iResolution.x * 2.0 * scale;
+
+      float horizontalFade = 1.0 - (cos(uv.x * 6.28) * 0.5 + 0.5);
+      float verticalFade = 1.0 - (cos(uv.y * 6.28) * 0.5 + 0.5);
+
+      space.y += random(space.x * warpFrequency + iTime * warpSpeed) * warpAmplitude * (0.5 + horizontalFade);
+      space.x += random(space.y * warpFrequency + iTime * warpSpeed + 2.0) * warpAmplitude * horizontalFade;
+
+      vec4 lines = vec4(0.0);
+      vec4 bgColor1 = vec4(0.05, 0.04, 0.12, 1.0);
+      vec4 bgColor2 = vec4(0.12, 0.05, 0.22, 1.0);
+
+      for(int l = 0; l < linesPerGroup; l++) {
+        float normalizedLineIndex = float(l) / float(linesPerGroup);
+        float offsetTime = iTime * offsetSpeed;
+        float offsetPosition = float(l) + space.x * offsetFrequency;
+        float rand = random(offsetPosition + offsetTime) * 0.5 + 0.5;
+        float halfWidth = mix(minLineWidth, maxLineWidth, rand * horizontalFade) / 2.0;
+        float offset = random(offsetPosition + offsetTime * (1.0 + normalizedLineIndex)) * mix(minOffsetSpread, maxOffsetSpread, horizontalFade);
+        float linePosition = getPlasmaY(space.x, horizontalFade, offset);
+        float line = drawSmoothLine(linePosition, halfWidth, space.y) / 2.0 + drawCrispLine(linePosition, halfWidth * 0.15, space.y);
+
+        float circleX = mod(float(l) + iTime * lineSpeed, 25.0) - 12.0;
+        vec2 circlePosition = vec2(circleX, getPlasmaY(circleX, horizontalFade, offset));
+        float circle = drawCircle(circlePosition, 0.01, space) * 4.0;
+
+        line = line + circle;
+        lines += line * lineColor * rand;
+      }
+
+      vec4 fragColor = mix(bgColor1, bgColor2, uv.x);
+      fragColor *= verticalFade;
+      fragColor.a = 1.0;
+      fragColor += lines;
+
+      gl_FragColor = fragColor;
+    }
+  `;
+
+  function loadShader(type, source) {
+    const shader = gl.createShader(type);
+    gl.shaderSource(shader, source);
+    gl.compileShader(shader);
+    if (!gl.getShaderParameter(shader, gl.COMPILE_STATUS)) {
+      console.error('Shader error:', gl.getShaderInfoLog(shader));
+      gl.deleteShader(shader);
+      return null;
+    }
+    return shader;
+  }
+
+  const vs = loadShader(gl.VERTEX_SHADER, vsSource);
+  const fs = loadShader(gl.FRAGMENT_SHADER, fsSource);
+  const program = gl.createProgram();
+  gl.attachShader(program, vs);
+  gl.attachShader(program, fs);
+  gl.linkProgram(program);
+
+  if (!gl.getProgramParameter(program, gl.LINK_STATUS)) {
+    console.error('Program link error:', gl.getProgramInfoLog(program));
+    return;
+  }
+
+  const posBuffer = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+
+  const posLoc = gl.getAttribLocation(program, 'aVertexPosition');
+  const resLoc = gl.getUniformLocation(program, 'iResolution');
+  const timeLoc = gl.getUniformLocation(program, 'iTime');
+
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+
+  const startTime = Date.now();
+  function render() {
+    const t = (Date.now() - startTime) / 1000;
+    gl.clearColor(0, 0, 0, 1);
+    gl.clear(gl.COLOR_BUFFER_BIT);
+    gl.useProgram(program);
+    gl.uniform2f(resLoc, canvas.width, canvas.height);
+    gl.uniform1f(timeLoc, t);
+    gl.bindBuffer(gl.ARRAY_BUFFER, posBuffer);
+    gl.vertexAttribPointer(posLoc, 2, gl.FLOAT, false, 0, 0);
+    gl.enableVertexAttribArray(posLoc);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(render);
+  }
+  requestAnimationFrame(render);
+}
+
+// ══════════════════════════════════════════
+// INIT
+// ══════════════════════════════════════════
+window.addEventListener('load', () => {
+  SCORM.init();
+  initShader();
+  updateOverallProgress();
+
+  // Restore module progress from saved exercise states
+  for (let m = 0; m < 5; m++) {
+    updateModuleProgress(m);
+  }
+});
+
+window.addEventListener('beforeunload', () => {
+  SCORM.finish();
+});
+</script>
+</body>
+</html>

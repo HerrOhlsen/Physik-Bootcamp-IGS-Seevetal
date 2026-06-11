@@ -1,0 +1,1942 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Physik Bootcamp — Track D3: Fachsprache</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #6668a0;
+
+  --accent: #9333ea;
+  --accent-bright: #c084fc;
+  --accent-glow: rgba(147,51,234,0.35);
+  --accent-deep: #7e22ce;
+  --accent-subtle: rgba(147,51,234,0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-glow: rgba(52, 211, 153, 0.25);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(192,132,252,0.15);
+  --border-strong: rgba(192,132,252,0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-full: 100px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+input, textarea, select { font-size: 16px; }
+button, [onclick] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ══════════════════════════════════════════
+   ANIMATED BACKGROUND CANVAS
+   ══════════════════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+#bg-canvas.dimmed { opacity: 0.15; }
+#bg-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREEN SYSTEM
+   ══════════════════════════════════════════ */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.screen.active {
+  display: block;
+  animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   LANDING PAGE
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+}
+.landing-header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(126, 34, 206, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: var(--r-full);
+  margin-bottom: 24px;
+}
+.landing-title {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-bright) 50%, #e9d5ff 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+.landing-sub {
+  color: var(--ink-muted);
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+.landing-meta {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.l-meta {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+.l-meta .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* Overall progress */
+.overall-progress {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+.op-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.op-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.op-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), #e9d5ff);
+  border-radius: var(--r-full);
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.op-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Module cards grid */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 920px;
+}
+.mod-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.mod-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--r-lg);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+.mod-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--glow);
+}
+.mod-card:hover::before { opacity: 1; }
+.mod-card.completed { border-color: var(--ok-border); }
+.mod-card.completed::after {
+  content: '\2713';
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0c0c1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.mc-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.mc-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.mc-desc {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.mc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mc-time {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+}
+.mc-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--accent-subtle);
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+.mc-status.done {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: var(--ok-border);
+}
+.mod-card:nth-child(1) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+.mod-card:nth-child(2) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+.mod-card:nth-child(3) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+
+/* Footer */
+.landing-footer {
+  margin-top: 48px;
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 1s both;
+}
+
+/* ══════════════════════════════════════════
+   MODULE PAGE LAYOUT
+   ══════════════════════════════════════════ */
+.module-page { background: var(--bg-deep); position: relative; }
+.module-page::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(147,51,234,0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Top navbar */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+}
+.top-nav-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+}
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.nav-title {
+  font-size: 0.85rem; font-weight: 600; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nav-progress {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-progress-track {
+  width: 80px; height: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.nav-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  border-radius: var(--r-full);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-progress-text {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Module content */
+.mod-content {
+  position: relative; z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px 100px;
+}
+
+/* ══════════════════════════════════════════
+   MODULE COMPONENTS
+   ══════════════════════════════════════════ */
+.hero {
+  padding: 52px 0 36px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  margin-bottom: 18px;
+  border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  font-weight: 900; line-height: 1.1; letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero-sub {
+  color: var(--ink-muted); font-size: 1rem;
+  max-width: 480px; margin: 0 auto 20px;
+}
+.hero-meta {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+}
+.meta-chip {
+  font-size: 0.78rem; color: var(--ink-muted); font-weight: 500;
+}
+.meta-chip .val {
+  color: var(--accent-bright); font-weight: 700; font-family: var(--mono);
+}
+
+/* Glass cards */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+
+/* Chapter sections */
+.chapter { margin-top: 40px; }
+.chapter-label { display: flex; align-items: center; gap: 14px; margin-bottom: 20px; }
+.chapter-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 36px; height: 36px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  border: 2px solid var(--accent);
+  color: var(--accent-bright);
+  font-family: var(--mono); font-size: 0.8rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.chapter-title {
+  font-size: 1.3rem; font-weight: 800; color: #fff;
+}
+
+/* Exercise cards */
+.exercise-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.exercise-card.solved { border-color: var(--ok-border); }
+.exercise-card.wrong-state { border-color: var(--err-border); }
+.ex-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.ex-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.ex-title { font-weight: 600; font-size: 0.9rem; color: var(--ink); }
+.ex-tag {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  color: var(--accent); background: var(--accent-subtle);
+  padding: 2px 8px; border-radius: var(--r-full);
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.ex-body { padding: 20px; }
+.ex-question { color: var(--ink); margin-bottom: 16px; line-height: 1.6; }
+
+/* MC options */
+.mc-options { display: flex; flex-direction: column; gap: 8px; margin-bottom: 12px; }
+.mc-opt {
+  padding: 12px 16px; background: var(--bg-card);
+  border: 2px solid var(--border); border-radius: var(--r-md);
+  font-size: 0.9rem; color: var(--ink); cursor: pointer;
+  transition: all 0.2s; line-height: 1.5;
+}
+.mc-opt:hover:not(.locked) { border-color: var(--accent); background: var(--bg-elevated); }
+.mc-opt.correct { background: var(--ok-bg); border-color: var(--ok); color: var(--ok); }
+.mc-opt.wrong { background: var(--err-bg); border-color: var(--err); color: var(--err); }
+.mc-opt.locked { cursor: default; }
+
+/* Answer inputs */
+.answer-row {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.answer-input {
+  flex: 1; min-width: 160px;
+  padding: 10px 14px;
+  background: var(--bg-deep);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--mono); font-size: 1rem;
+  outline: none; transition: all 0.2s;
+}
+.answer-input::placeholder { color: var(--ink-dim); }
+.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.answer-input.correct { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.answer-input.incorrect { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+
+/* Buttons */
+.btn-check {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  background: var(--accent-deep);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-check:hover { background: var(--accent); transform: translateY(-1px); }
+.btn-hint {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 8px 14px;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.8rem;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-hint:hover { border-color: var(--warn); color: var(--warn); }
+
+/* Hint & Feedback */
+.hint-box {
+  display: none; margin-top: 12px; padding: 12px 16px;
+  background: var(--warn-bg);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: var(--r-md);
+  font-size: 0.85rem; color: var(--warn);
+}
+.hint-box.open { display: block; }
+.fb-block {
+  margin-top: 12px; padding: 10px 14px;
+  border-radius: var(--r-md);
+  font-size: 0.85rem; display: none;
+}
+.fb-block.correct {
+  display: block;
+  background: var(--ok-bg); color: var(--ok);
+  border: 1px solid var(--ok-border);
+}
+.fb-block.incorrect {
+  display: block;
+  background: var(--err-bg); color: var(--err);
+  border: 1px solid var(--err-border);
+}
+
+/* Option pills (MC) */
+.opt-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.opt-pill {
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+  color: var(--ink); cursor: pointer; transition: all 0.2s;
+}
+.opt-pill:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.opt-pill.selected { border-color: var(--accent); background: var(--accent-deep); color: #fff; }
+
+/* Continue & Result buttons */
+.btn-continue {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; max-width: 320px;
+  margin: 28px auto 0;
+  padding: 14px 24px;
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-lg);
+  color: var(--accent-bright);
+  font-family: var(--font); font-size: 0.95rem; font-weight: 600;
+  cursor: pointer; transition: all 0.25s;
+}
+.btn-continue:hover {
+  background: var(--accent-deep); border-color: var(--accent); color: #fff;
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(147, 51, 234, 0.3);
+}
+.btn-result {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; max-width: 360px;
+  margin: 32px auto 0;
+  padding: 16px 28px;
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  border: none; border-radius: var(--r-lg);
+  color: #fff;
+  font-family: var(--font); font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-result:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(147, 51, 234, 0.4);
+}
+
+/* Table */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+
+/* Callout */
+.callout-v2 {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 16px 20px; border-radius: var(--r-md); margin: 16px 0;
+}
+.callout-v2.info {
+  background: rgba(56, 189, 248, 0.08);
+  border: 1px solid rgba(56, 189, 248, 0.2);
+}
+.callout-v2.info .body { color: #7dd3fc; }
+.callout-v2.info .title { color: #38bdf8; font-weight: 700; margin-bottom: 4px; }
+.callout-v2.warning {
+  background: var(--warn-bg);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+}
+.callout-v2.warning .body { color: var(--warn); }
+
+/* Extra section */
+.extra-section {
+  margin-top: 32px;
+  border: 1px solid var(--border);
+  border-radius: var(--r-md);
+  background: var(--bg-deep);
+  overflow: hidden;
+}
+.extra-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; cursor: pointer;
+  font-size: 0.92rem; font-weight: 600;
+  color: var(--ink-muted);
+  list-style: none; user-select: none;
+}
+.extra-toggle::-webkit-details-marker { display: none; }
+.extra-section[open] .extra-toggle {
+  color: var(--ink); background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.extra-icon {
+  font-size: 1.1rem; font-weight: 700; color: var(--accent);
+  transition: transform 0.2s; display: inline-block; width: 18px; text-align: center;
+}
+.extra-section[open] .extra-icon { transform: rotate(45deg); }
+.extra-count {
+  font-size: 0.78rem; font-weight: 400;
+  color: var(--ink-dim); margin-left: auto;
+}
+.extra-intro {
+  padding: 12px 20px 4px; font-size: 0.85rem;
+  color: var(--ink-muted);
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 8px;
+}
+.extra-card { border-left: 3px solid var(--accent-deep); opacity: 0.95; }
+.extra-card .ex-num { background: var(--accent-deep); }
+.extra-tag {
+  background: color-mix(in srgb, var(--accent) 15%, transparent);
+  color: var(--accent);
+}
+.extra-btn {
+  background: var(--bg-card);
+  border: 1px solid var(--border-strong);
+  color: var(--ink-muted);
+}
+.extra-btn:hover { background: var(--accent-deep); color: var(--ink); }
+.solution-box {
+  margin-top: 12px; padding: 14px 16px;
+  background: var(--bg-elevated); border: 1px solid var(--border);
+  border-radius: var(--r-sm); font-size: 0.88rem; color: var(--ink-muted);
+}
+.solution-title {
+  font-weight: 700; color: var(--accent-bright);
+  margin-bottom: 8px; font-size: 0.8rem;
+  text-transform: uppercase; letter-spacing: 0.08em;
+}
+.extra-rubric { margin-top: 10px; padding-top: 10px; border-top: 1px solid var(--border); }
+.extra-rubric-title { font-size: 0.78rem; color: var(--ink-dim); margin-bottom: 6px; }
+.extra-rubric label { display: flex; align-items: center; gap: 8px; font-size: 0.83rem; color: var(--ink-muted); margin-bottom: 4px; cursor: pointer; }
+.answer-textarea {
+  width: 100%; min-height: 80px; padding: 10px 14px;
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--r-sm); color: var(--ink);
+  font-family: var(--font); font-size: 0.9rem; resize: vertical; margin-top: 10px;
+}
+.answer-textarea:focus { outline: none; border-color: var(--accent); }
+
+/* Keyword highlight */
+.kw {
+  color: var(--accent-bright); font-weight: 700;
+  background: rgba(147, 51, 234, 0.15);
+  padding: 1px 6px; border-radius: 4px;
+}
+
+/* Compare grid (D3.1) */
+.cmp-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+@media (max-width: 540px) { .cmp-grid { grid-template-columns: 1fr; } }
+.cmp-bad { background: var(--err-bg); border: 1.5px solid rgba(248,113,113,0.3); border-radius: var(--r-lg); padding: 18px; }
+.cmp-good { background: var(--ok-bg); border: 1.5px solid rgba(52,211,153,0.3); border-radius: var(--r-lg); padding: 18px; }
+.cmp-label { font-family: var(--mono); font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.1em; margin-bottom: 8px; }
+.cmp-bad .cmp-label { color: var(--err); }
+.cmp-good .cmp-label { color: var(--ok); }
+.cmp-text { font-size: 0.9rem; line-height: 1.6; color: var(--ink); }
+
+/* Experiment steps (D3.1) */
+.exp-steps { display: flex; flex-direction: column; gap: 0; margin: 16px 0; }
+.exp-step { display: flex; gap: 14px; padding: 14px 0; border-bottom: 1px solid var(--border); }
+.exp-step:last-child { border-bottom: none; }
+.es-icon { width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 1.1rem; flex-shrink: 0; border: 2px solid var(--accent); background: rgba(147,51,234,0.1); }
+.es-content h5 { font-size: 0.9rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.es-content p { font-size: 0.85rem; color: var(--ink-muted); line-height: 1.5; }
+
+/* Peer review cards (D3.2) */
+.peer-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 20px; margin-bottom: 20px; transition: border-color 0.3s; }
+.peer-card:hover { border-color: var(--border-strong); }
+.peer-card-header { display: flex; align-items: center; gap: 12px; margin-bottom: 14px; }
+.peer-avatar { width: 40px; height: 40px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 1rem; flex-shrink: 0; }
+.peer-name { font-size: 0.9rem; font-weight: 700; color: #fff; }
+.peer-task { font-size: 0.75rem; color: var(--ink-dim); }
+.peer-text { background: var(--bg-deep); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 16px; font-size: 0.9rem; color: var(--ink-muted); line-height: 1.6; margin-bottom: 14px; }
+.peer-annotations { display: flex; flex-direction: column; gap: 8px; }
+.anno { display: flex; gap: 10px; align-items: flex-start; font-size: 0.85rem; }
+.anno-icon { flex-shrink: 0; margin-top: 2px; }
+.anno-good { color: var(--ok); }
+.anno-bad { color: var(--err); }
+.anno-suggest { color: var(--accent-bright); }
+
+/* Checklist (D3.2) */
+.checklist { display: flex; flex-direction: column; gap: 8px; margin-bottom: 16px; }
+.cl-item { display: flex; gap: 12px; padding: 12px 16px; background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-md); cursor: pointer; transition: all 0.15s; align-items: center; }
+.cl-item:hover { border-color: var(--accent); background: var(--bg-card); }
+.cl-item.checked { background: var(--ok-bg); border-color: rgba(52,211,153,0.3); }
+.cl-check { width: 22px; height: 22px; border-radius: 6px; border: 2px solid var(--ink-dim); display: flex; align-items: center; justify-content: center; flex-shrink: 0; transition: all 0.15s; font-size: 0.7rem; color: transparent; }
+.cl-item.checked .cl-check { background: var(--ok); border-color: var(--ok); color: #fff; }
+.cl-text { font-size: 0.88rem; color: var(--ink); }
+.cl-progress-bar { height: 4px; background: var(--bg-elevated); border-radius: 100px; margin-top: 12px; overflow: hidden; }
+.cl-bar { height: 100%; background: var(--ok); border-radius: 100px; width: 0; transition: width 0.3s; }
+.cl-count { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-dim); text-align: right; margin-top: 6px; }
+
+/* Write steps (D3.3) */
+.write-steps { display: flex; flex-direction: column; gap: 10px; margin-bottom: 16px; }
+.ws { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 16px; display: flex; gap: 14px; align-items: flex-start; transition: border-color 0.3s; }
+.ws:hover { border-color: var(--border-strong); }
+.ws-num { width: 32px; height: 32px; border-radius: 50%; background: var(--accent); color: #fff; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem; flex-shrink: 0; }
+.ws-content h5 { font-size: 0.92rem; font-weight: 700; color: #fff; margin-bottom: 4px; }
+.ws-content p { font-size: 0.85rem; color: var(--ink-muted); line-height: 1.5; }
+
+/* Keyword tags (D3.3) */
+.kw-bar { display: flex; flex-wrap: wrap; gap: 8px; margin: 12px 0; }
+.kw-tag { padding: 5px 14px; border-radius: 100px; font-size: 0.78rem; font-weight: 600; background: rgba(147,51,234,0.12); color: var(--accent-bright); border: 1px solid var(--border); }
+
+/* Fachtext box (D3.3) */
+.fachtext-box { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg); padding: 24px; margin-bottom: 16px; transition: border-color 0.3s; }
+.fachtext-box:hover { border-color: var(--border-strong); }
+.fachtext-box h4 { font-size: 0.95rem; font-weight: 700; color: #fff; margin-bottom: 16px; padding-bottom: 10px; border-bottom: 1px solid var(--border); }
+.ft-section { margin-bottom: 16px; }
+.ft-section-label { font-family: var(--mono); font-size: 0.65rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.12em; color: var(--accent); margin-bottom: 6px; }
+.ft-text { font-size: 0.9rem; line-height: 1.7; color: var(--ink); }
+.ft-text .kw { color: var(--accent-bright); font-weight: 700; }
+
+/* KI feedback */
+.loading .spinner {
+  display: inline-block; width: 16px; height: 16px;
+  border: 2px solid rgba(255,255,255,0.2); border-top-color: var(--accent-bright);
+  border-radius: 50%; animation: spin 0.8s linear infinite;
+  margin-right: 8px; vertical-align: middle;
+}
+@keyframes spin { to { transform: rotate(360deg); } }
+
+/* Scroll reveal */
+.reveal {
+  opacity: 0; transform: translateY(24px);
+  transition: opacity 0.6s ease, transform 0.6s ease;
+}
+.reveal.visible { opacity: 1; transform: translateY(0); }
+
+/* Responsive */
+@media (max-width: 640px) {
+  .hero { padding: 40px 0 28px; }
+  .hero h1 { font-size: 1.8rem; }
+  .glass { padding: 16px; }
+  .answer-row { flex-direction: column; align-items: stretch; }
+  .answer-input { min-width: 0; }
+  .cmp-grid { grid-template-columns: 1fr; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     ANIMATED BACKGROUND CANVAS
+     ══════════════════════════════════════════ -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 0: LANDING PAGE
+     ══════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">TRACK D3</div>
+      <h1 class="landing-title">Fachsprache</h1>
+      <p class="landing-sub">Hypothesen formulieren, Peer-Review und Fachtexte analysieren</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">3</span> Module</span>
+        <span class="l-meta"><span class="val">15</span> Aufgaben</span>
+        <span class="l-meta"><span class="val">Level 3</span></span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track"><div class="op-fill" id="opFill"></div></div>
+        <span class="op-label" id="opLabel">0 / 3 Module</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card" onclick="openModule(0)" id="card-0">
+        <div class="mc-num">D3.1</div>
+        <div class="mc-title">Hypothesen formulieren</div>
+        <div class="mc-desc">Wenn-dann-weil-Schema, Experiment beschreiben, Vorher &amp; Nachher</div>
+        <div class="mc-footer">
+          <span class="mc-time">30 min</span>
+          <span class="mc-status" id="status-0">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(1)" id="card-1">
+        <div class="mc-num">D3.2</div>
+        <div class="mc-title">Peer-Review</div>
+        <div class="mc-desc">Texte anderer kommentieren, konstruktives Feedback, Fehler benennen</div>
+        <div class="mc-footer">
+          <span class="mc-time">30 min</span>
+          <span class="mc-status" id="status-1">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(2)" id="card-2">
+        <div class="mc-num">D3.3</div>
+        <div class="mc-title">Fachtext schreiben</div>
+        <div class="mc-desc">5-Abschnitte-Struktur, Fachwortschatz, Experimentbeschreibung</div>
+        <div class="mc-footer">
+          <span class="mc-time">35 min</span>
+          <span class="mc-status" id="status-2">Starten</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-footer">Track D3 &middot; v4</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1: MODULE D3.1 - Hypothesen formulieren
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-0">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">D3.1 &mdash; Hypothesen formulieren</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div>
+          <span class="nav-progress-text" id="prog-text-0">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">D3.1</div>
+        <h1>Hypothesen<br>formulieren</h1>
+        <p class="hero-sub">Experiment beschreiben &middot; Vorher &amp; Nachher &middot; Wissenschaftliche Sprache</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 3</span> Fortgeschritten</div>
+          <div class="meta-chip"><span class="val">30 min</span> Dauer</div>
+        </div>
+      </section>
+
+      <!-- Chapter 1: Was ist eine Hypothese? -->
+      <section class="chapter" id="m0-ch1">
+        <div class="chapter-label">
+          <span class="chapter-num">01</span>
+          <h2 class="chapter-title">Was ist eine Hypothese?</h2>
+        </div>
+        <div class="glass">
+          <p>Eine Hypothese ist eine <span class="kw">begründete Vermutung</span>, die vor dem Experiment aufgestellt wird und <span class="kw">überprüfbar</span> sein muss.</p>
+        </div>
+        <div class="glass">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:10px;">Das Wenn-dann-Schema</div>
+          <p style="background:var(--bg-deep); border:1px solid var(--border-strong); border-radius:var(--r-md); padding:18px; text-align:center; margin:12px 0;">
+            &bdquo;<span class="kw">Wenn</span> [unabhängige Variable verändert wird], <span class="kw">dann</span> [Auswirkung auf abhängige Variable], <span class="kw">weil</span> [physikalische Begründung].&ldquo;
+          </p>
+          <p style="margin-top:12px; color:var(--ink-muted); font-size:0.9rem;">
+            <strong style="color:var(--accent-bright);">Beispiel:</strong> &bdquo;Wenn die Höhe, von der ein Ball fällt, zunimmt, dann steigt seine Aufprallgeschwindigkeit, weil die potenzielle Energie proportional zur Höhe ist.&ldquo;
+          </p>
+        </div>
+        <div class="glass">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:10px;">Experiment: Vorher &ndash; Während &ndash; Nachher</div>
+          <div class="exp-steps">
+            <div class="exp-step">
+              <div class="es-icon">&#128221;</div>
+              <div class="es-content">
+                <h5>Vorher (Hypothese)</h5>
+                <p>&bdquo;Ich vermute, dass... [Wenn-dann-weil].&ldquo; Nenne Messgrössen, Einheiten, erwartete Tendenz.</p>
+              </div>
+            </div>
+            <div class="exp-step">
+              <div class="es-icon">&#9879;&#65039;</div>
+              <div class="es-content">
+                <h5>Während (Beobachtung)</h5>
+                <p>&bdquo;Ich beobachte, dass... [objektive Beschreibung ohne Interpretation].&ldquo; Nur Sinneswahrnehmungen, keine Erklärungen.</p>
+              </div>
+            </div>
+            <div class="exp-step">
+              <div class="es-icon">&#9989;</div>
+              <div class="es-content">
+                <h5>Nachher (Schlussfolgerung)</h5>
+                <p>&bdquo;Die Messung zeigt, dass... Die Hypothese wird [bestätigt / widerlegt], weil...&ldquo; Vergleiche Hypothese mit Ergebnis.</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="cmp-grid">
+          <div class="cmp-bad">
+            <div class="cmp-label">Keine Hypothese</div>
+            <div class="cmp-text">&bdquo;Der Ball trifft schneller auf, wenn er höher fällt.&ldquo;<br><em style="color:var(--ink-dim); font-size:0.82rem;">(Keine Begründung, kein Weil, keine Variable genannt)</em></div>
+          </div>
+          <div class="cmp-good">
+            <div class="cmp-label">Echte Hypothese</div>
+            <div class="cmp-text">&bdquo;Wenn die Fallhöhe verdoppelt wird, dann steigt die Aufprallgeschwindigkeit um den Faktor $\sqrt{2}$, weil $v = \sqrt{2gh}$ gilt.&ldquo;</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter 2: Beispiele -->
+      <section class="chapter" id="m0-ch2">
+        <div class="chapter-label">
+          <span class="chapter-num">02</span>
+          <h2 class="chapter-title">Beispiele aus der Praxis</h2>
+        </div>
+        <div class="glass">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:10px;">Experiment: Schiefe Ebene</div>
+          <p style="color:var(--ink-muted); margin-bottom:12px;">Ein Wagen rollt eine schiefe Ebene herunter. Der Neigungswinkel wird variiert.</p>
+          <div class="exp-steps">
+            <div class="exp-step">
+              <div class="es-icon">&#128221;</div>
+              <div class="es-content">
+                <h5>Hypothese (Vorher)</h5>
+                <p>&bdquo;Wenn der Neigungswinkel der schiefen Ebene größer wird, dann nimmt die Beschleunigung des Wagens zu, weil die Hangabtriebskraft $F_H = m \cdot g \cdot \sin(\alpha)$ mit dem Winkel zunimmt.&ldquo;</p>
+              </div>
+            </div>
+            <div class="exp-step">
+              <div class="es-icon">&#9879;&#65039;</div>
+              <div class="es-content">
+                <h5>Beobachtung (Während)</h5>
+                <p>&bdquo;Ich beobachte, dass der Wagen bei steilerer Ebene schneller beschleunigt und früher unten ankommt.&ldquo;</p>
+              </div>
+            </div>
+            <div class="exp-step">
+              <div class="es-icon">&#9989;</div>
+              <div class="es-content">
+                <h5>Schlussfolgerung (Nachher)</h5>
+                <p>&bdquo;Die Messung ergibt: bei 30° $\rightarrow$ $a = 4{,}9 \text{ m/s}^2$; bei 45° $\rightarrow$ $a = 7{,}1 \text{ m/s}^2$. Die Hypothese wird bestätigt: Die Beschleunigung steigt mit dem Winkel.&ldquo;</p>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div class="glass">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:10px;">Experiment: Federpendel</div>
+          <div class="exp-steps">
+            <div class="exp-step">
+              <div class="es-icon">&#128221;</div>
+              <div class="es-content">
+                <h5>Hypothese</h5>
+                <p>&bdquo;Wenn die Masse am Federpendel zunimmt, dann wird die Periodendauer länger, weil das Trägheitsmoment zunimmt und die Schwingung langsamer wird.&ldquo;</p>
+              </div>
+            </div>
+            <div class="exp-step">
+              <div class="es-icon">&#9989;</div>
+              <div class="es-content">
+                <h5>Ergebnis</h5>
+                <p>&bdquo;Messung bestätigt die Hypothese: Mit größerer Masse schwang das Pendel langsamer.&ldquo;</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter 3: Exercises -->
+      <section class="chapter" id="m0-ch3" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">03</span>
+          <h2 class="chapter-title">Aufgaben</h2>
+        </div>
+
+        <!-- Ex 1: MC Hypothese erkennen -->
+        <div class="exercise-card" id="m0-ex1">
+          <div class="ex-header">
+            <span class="ex-num">1</span>
+            <span class="ex-title">Hypothese erkennen</span>
+            <span class="ex-tag">MC</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Welche der folgenden Aussagen ist eine korrekte physikalische Hypothese?</p>
+            <div class="mc-options" id="m0-og1">
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og1',0,2,1)">&bdquo;Die Kugel rollt schnell.&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og1',1,2,1)">&bdquo;Ich glaube, das Experiment klappt.&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og1',2,2,1)">&bdquo;Wenn die Masse des Körpers verdoppelt wird, dann verdoppelt sich die Gewichtskraft ($F_G = m \cdot g$), weil Gewichtskraft proportional zur Masse ist.&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og1',3,2,1)">&bdquo;Der Ball fiel runter.&ldquo;</div>
+            </div>
+            <div class="fb-block" id="m0-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2: MC Beobachtung vs. Schlussfolgerung -->
+        <div class="exercise-card" id="m0-ex2">
+          <div class="ex-header">
+            <span class="ex-num">2</span>
+            <span class="ex-title">Beobachtung vs. Schlussfolgerung</span>
+            <span class="ex-tag">MC</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Welche Aussage ist eine <strong>Beobachtung</strong> (nicht eine Schlussfolgerung)?</p>
+            <div class="mc-options" id="m0-og2">
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og2',0,1,2)">&bdquo;Die Reibungskraft bremste den Wagen.&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og2',1,1,2)">&bdquo;Der Wagen verlangsamte sich nach 2 Sekunden.&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og2',2,1,2)">&bdquo;Die Energie wurde dissipiert.&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og2',3,1,2)">&bdquo;Das Experiment bestätigt das Gesetz.&ldquo;</div>
+            </div>
+            <div class="fb-block" id="m0-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3: Input Schema anwenden -->
+        <div class="exercise-card" id="m0-ex3">
+          <div class="ex-header">
+            <span class="ex-num">3</span>
+            <span class="ex-title">Schema anwenden</span>
+            <span class="ex-tag">Eingabe</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Vervollständige: &bdquo;Wenn [Fallhöhe wird verdoppelt], dann [Aufprallgeschwindigkeit steigt], weil ___&ldquo;</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m0-a3" type="text" placeholder="Begründung eingeben...">
+              <button class="btn-check" onclick="checkInputMod(0,3,'m0-a3','m0-fb3','e_pot|epot|energie|v=|formel|proportional|sqrt|wurzel')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h3">Nenne die relevante Formel: $v = \sqrt{2gh}$ oder verweise auf den Zusammenhang zwischen potenzieller und kinetischer Energie.</div>
+            <div class="fb-block" id="m0-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4: MC Experimentbeschreibung -->
+        <div class="exercise-card" id="m0-ex4">
+          <div class="ex-header">
+            <span class="ex-num">4</span>
+            <span class="ex-title">Experimentbeschreibung</span>
+            <span class="ex-tag">MC</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">In welchem Schritt gehört die Aussage: <em>&bdquo;Die Messung zeigt $a = 5 \text{ m/s}^2$. Die Hypothese wird bestätigt.&ldquo;</em></p>
+            <div class="mc-options" id="m0-og4">
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og4',0,2,4)">Hypothese (Vorher)</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og4',1,2,4)">Beobachtung (Während)</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og4',2,2,4)">Schlussfolgerung (Nachher)</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og4',3,2,4)">Materialauflistung</div>
+            </div>
+            <div class="fb-block" id="m0-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5: MC Qualitätsmerkmal -->
+        <div class="exercise-card" id="m0-ex5">
+          <div class="ex-header">
+            <span class="ex-num">5</span>
+            <span class="ex-title">Qualitätsmerkmal</span>
+            <span class="ex-tag">MC</span>
+          </div>
+          <div class="ex-body">
+            <p class="ex-question">Was muss eine wissenschaftliche Hypothese zwingend sein?</p>
+            <div class="mc-options" id="m0-og5">
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og5',0,1,5)">Sie muss immer richtig sein.</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og5',1,1,5)">Sie muss überprüfbar (falsifizierbar) und begründet sein.</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og5',2,1,5)">Sie muss mindestens 100 Wörter lang sein.</div>
+              <div class="mc-opt" onclick="checkMCmod(0,'m0-og5',3,1,5)">Sie darf keine Formel enthalten.</div>
+            </div>
+            <div class="fb-block" id="m0-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(0)">Ergebnis anzeigen</button>
+
+        <!-- Extra exercises -->
+        <details class="extra-section" style="margin-top:32px;">
+          <summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? &mdash; Zusätzliche Übungen<span class="extra-count">(2 weitere)</span></summary>
+          <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong> &mdash; sie zählen nicht zum Score.</p></div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Vollständige Hypothese formulieren</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Formuliere eine vollständige physikalische Hypothese über die Federausdehnung. Nutze das Schema: <em>&bdquo;Wenn [Bedingung], dann [Ergebnis], weil [Gesetz/Begründung].&ldquo;</em></p>
+              <textarea class="answer-textarea" id="m0-taE1" rows="3" placeholder="Wenn ..., dann ..., weil ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m0-solE1')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m0-solE1" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p>&bdquo;Wenn die Kraft auf die Feder verdoppelt wird, dann verdoppelt sich die Ausdehnung, weil nach dem Hookeschen Gesetz ($F = k \cdot x$) Kraft und Ausdehnung proportional zueinander sind.&ldquo;</p>
+                <div class="extra-rubric"><div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> Wenn-dann-weil-Struktur vorhanden</label>
+                  <label><input type="checkbox"> Physikalisches Gesetz benannt</label>
+                  <label><input type="checkbox"> Überprüfbare Aussage (Proportionalität oder Formel)</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Hypothese bewerten</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Beurteile die folgende Aussage: <em>&bdquo;Wenn ich schwerer bin, falle ich schneller.&ldquo;</em><br>Ist das eine gute physikalische Hypothese? Begründe in einem Satz, was fehlt.</p>
+              <textarea class="answer-textarea" id="m0-taE2" rows="3" placeholder="Deine Begründung ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m0-solE2')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m0-solE2" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p>Nein &mdash; diese Hypothese ignoriert den physikalischen Sachverhalt: Im Vakuum fallen alle Körper gleich schnell (Galilei, $g$ unabhängig von $m$). Eine gute Hypothese benötigt eine nachprüfbare, physikalisch begründete Vorhersage und benennt, unter welchen Bedingungen sie gilt.</p>
+                <div class="extra-rubric"><div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> Physikalischen Fehler benannt ($g$ unabhängig von $m$)</label>
+                  <label><input type="checkbox"> Kriterium für gute Hypothese genannt (prüfbar, begründet)</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2: MODULE D3.2 - Peer-Review
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-1">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">D3.2 &mdash; Peer-Review</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div>
+          <span class="nav-progress-text" id="prog-text-1">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">D3.2</div>
+        <h1>Peer-Review</h1>
+        <p class="hero-sub">Texte anderer kommentieren &middot; konstruktives Feedback &middot; Fehler präzise benennen</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 3</span> Fortgeschritten</div>
+          <div class="meta-chip"><span class="val">30 min</span> Dauer</div>
+        </div>
+      </section>
+
+      <!-- Chapter 1: Review-Beispiele -->
+      <section class="chapter" id="m1-ch1">
+        <div class="chapter-label">
+          <span class="chapter-num">01</span>
+          <h2 class="chapter-title">Review-Beispiele</h2>
+        </div>
+        <div class="glass">
+          <p>Beim <strong>Peer-Review</strong> liest du eine Antwort eines Mitschülers und gibst konstruktives Feedback: Was ist gut? Was fehlt? Wie kann der Text verbessert werden?</p>
+        </div>
+
+        <!-- Peer A -->
+        <div class="peer-card">
+          <div class="peer-card-header">
+            <div class="peer-avatar">A</div>
+            <div><div class="peer-name">Schüler:in A</div><div class="peer-task">Aufgabe: Beschreibe den freien Fall fachsprachlich.</div></div>
+          </div>
+          <div class="peer-text">&bdquo;Ein Stein fällt schneller und schneller nach unten. Die Schwerkraft zieht ihn. Am Ende trifft er auf.&ldquo;</div>
+          <div class="peer-annotations">
+            <div class="anno"><span class="anno-icon">&#9888;&#65039;</span><span class="anno-bad">&bdquo;schneller und schneller&ldquo; &rarr; besser: &bdquo;gleichmäßig beschleunigt&ldquo; oder &bdquo;mit konstanter Beschleunigung $g = 9{,}81 \text{ m/s}^2$&ldquo;</span></div>
+            <div class="anno"><span class="anno-icon">&#9888;&#65039;</span><span class="anno-bad">&bdquo;Die Schwerkraft zieht ihn&ldquo; &rarr; besser: &bdquo;Die Gewichtskraft $F_G = m \cdot g$ beschleunigt ihn nach unten.&ldquo;</span></div>
+            <div class="anno"><span class="anno-icon">&#9888;&#65039;</span><span class="anno-bad">Keine Formel, keine Einheit, kein physikalisches Gesetz genannt.</span></div>
+            <div class="anno"><span class="anno-icon">&#128161;</span><span class="anno-suggest">Vorschlag: &bdquo;Im freien Fall wirkt ausschließlich die Gewichtskraft $F_G = m \cdot g$ auf den Körper. Er beschleunigt gleichmäßig mit $g \approx 9{,}81 \text{ m/s}^2$ nach unten.&ldquo;</span></div>
+          </div>
+        </div>
+
+        <!-- Peer B -->
+        <div class="peer-card">
+          <div class="peer-card-header">
+            <div class="peer-avatar">B</div>
+            <div><div class="peer-name">Schüler:in B</div><div class="peer-task">Aufgabe: Erkläre, warum ein Auto nach dem Bremsen zum Stehen kommt.</div></div>
+          </div>
+          <div class="peer-text">&bdquo;Das Auto kommt zum Stehen, weil die Bremskraft auf das Auto wirkt. Die Bremskraft ist entgegengesetzt zur Fahrtrichtung. Das Auto wird langsamer.&ldquo;</div>
+          <div class="peer-annotations">
+            <div class="anno"><span class="anno-icon">&#9989;</span><span class="anno-good">Richtig: Richtung der Bremskraft korrekt beschrieben.</span></div>
+            <div class="anno"><span class="anno-icon">&#9888;&#65039;</span><span class="anno-bad">Kein physikalisches Gesetz genannt (2. Newtonsches Gesetz: $F = m \cdot a$, mit negativer Beschleunigung).</span></div>
+            <div class="anno"><span class="anno-icon">&#9888;&#65039;</span><span class="anno-bad">&bdquo;langsamer&ldquo; ist korrekt, aber unvollständig &ndash; nenne: &bdquo;negative Beschleunigung&ldquo; oder &bdquo;Verzögerung&ldquo;.</span></div>
+            <div class="anno"><span class="anno-icon">&#128161;</span><span class="anno-suggest">Ergänze: &bdquo;Nach dem 2. Newtonschen Gesetz gilt $F = m \cdot a$. Da die Reibungskraft entgegen der Bewegungsrichtung wirkt, entsteht eine negative Beschleunigung (Verzögerung). Das Auto bleibt stehen, wenn $v = 0$ erreicht wird.&ldquo;</span></div>
+          </div>
+        </div>
+
+        <!-- Peer C -->
+        <div class="peer-card">
+          <div class="peer-card-header">
+            <div class="peer-avatar">C</div>
+            <div><div class="peer-name">Schüler:in C</div><div class="peer-task">Aufgabe: Was passiert mit der Energie beim Hochwerfen eines Balls?</div></div>
+          </div>
+          <div class="peer-text">&bdquo;Die kinetische Energie des Balls wird beim Aufsteigen in potenzielle Energie umgewandelt. Im höchsten Punkt ist $E_{kin} = 0$ und $E_{pot}$ maximal. Beim Fallen kehrt sich dieser Vorgang um. Ohne Reibung gilt: $E_{kin} + E_{pot} = \text{const}$.&ldquo;</div>
+          <div class="peer-annotations">
+            <div class="anno"><span class="anno-icon">&#9989;</span><span class="anno-good">Energieformen korrekt benannt und Umwandlung richtig beschrieben.</span></div>
+            <div class="anno"><span class="anno-icon">&#9989;</span><span class="anno-good">Formel für Energieerhaltung korrekt aufgeschrieben.</span></div>
+            <div class="anno"><span class="anno-icon">&#9989;</span><span class="anno-good">Sonderfall (höchster Punkt) korrekt erwähnt.</span></div>
+            <div class="anno"><span class="anno-icon">&#128161;</span><span class="anno-suggest">Sehr gute Antwort! Optional: Zahlenbeispiel ergänzen oder erwähnen, was bei Luftreibung passiert.</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter 2: Checkliste -->
+      <section class="chapter" id="m1-ch2">
+        <div class="chapter-label">
+          <span class="chapter-num">02</span>
+          <h2 class="chapter-title">Peer-Review-Checkliste</h2>
+        </div>
+        <div class="glass">
+          <p>Klicke auf jedes Kriterium, das in der zu bewertenden Antwort erfüllt ist. Nutze diese Liste bei jedem Review!</p>
+        </div>
+        <div class="checklist" id="checklist">
+          <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Fachbegriffe korrekt verwendet (keine Alltagssprache wie &bdquo;schneller&ldquo; statt &bdquo;beschleunigt&ldquo;)</div></div>
+          <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Physikalisches Gesetz / Prinzip benannt</div></div>
+          <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Formel korrekt aufgeschrieben</div></div>
+          <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Einheiten vollständig und korrekt</div></div>
+          <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Richtung / Vorzeichen bei Kräften und Vektoren korrekt</div></div>
+          <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Ergebnis als vollständiger Satz formuliert</div></div>
+          <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Keine inhaltlichen physikalischen Fehler</div></div>
+          <div class="cl-item" onclick="toggleCheck(this)"><div class="cl-check">&#10003;</div><div class="cl-text">Argumentation logisch und vollständig</div></div>
+        </div>
+        <div class="cl-progress-bar"><div class="cl-bar" id="clBar"></div></div>
+        <div class="cl-count" id="clCount">0 / 8 Kriterien</div>
+      </section>
+
+      <!-- Chapter 3: Exercises -->
+      <section class="chapter" id="m1-ch3" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">03</span>
+          <h2 class="chapter-title">Aufgaben</h2>
+        </div>
+
+        <div class="exercise-card" id="m1-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Feedback-Typ</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Welche Art von Feedback ist beim Peer-Review konstruktiv?</p>
+            <div class="mc-options" id="m1-og1">
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og1',0,2,1)">&bdquo;Das ist falsch.&ldquo; (ohne Erklärung)</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og1',1,2,1)">&bdquo;Sehr gut, weiter so!&ldquo; (ohne Begründung)</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og1',2,2,1)">&bdquo;Der Begriff &#8218;Gewicht&#8216; sollte &#8218;Gewichtskraft&#8216; heißen, da Gewicht eine Kraft (in Newton) ist, keine Masse.&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og1',3,2,1)">&bdquo;Das ist meine Meinung.&ldquo;</div>
+            </div>
+            <div class="fb-block" id="m1-fb1"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Fehler in Schüler:in A</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Was ist das Hauptproblem in der Antwort von Schüler:in A (freier Fall)?</p>
+            <div class="mc-options" id="m1-og2">
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og2',0,1,2)">Die Antwort ist zu lang.</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og2',1,1,2)">Alltagssprache statt Fachsprache; keine Formeln oder Gesetze genannt.</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og2',2,1,2)">Die Physik ist grundlegend falsch.</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og2',3,1,2)">Die Einheit fehlt beim Ergebnis.</div>
+            </div>
+            <div class="fb-block" id="m1-fb2"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Beste Antwort</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Welche der drei Schülerantworten (A, B oder C) war am vollständigsten?</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m1-a3" type="text" placeholder="A, B oder C">
+              <button class="btn-check" onclick="checkInputMod(1,3,'m1-a3','m1-fb3','c|schüler c|schüler:in c')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m1-fb3"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Verbesserungsvorschlag</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Was sollte bei Schüler:in B noch ergänzt werden?</p>
+            <div class="mc-options" id="m1-og4">
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og4',0,2,4)">Ein Foto des Experiments</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og4',1,2,4)">Die eigene Meinung zur Aufgabe</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og4',2,2,4)">Das 2. Newtonsche Gesetz und der Begriff &bdquo;Verzögerung&ldquo; (negative Beschleunigung)</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og4',3,2,4)">Mehr Adjektive für bessere Beschreibung</div>
+            </div>
+            <div class="fb-block" id="m1-fb4"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Review-Ziel</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Was ist das Hauptziel eines Peer-Reviews in der Physik?</p>
+            <div class="mc-options" id="m1-og5">
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og5',0,1,5)">Den Mitschüler zu benoten</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og5',1,1,5)">Fachliche Fehler und Lücken im Ausdruck zu finden, damit die Person ihre Antwort verbessern kann</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og5',2,1,5)">Die eigene Antwort zu kopieren</div>
+              <div class="mc-opt" onclick="checkMCmod(1,'m1-og5',3,1,5)">Den Mitschüler zu loben</div>
+            </div>
+            <div class="fb-block" id="m1-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(1)">Ergebnis anzeigen</button>
+
+        <!-- Extra exercises -->
+        <details class="extra-section" style="margin-top:32px;">
+          <summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? &mdash; Zusätzliche Übungen<span class="extra-count">(2 weitere)</span></summary>
+          <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong> &mdash; sie zählen nicht zum Score.</p></div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Review-Kommentar verfassen</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Schreibe einen Peer-Review-Kommentar für diese Schülerantwort:<br><em>&bdquo;Der Ball fällt runter, weil er schwer ist.&ldquo;</em><br><br>Nutze die Checkliste: Was fehlt? Was ist unklar? Wie kann man es verbessern?</p>
+              <textarea class="answer-textarea" id="m1-taE1" rows="4" placeholder="Dein Review-Kommentar ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m1-solE1')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m1-solE1" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p>Die Antwort verwendet Alltagssprache (&bdquo;fällt runter&ldquo;). Korrekt wäre: &bdquo;Der Körper wird durch die Gewichtskraft $F_G = m \cdot g$ gleichmäßig nach unten beschleunigt ($a = g \approx 10\,\text{m/s}^2$).&ldquo; Außerdem fehlt eine Bezugnahme auf das 2. Newtonsche Gesetz und die Einheit.</p>
+                <div class="extra-rubric"><div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> Konkreten Fachbegriff benannt, der fehlt</label>
+                  <label><input type="checkbox"> Verbesserungsvorschlag formuliert</label>
+                  <label><input type="checkbox"> Eigene Antwort in vollständigem Satz</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Beobachtung vs. Schlussfolgerung</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Ein Ball fällt aus $h = 2\,\text{m}$ und benötigt $t = 0{,}63\,\text{s}$.<br>Schreibe je einen Satz als <strong>Beobachtung</strong> und einen als <strong>Schlussfolgerung</strong>.</p>
+              <textarea class="answer-textarea" id="m1-taE2" rows="3" placeholder="Beobachtung: ...&#10;Schlussfolgerung: ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m1-solE2')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m1-solE2" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p><strong>Beobachtung:</strong> Der Ball benötigte $t = 0{,}63\,\text{s}$ für den Fall aus $h = 2\,\text{m}$.<br><strong>Schlussfolgerung:</strong> Da $v = \sqrt{2gh} \approx 6{,}3\,\text{m/s}$ gilt, bestätigt das Ergebnis den Energieerhaltungssatz.</p>
+                <div class="extra-rubric"><div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> Beobachtung beschreibt Messdaten (Zahlen)</label>
+                  <label><input type="checkbox"> Schlussfolgerung verweist auf ein Gesetz</label>
+                  <label><input type="checkbox"> Beide als vollständiger Satz</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3: MODULE D3.3 - Fachtext schreiben
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-2">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">D3.3 &mdash; Fachtext schreiben</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-2"></div></div>
+          <span class="nav-progress-text" id="prog-text-2">0 / 5</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">D3.3</div>
+        <h1>Fachtext<br>schreiben</h1>
+        <p class="hero-sub">Experiment fachsprachlich beschreiben &middot; Struktur &middot; Wortschatz</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 3</span> Fortgeschritten</div>
+          <div class="meta-chip"><span class="val">35 min</span> Dauer</div>
+        </div>
+      </section>
+
+      <!-- Chapter 1: Struktur -->
+      <section class="chapter" id="m2-ch1">
+        <div class="chapter-label">
+          <span class="chapter-num">01</span>
+          <h2 class="chapter-title">Die 5-Abschnitte-Struktur</h2>
+        </div>
+        <div class="glass">
+          <p>Jeder vollständige Physik-Fachtext folgt dieser Struktur. Lerne sie auswendig!</p>
+        </div>
+        <div class="write-steps">
+          <div class="ws"><div class="ws-num">1</div><div class="ws-content"><h5>Fragestellung</h5><p>Was soll untersucht werden? Formuliere als Frage: &bdquo;Wie hängt [Variable A] von [Variable B] ab?&ldquo;</p></div></div>
+          <div class="ws"><div class="ws-num">2</div><div class="ws-content"><h5>Hypothese</h5><p>Begründete Vermutung vor dem Experiment: &bdquo;Wenn&hellip;, dann&hellip;, weil&hellip;&ldquo;</p></div></div>
+          <div class="ws"><div class="ws-num">3</div><div class="ws-content"><h5>Durchführung &amp; Beobachtung</h5><p>Was wurde gemacht? Was wurde beobachtet? (Nur Fakten, keine Interpretation)</p></div></div>
+          <div class="ws"><div class="ws-num">4</div><div class="ws-content"><h5>Auswertung (Formeln &amp; Rechnung)</h5><p>Welche Formel gilt? Einsetzen der Messwerte, Ergebnis mit Einheit.</p></div></div>
+          <div class="ws"><div class="ws-num">5</div><div class="ws-content"><h5>Schlussfolgerung</h5><p>Was kann man sagen? Hypothese bestätigt/widerlegt? Mögliche Fehler? Physikalische Bedeutung?</p></div></div>
+        </div>
+        <div class="glass">
+          <div style="font-family:var(--mono); font-size:0.65rem; color:var(--accent); text-transform:uppercase; letter-spacing:0.15em; margin-bottom:10px;">Wichtiger Fachwortschatz</div>
+          <div class="kw-bar">
+            <span class="kw-tag">gleichmäßig beschleunigt</span>
+            <span class="kw-tag">Nettokraft</span>
+            <span class="kw-tag">Energieerhaltung</span>
+            <span class="kw-tag">proportional zu</span>
+            <span class="kw-tag">Impuls</span>
+            <span class="kw-tag">Wirkungsgrad</span>
+            <span class="kw-tag">Periodendauer</span>
+            <span class="kw-tag">Amplitude</span>
+            <span class="kw-tag">Resonanz</span>
+            <span class="kw-tag">Trägheit</span>
+            <span class="kw-tag">Reibungskraft</span>
+            <span class="kw-tag">Normalkraft</span>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter 2: Beispieltext -->
+      <section class="chapter" id="m2-ch2">
+        <div class="chapter-label">
+          <span class="chapter-num">02</span>
+          <h2 class="chapter-title">Beispieltext</h2>
+        </div>
+        <div class="fachtext-box">
+          <h4>Beispiel-Fachtext: Freier Fall von der Schule</h4>
+          <div class="ft-section">
+            <div class="ft-section-label">1. Fragestellung</div>
+            <div class="ft-text">Wie hängt die <span class="kw">Aufprallgeschwindigkeit</span> eines frei fallenden Körpers von der <span class="kw">Fallhöhe</span> ab?</div>
+          </div>
+          <div class="ft-section">
+            <div class="ft-section-label">2. Hypothese</div>
+            <div class="ft-text">Wenn die Fallhöhe zunimmt, dann steigt die Aufprallgeschwindigkeit, weil die <span class="kw">potenzielle Energie</span> ($E_{pot} = mgh$) proportional zur Höhe ist und beim Fall vollständig in <span class="kw">kinetische Energie</span> umgewandelt wird.</div>
+          </div>
+          <div class="ft-section">
+            <div class="ft-section-label">3. Durchführung &amp; Beobachtung</div>
+            <div class="ft-text">Ein Ball ($m = 0{,}1 \text{ kg}$) wurde aus verschiedenen Höhen ($h = 1 \text{ m}$; $2 \text{ m}$; $3 \text{ m}$) fallen gelassen. Die Fallzeit wurde mit einer Stoppuhr gemessen. Es wurde beobachtet, dass der Ball aus größerer Höhe eine längere Fallzeit hatte und lauter aufprallte.</div>
+          </div>
+          <div class="ft-section">
+            <div class="ft-section-label">4. Auswertung</div>
+            <div class="ft-text">Nach dem <span class="kw">Energieerhaltungssatz</span> gilt: $E_{pot} = E_{kin}$, also $mgh = \frac{1}{2}mv^2$. Daraus folgt: $v = \sqrt{2gh}$.<br>Ergebnis: $h = 2 \text{ m}$: $v = \sqrt{2 \cdot 9{,}81 \cdot 2} \approx 6{,}26 \text{ m/s}$.</div>
+          </div>
+          <div class="ft-section">
+            <div class="ft-section-label">5. Schlussfolgerung</div>
+            <div class="ft-text">Die Messergebnisse bestätigen die Hypothese: Die <span class="kw">Aufprallgeschwindigkeit</span> ist proportional zur Wurzel der Fallhöhe ($v \propto \sqrt{h}$). Mögliche Messfehler: Reaktionszeit beim Stoppen der Uhr; Luftwiderstand vernachlässigt.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter 3: Exercises -->
+      <section class="chapter" id="m2-ch3" style="margin-top:40px;">
+        <div class="chapter-label">
+          <span class="chapter-num">03</span>
+          <h2 class="chapter-title">Aufgaben</h2>
+        </div>
+
+        <div class="exercise-card" id="m2-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Abschnitt zuordnen</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">In welchem Abschnitt eines Fachtexts steht: <em>&bdquo;$v = \sqrt{2gh} = \sqrt{2 \cdot 10 \cdot 5} = 10 \text{ m/s}$&ldquo;</em>?</p>
+            <div class="mc-options" id="m2-og1">
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og1',0,2,1)">Hypothese</div>
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og1',1,2,1)">Beobachtung</div>
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og1',2,2,1)">Auswertung</div>
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og1',3,2,1)">Schlussfolgerung</div>
+            </div>
+            <div class="fb-block" id="m2-fb1"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Fragestellung formulieren</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Welche Fragestellung passt zu einem Experiment über den Zusammenhang von Masse und Gewichtskraft?</p>
+            <div class="mc-options" id="m2-og2">
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og2',0,1,2)">&bdquo;Was ist Masse?&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og2',1,1,2)">&bdquo;Wie hängt die Gewichtskraft von der Masse ab?&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og2',2,1,2)">&bdquo;Ich messe jetzt die Gewichtskraft.&ldquo;</div>
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og2',3,1,2)">&bdquo;Gewichtskraft ist cool.&ldquo;</div>
+            </div>
+            <div class="fb-block" id="m2-fb2"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Wortschatz</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Wie nennt man den korrekten Fachbegriff für &bdquo;immer schneller werden mit gleichbleibender Zunahme der Geschwindigkeit&ldquo;?</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m2-a3" type="text" placeholder="Fachbegriff">
+              <button class="btn-check" onclick="checkInputMod(2,3,'m2-a3','m2-fb3','gleichmäßig beschleunigt|gleichmaßig|gleichformig beschleunigt|konstante beschleunigung|gleichförmig beschleunigt')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h3">Die Beschleunigung ist konstant &ndash; das nennt man &bdquo;gleichmäßig beschleunigte Bewegung&ldquo;.</div>
+            <div class="fb-block" id="m2-fb3"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Schlussfolgerung</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Was sollte in der Schlussfolgerung eines Fachtexts stehen?</p>
+            <div class="mc-options" id="m2-og4">
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og4',0,2,4)">Nur die Messwerte in einer Tabelle</div>
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og4',1,2,4)">Die Hypothese und die Messung</div>
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og4',2,2,4)">Ob die Hypothese bestätigt/widerlegt wurde, mögliche Fehler und physikalische Bedeutung</div>
+              <div class="mc-opt" onclick="checkMCmod(2,'m2-og4',3,2,4)">Eine neue Hypothese für das nächste Experiment</div>
+            </div>
+            <div class="fb-block" id="m2-fb4"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Abschnitte zählen</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Wie viele Abschnitte hat die vollständige 5-Abschnitte-Struktur eines Physik-Fachtexts?</p>
+            <div class="answer-row">
+              <input class="answer-input" id="m2-a5" type="text" placeholder="Anzahl eingeben">
+              <button class="btn-check" onclick="checkInputMod(2,5,'m2-a5','m2-fb5','5|fünf')">Prüfen</button>
+            </div>
+            <div class="fb-block" id="m2-fb5"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(2)">Ergebnis anzeigen</button>
+
+        <!-- Extra exercises -->
+        <details class="extra-section" style="margin-top:32px;">
+          <summary class="extra-toggle"><span class="extra-icon">+</span>Noch nicht sicher? &mdash; Zusätzliche Übungen<span class="extra-count">(2 weitere)</span></summary>
+          <div class="extra-intro"><p>Diese Aufgaben sind <strong>optional</strong> &mdash; sie zählen nicht zum Score.</p></div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Hypothesen-Abschnitt schreiben</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Schreibe den Hypothesen-Abschnitt für ein Experiment zum Zusammenhang von Federkraft und Ausdehnung.<br>Nutze das Wenn-dann-weil-Schema und nenne das physikalische Gesetz.</p>
+              <textarea class="answer-textarea" id="m2-taE1" rows="3" placeholder="Wenn ..., dann ..., weil ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m2-solE1')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m2-solE1" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p>&bdquo;Wenn die Kraft auf die Feder zunimmt, dann nimmt die Ausdehnung proportional zu, weil nach dem Hookeschen Gesetz ($F = k \cdot x$) Kraft und Ausdehnung linear zusammenhängen.&ldquo;</p>
+                <div class="extra-rubric"><div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> Wenn-dann-weil vorhanden</label>
+                  <label><input type="checkbox"> Gesetz benannt (Hooke) oder Formel $F = k \cdot x$</label>
+                  <label><input type="checkbox"> Grammatikalisch vollständiger Satz</label>
+                </div>
+              </div>
+            </div>
+          </div>
+          <div class="exercise-card extra-card">
+            <div class="ex-header"><span class="ex-num">+2</span><span class="ex-title">Schlussfolgerungs-Abschnitt ergänzen</span><span class="ex-tag extra-tag">Zusatz</span></div>
+            <div class="ex-body">
+              <p class="ex-question">Ein Experiment zum freien Fall zeigt: Die Aufprallgeschwindigkeit steigt mit der Fallhöhe.<br>Schreibe den Schlussfolgerungs-Abschnitt: Wurde die Hypothese bestätigt? Nenne einen möglichen Messfehler. Erkläre die physikalische Bedeutung.</p>
+              <textarea class="answer-textarea" id="m2-taE2" rows="4" placeholder="Die Messergebnisse bestätigen/widerlegen die Hypothese, weil ..."></textarea>
+              <button class="btn-check extra-btn" onclick="toggleSolution('m2-solE2')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <div class="solution-box" id="m2-solE2" style="display:none;">
+                <div class="solution-title">Musterlösung</div>
+                <p>Die Messergebnisse bestätigen die Hypothese: Die Aufprallgeschwindigkeit steigt mit der Fallhöhe gemäß $v \propto \sqrt{h}$. Ein möglicher Messfehler ist die Reaktionszeit beim Stoppen der Uhr. Die physikalische Bedeutung: Energieerhaltung ($E_{pot} \to E_{kin}$) ist experimentell nachweisbar.</p>
+                <div class="extra-rubric"><div class="extra-rubric-title">Hast du das?</div>
+                  <label><input type="checkbox"> Hypothese bestätigt oder widerlegt</label>
+                  <label><input type="checkbox"> Mindestens ein Messfehler genannt</label>
+                  <label><input type="checkbox"> Physikalische Bedeutung erklärt</label>
+                </div>
+              </div>
+            </div>
+          </div>
+        </details>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════ -->
+<script>
+/* ────────────────────────────────────────────
+   STATE
+   ──────────────────────────────────────────── */
+const MODULE_EX_COUNTS = [5, 5, 5];
+let moduleStates = [false, false, false];
+let exerciseStates = {};
+
+/* ────────────────────────────────────────────
+   SCORM 1.2 API
+   ──────────────────────────────────────────── */
+const SCORM = (() => {
+  let api = null, initialized = false;
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) win = win.parent;
+      else if (win.opener) win = win.opener;
+      else break;
+    }
+    return win ? win.API : null;
+  }
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.moduleStates) moduleStates = saved.moduleStates;
+            if (saved.exerciseStates) exerciseStates = saved.exerciseStates;
+          } catch(e) {}
+        }
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
+        }
+      }
+    } catch(e) { console.log('SCORM init:', e); }
+  }
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ moduleStates, exerciseStates }));
+      let total = 0, solved = 0;
+      for (const key in exerciseStates) { total++; if (exerciseStates[key]) solved++; }
+      const score = total > 0 ? Math.round((solved / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+      if (moduleStates.every(s => s)) api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      api.LMSCommit('');
+    } catch(e) { console.log('SCORM save:', e); }
+  }
+  function finish() {
+    if (!api || !initialized) return;
+    try { save(); api.LMSFinish(''); } catch(e) {}
+  }
+  return { init, save, finish };
+})();
+
+/* ────────────────────────────────────────────
+   SCREEN NAVIGATION
+   ──────────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(id);
+  if (s) s.classList.add('active');
+  window.scrollTo(0, 0);
+  const canvas = document.getElementById('bg-canvas');
+  if (id === 'screen-landing') {
+    canvas.classList.remove('dimmed', 'hidden');
+  } else {
+    canvas.classList.add('hidden');
+  }
+}
+
+function openModule(idx) {
+  showScreen('screen-mod-' + idx);
+  restoreModuleState(idx);
+  setTimeout(() => MathJax?.typesetPromise?.(), 100);
+}
+
+function goLanding() {
+  showScreen('screen-landing');
+  updateLanding();
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   EXERCISE SYSTEM
+   ──────────────────────────────────────────── */
+function normalize(v) {
+  return v.trim().replace(/\s+/g, '').toLowerCase()
+    .replace(/,/g, '.').replace(/\u00d7/g, '*').replace(/\u00b7/g, '*').replace(/\u00f7/g, '/').replace(/\u22c5/g, '*');
+}
+
+function checkMCmod(mod, mcId, chosenIdx, correctIdx, exNum) {
+  const key = mod + '-' + exNum;
+  if (exerciseStates[key]) return;
+  const opts = document.querySelectorAll('#' + mcId + ' .mc-opt');
+  opts.forEach((o, i) => {
+    o.classList.add('locked'); o.onclick = null;
+    if (i === correctIdx) o.classList.add('correct');
+    else if (i === chosenIdx) o.classList.add('wrong');
+  });
+  const fb = document.getElementById('m' + mod + '-fb' + exNum);
+  const card = document.getElementById('m' + mod + '-ex' + exNum);
+  if (chosenIdx === correctIdx) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Nicht ganz &ndash; sieh dir die grüne Antwort an.';
+    card.classList.add('wrong-state');
+  }
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function checkInputMod(mod, ex, inputId, fbId, patterns) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = document.getElementById(inputId).value.trim().toLowerCase();
+  if (!val) return;
+  const ok = patterns.split('|').some(p => val.includes(p.toLowerCase()));
+  const fb = document.getElementById(fbId);
+  const inp = document.getElementById(inputId);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+
+  if (ok) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    inp.className = 'answer-input correct';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Noch nicht ganz &ndash; schau dir den Tipp an.';
+    inp.className = 'answer-input incorrect';
+    card.classList.add('wrong-state');
+  }
+  inp.disabled = true;
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function toggleHint(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+function toggleSolution(id) {
+  var el = document.getElementById(id);
+  if (el) el.style.display = (el.style.display === 'none' || el.style.display === '') ? 'block' : 'none';
+}
+
+/* ────────────────────────────────────────────
+   CHECKLIST (D3.2)
+   ──────────────────────────────────────────── */
+function toggleCheck(item) {
+  item.classList.toggle('checked');
+  const checkedCount = document.querySelectorAll('.cl-item.checked').length;
+  const bar = document.getElementById('clBar');
+  const count = document.getElementById('clCount');
+  if (bar) bar.style.width = (checkedCount / 8 * 100) + '%';
+  if (count) count.textContent = checkedCount + ' / 8 Kriterien';
+}
+
+/* ────────────────────────────────────────────
+   PROGRESS TRACKING
+   ──────────────────────────────────────────── */
+function updateModuleProgress(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const pct = (solved / total) * 100;
+  const fill = document.getElementById('prog-fill-' + mod);
+  const text = document.getElementById('prog-text-' + mod);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = solved + ' / ' + total;
+
+  if (solved === total) {
+    moduleStates[mod] = true;
+  }
+}
+
+function updateLanding() {
+  const completedCount = moduleStates.filter(Boolean).length;
+  const opFill = document.getElementById('opFill');
+  const opLabel = document.getElementById('opLabel');
+  if (opFill) opFill.style.width = (completedCount / 3 * 100) + '%';
+  if (opLabel) opLabel.textContent = completedCount + ' / 3 Module';
+
+  for (let i = 0; i < 3; i++) {
+    const card = document.getElementById('card-' + i);
+    const status = document.getElementById('status-' + i);
+    if (moduleStates[i]) {
+      card.classList.add('completed');
+      status.textContent = 'Erledigt';
+      status.classList.add('done');
+    } else {
+      card.classList.remove('completed');
+      let started = false;
+      for (let e = 1; e <= MODULE_EX_COUNTS[i]; e++) {
+        if (exerciseStates[i + '-' + e]) { started = true; break; }
+      }
+      status.textContent = started ? 'Angefangen' : 'Starten';
+      status.classList.remove('done');
+    }
+  }
+}
+
+function restoreModuleState(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) {
+      const card = document.getElementById('m' + mod + '-ex' + i);
+      const fb = document.getElementById('m' + mod + '-fb' + i);
+      if (card) card.classList.add('solved');
+      if (fb) {
+        fb.className = 'fb-block correct';
+        fb.innerHTML = '&#10003; Richtig!';
+      }
+    }
+  }
+  updateModuleProgress(mod);
+}
+
+function showResult(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const modNames = ['D3.1', 'D3.2', 'D3.3'];
+  let msg;
+  if (solved === total) {
+    msg = 'Modul ' + modNames[mod] + ' abgeschlossen! Alle ' + total + ' Aufgaben richtig.';
+    moduleStates[mod] = true;
+  } else if (solved === 0) {
+    msg = 'Noch keine Aufgabe gelöst. Versuche es!';
+  } else {
+    msg = solved + ' von ' + total + ' Aufgaben richtig. Weiter so!';
+  }
+  alert(msg);
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   ANIMATED BACKGROUND (WebGL aurora shader)
+   ──────────────────────────────────────────── */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const gl = canvas.getContext('webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+  const fs = `
+precision mediump float;
+uniform vec2 iRes;
+uniform float iTime;
+float hash(float n){return fract(sin(n)*43758.5453);}
+float noise(float x){float i=floor(x);float f=fract(x);float u=f*f*(3.0-2.0*f);return mix(hash(i),hash(i+1.0),u);}
+void main(){
+  vec2 uv=gl_FragCoord.xy/iRes.xy;
+  float t=iTime*0.4;
+  vec3 col=vec3(0.04,0.02,0.10);
+  for(int i=0;i<6;i++){
+    float fi=float(i);
+    float y=0.25+fi*0.13;
+    float wave=noise(uv.x*3.0+t*(0.5+fi*0.07)+fi*4.7)*0.13;
+    float band=smoothstep(0.055,0.0,abs(uv.y-y-wave));
+    float bright=band*(0.9-fi*0.12)*noise(uv.x*2.0-t*0.8+fi*3.14);
+    vec3 bandCol=mix(vec3(0.55,0.12,0.95),vec3(0.25,0.45,0.95),fi/6.0);
+    col+=bandCol*bright*0.55;
+  }
+  gl_FragColor=vec4(col,1.0);
+}`;
+  function compileShader(src,type){const s=gl.createShader(type);gl.shaderSource(s,src);gl.compileShader(s);return s;}
+  const prog=gl.createProgram();
+  gl.attachShader(prog,compileShader(vs,gl.VERTEX_SHADER));
+  gl.attachShader(prog,compileShader(fs,gl.FRAGMENT_SHADER));
+  gl.linkProgram(prog);gl.useProgram(prog);
+  const buf=gl.createBuffer();gl.bindBuffer(gl.ARRAY_BUFFER,buf);
+  gl.bufferData(gl.ARRAY_BUFFER,new Float32Array([-1,-1,1,-1,-1,1,1,1]),gl.STATIC_DRAW);
+  const pLoc=gl.getAttribLocation(prog,'p');
+  gl.enableVertexAttribArray(pLoc);gl.vertexAttribPointer(pLoc,2,gl.FLOAT,false,0,0);
+  const uTime=gl.getUniformLocation(prog,'iTime');
+  const uRes=gl.getUniformLocation(prog,'iRes');
+  function resize(){canvas.width=window.innerWidth;canvas.height=window.innerHeight;gl.viewport(0,0,canvas.width,canvas.height);}
+  function draw(t){gl.uniform1f(uTime,t*0.001);gl.uniform2f(uRes,canvas.width,canvas.height);gl.drawArrays(gl.TRIANGLE_STRIP,0,4);requestAnimationFrame(draw);}
+  window.addEventListener('resize',resize);resize();requestAnimationFrame(draw);
+})();
+
+/* ────────────────────────────────────────────
+   INIT
+   ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  SCORM.init();
+  updateLanding();
+});
+window.addEventListener('beforeunload', () => {
+  SCORM.finish();
+});
+</script>
+</body>
+</html>

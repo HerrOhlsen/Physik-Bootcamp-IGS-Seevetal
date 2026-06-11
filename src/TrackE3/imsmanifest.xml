@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<manifest identifier="TrackE3" version="1.0"
+  xmlns="http://www.imsproject.org/xsd/imscp_rootv1p1p2"
+  xmlns:adlcp="http://www.adlnet.org/xsd/adlcp_rootv1p2"
+  xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+  xsi:schemaLocation="http://www.imsproject.org/xsd/imscp_rootv1p1p2 imscp_rootv1p1p2.xsd
+                       http://www.adlnet.org/xsd/adlcp_rootv1p2 adlcp_rootv1p2.xsd">
+  <metadata>
+    <schema>ADL SCORM</schema>
+    <schemaversion>1.2</schemaversion>
+  </metadata>
+  <organizations default="TrackE3_org">
+    <organization identifier="TrackE3_org">
+      <title>Physik Bootcamp – Track E3: Synthese (Level 3)</title>
+      <item identifier="TrackE3_item" identifierref="TrackE3_res">
+        <title>Track E3 – Synthese (Level 3)</title>
+      </item>
+    </organization>
+  </organizations>
+  <resources>
+    <resource identifier="TrackE3_res" type="webcontent" adlcp:scormtype="sco" href="index.html">
+      <file href="index.html"/>
+    </resource>
+  </resources>
+</manifest>

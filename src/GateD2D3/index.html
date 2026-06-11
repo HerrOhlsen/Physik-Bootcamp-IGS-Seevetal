@@ -1,0 +1,517 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Gate-Test D2→D3 | Physik-Bootcamp</title>
+<script>MathJax={tex:{inlineMath:[['$','$']]},startup:{typeset:false}};</script>
+<script src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+<style>
+input, textarea, select { font-size: 16px; }
+html { height: 100%; }
+body { min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
+button, [onclick] { touch-action: manipulation; }
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#f8fafc;color:#1e293b;}
+.header{background:linear-gradient(135deg,#6b21a8,#9333ea);color:#fff;padding:20px max(16px,calc(50% - 364px))}
+.header-top{display:flex;align-items:center;gap:10px;flex-wrap:wrap}
+.badge{display:inline-block;padding:3px 10px;border-radius:20px;font-size:12px;font-weight:700}
+.track-badge{background:rgba(255,255,255,.2);color:#fff}
+.gate-badge{background:#fff;color:#6b21a8}
+.ai-badge{background:#d1fae5;color:#065f46;border:1px solid #6ee7b7}
+.header h1{font-size:1.4rem;font-weight:700;margin-top:8px}
+.header p{font-size:.9rem;opacity:.9;margin-top:4px}
+.info-box{background:rgba(255,255,255,.12);border:1px solid rgba(255,255,255,.25);border-radius:10px;padding:12px 16px;margin-top:12px;font-size:.88rem}
+.info-box strong{display:block;margin-bottom:4px}
+.container{max-width:760px;margin:0 auto;padding:24px 16px}
+.task-card{background:#fff;border-radius:12px;padding:24px;margin-bottom:20px;box-shadow:0 1px 4px rgba(0,0,0,.07);border-left:4px solid #9333ea;transition:border-color .3s}
+.task-card.evaluated{border-left-color:#10b981}
+.task-num{font-size:.8rem;font-weight:700;color:#7e22ce;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px}
+.task-title{font-size:1.05rem;font-weight:700;margin-bottom:8px;color:#1e293b}
+.task-desc{font-size:.95rem;line-height:1.6;color:#475569;margin-bottom:14px}
+.context-box{background:#faf5ff;border-radius:8px;padding:12px 16px;margin-bottom:14px;font-size:.9rem;line-height:1.6;border-left:3px solid #c084fc}
+.context-box strong{color:#7e22ce}
+.textarea-label{font-size:.85rem;font-weight:600;color:#475569;margin-bottom:6px;display:block}
+textarea{width:100%;border:1px solid #e2e8f0;border-radius:8px;padding:12px 14px;font-size:.95rem;font-family:inherit;outline:none;resize:vertical;min-height:120px;line-height:1.6}
+textarea:focus{border-color:#9333ea;box-shadow:0 0 0 3px rgba(147,51,234,.1)}
+textarea:disabled{background:#f8fafc;color:#64748b}
+.char-count{font-size:.78rem;color:#94a3b8;text-align:right;margin-top:4px}
+.rubric-section{background:#f8fafc;border-radius:10px;padding:16px;margin-top:14px}
+.rubric-section h4{font-size:.88rem;font-weight:700;color:#475569;margin-bottom:10px;text-transform:uppercase;letter-spacing:.5px}
+.rubric-table{width:100%;border-collapse:collapse;font-size:.85rem}
+.rubric-table th{background:#faf5ff;color:#7e22ce;padding:8px 10px;text-align:left;border-bottom:2px solid #e9d5ff}
+.rubric-table td{padding:8px 10px;border-bottom:1px solid #f1f5f9;line-height:1.4}
+.rubric-table tr:last-child td{border-bottom:none}
+.points{display:inline-block;background:#faf5ff;color:#7e22ce;border-radius:4px;padding:1px 6px;font-weight:700;font-size:.8rem}
+.points.earned{background:#d1fae5;color:#065f46}
+/* AI Feedback */
+.ai-feedback{margin-top:14px;border-radius:10px;padding:14px 16px;display:none}
+.ai-feedback.show{display:block}
+.ai-feedback.pass{background:#f0fdf4;border:1px solid #bbf7d0}
+.ai-feedback.partial{background:#fffbeb;border:1px solid #fde68a}
+.ai-feedback.fail{background:#fef2f2;border:1px solid #fecaca}
+.ai-score{font-size:1.1rem;font-weight:800;margin-bottom:6px}
+.ai-score.pass{color:#065f46}
+.ai-score.partial{color:#92400e}
+.ai-score.fail{color:#991b1b}
+.ai-fb-text{font-size:.88rem;line-height:1.6;color:#374151}
+/* Submit */
+.submit-area{text-align:center;padding:20px 0 36px}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-ai{background:#7e22ce;color:#fff;border:none;border-radius:10px;padding:14px 36px;font-size:1rem;font-weight:700;cursor:pointer;transition:all .2s;box-shadow:0 2px 8px rgba(126,34,206,.3)}
+.btn-ai:hover:not(:disabled){background:#6b21a8;transform:translateY(-1px)}
+.btn-ai:disabled{background:#94a3b8;cursor:not-allowed;transform:none;box-shadow:none}
+.btn-retry{background:#f1f5f9;color:#475569;border:none;border-radius:10px;padding:14px 28px;font-size:.95rem;font-weight:600;cursor:pointer}
+/* Loading */
+.loading-hint{font-size:.85rem;color:#7e22ce;margin-top:10px;display:none}
+.loading-hint.show{display:block}
+/* Total result */
+.total-result{background:#fff;border-radius:14px;padding:28px;margin-bottom:24px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.08);display:none}
+.total-result.show{display:block}
+.total-icon{font-size:3rem;margin-bottom:8px}
+.total-score{font-size:2.5rem;font-weight:800;margin-bottom:4px}
+.total-score.pass{color:#065f46}
+.total-score.fail{color:#991b1b}
+.total-badge{display:inline-block;padding:6px 20px;border-radius:20px;font-weight:700;font-size:1rem;margin-bottom:12px}
+.total-badge.pass{background:#d1fae5;color:#065f46}
+.total-badge.fail{background:#fee2e2;color:#991b1b}
+.total-msg{font-size:.95rem;color:#475569;line-height:1.6}
+/* Progress */
+.progress-bar{height:6px;background:#e2e8f0;border-radius:3px;margin:16px 0 24px;overflow:hidden}
+.progress-fill{height:100%;background:#9333ea;border-radius:3px;transition:width .3s}
+.progress-info{font-size:.85rem;color:#64748b;text-align:right;margin-top:-20px;margin-bottom:20px}
+@media print{
+  .header,.submit-area{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  textarea{border:1px solid #ccc;min-height:150px}
+  .btn-ai,.btn-retry{display:none}
+}
+</style>
+</head>
+<body>
+<div class="header">
+  <div class="header-top">
+    <span class="badge track-badge">Track D – Fachsprache</span>
+    <span class="badge gate-badge">Gate-Test</span>
+    <span class="badge ai-badge">✦ KI-Bewertung</span>
+  </div>
+  <h1>Gate-Test: Level 2 → Level 3</h1>
+  <p>5 Kurz-Erklärungen in Fachsprache</p>
+  <div class="info-box">
+    <strong>So läuft dieser Test ab:</strong>
+    Schreibe zu jeder Aufgabe eine kurze, physikalisch präzise Erklärung. Klicke dann auf „KI-Bewertung anfordern" – du bekommst sofort Punkte und Feedback. Bestanden: ≥ 15 von 20 Punkten.
+  </div>
+</div>
+
+<div class="container">
+  <div class="progress-bar"><div class="progress-fill" id="progFill" style="width:0%"></div></div>
+  <div class="progress-info" id="progInfo">0 von 5 ausgefüllt</div>
+
+  <div class="total-result" id="totalResult">
+    <div class="total-icon" id="totalIcon">🎉</div>
+    <div class="total-score" id="totalScore">0/20</div>
+    <div class="total-badge" id="totalBadge">Bestanden ✓</div>
+    <div class="total-msg" id="totalMsg"></div>
+  </div>
+
+  <!-- Aufgabe 1 -->
+  <div class="task-card" id="card1">
+    <div class="task-num">Aufgabe 1 · 4 Punkte</div>
+    <div class="task-title">Erkläre den Unterschied zwischen Geschwindigkeit und Beschleunigung.</div>
+    <div class="task-desc">Nutze Fachbegriffe, nenne die Formeln und gib je ein Beispiel. Schreibe in vollständigen Sätzen.</div>
+    <span class="textarea-label">Deine Erklärung:</span>
+    <textarea id="t1" placeholder="Geschwindigkeit ist …" oninput="updateProgress()"></textarea>
+    <div class="char-count" id="cc1">0 Zeichen</div>
+    <div class="rubric-section">
+      <h4>Bewertungsrubrik</h4>
+      <table class="rubric-table">
+        <tr><th>Kriterium</th><th style="width:80px">Punkte</th></tr>
+        <tr><td>Definition Geschwindigkeit korrekt ($v = s/t$, Einheit m/s)</td><td><span class="points" id="pts1-1">1 Pt.</span></td></tr>
+        <tr><td>Definition Beschleunigung korrekt ($a = \Delta v/\Delta t$, Einheit m/s²)</td><td><span class="points" id="pts1-2">1 Pt.</span></td></tr>
+        <tr><td>Klarer Unterschied benannt (v = konstant vs. a = Änderung von v)</td><td><span class="points" id="pts1-3">1 Pt.</span></td></tr>
+        <tr><td>Sinnvolle Beispiele gegeben</td><td><span class="points" id="pts1-4">1 Pt.</span></td></tr>
+      </table>
+    </div>
+    <div class="ai-feedback" id="fb1">
+      <div class="ai-score" id="score1"></div>
+      <div class="ai-fb-text" id="fbtext1"></div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 2 -->
+  <div class="task-card" id="card2">
+    <div class="task-num">Aufgabe 2 · 4 Punkte</div>
+    <div class="task-title">Beschreibe, was im Energieerhaltungssatz steht – in eigenen Worten.</div>
+    <div class="task-desc">Erkläre, was passiert, wenn ein Ball fällt: Wie ändern sich $E_{kin}$ und $E_{pot}$? Formuliere in präziser Fachsprache.</div>
+    <div class="context-box">
+      <strong>Situation:</strong> Ein Ball der Masse $m = 0{,}5\,\text{kg}$ fällt aus der Höhe $h = 5\,\text{m}$ senkrecht nach unten.
+    </div>
+    <span class="textarea-label">Deine Erklärung:</span>
+    <textarea id="t2" placeholder="Beim freien Fall wandelt sich …" oninput="updateProgress()"></textarea>
+    <div class="char-count" id="cc2">0 Zeichen</div>
+    <div class="rubric-section">
+      <h4>Bewertungsrubrik</h4>
+      <table class="rubric-table">
+        <tr><th>Kriterium</th><th style="width:80px">Punkte</th></tr>
+        <tr><td>Energieerhaltung als Prinzip korrekt benannt ($E_{ges} = const.$)</td><td><span class="points" id="pts2-1">1 Pt.</span></td></tr>
+        <tr><td>$E_{pot}$ nimmt ab, $E_{kin}$ nimmt zu – korrekt beschrieben</td><td><span class="points" id="pts2-2">1 Pt.</span></td></tr>
+        <tr><td>Formeln $E_{pot} = mgh$ und $E_{kin} = \frac{1}{2}mv^2$ genannt</td><td><span class="points" id="pts2-3">1 Pt.</span></td></tr>
+        <tr><td>Klare Fachsprache (keine Umgangssprache)</td><td><span class="points" id="pts2-4">1 Pt.</span></td></tr>
+      </table>
+    </div>
+    <div class="ai-feedback" id="fb2">
+      <div class="ai-score" id="score2"></div>
+      <div class="ai-fb-text" id="fbtext2"></div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 3 -->
+  <div class="task-card" id="card3">
+    <div class="task-num">Aufgabe 3 · 4 Punkte</div>
+    <div class="task-title">Erkläre Newtons erstes Gesetz (Trägheitsprinzip) mit eigenen Worten.</div>
+    <div class="task-desc">Formuliere das Gesetz präzise, benenne Fachbegriffe und gib ein Alltagsbeispiel, das du physikalisch erklärst.</div>
+    <span class="textarea-label">Deine Erklärung:</span>
+    <textarea id="t3" placeholder="Das erste Newtonsche Gesetz besagt …" oninput="updateProgress()"></textarea>
+    <div class="char-count" id="cc3">0 Zeichen</div>
+    <div class="rubric-section">
+      <h4>Bewertungsrubrik</h4>
+      <table class="rubric-table">
+        <tr><th>Kriterium</th><th style="width:80px">Punkte</th></tr>
+        <tr><td>Formulierung: „Ein Körper bleibt im Ruhezustand oder bewegt sich gleichförmig, solange keine Nettokraft wirkt"</td><td><span class="points" id="pts3-1">1 Pt.</span></td></tr>
+        <tr><td>Begriff „Trägheit" korrekt verwendet</td><td><span class="points" id="pts3-2">1 Pt.</span></td></tr>
+        <tr><td>Sinnvolles Alltagsbeispiel genannt</td><td><span class="points" id="pts3-3">1 Pt.</span></td></tr>
+        <tr><td>Beispiel physikalisch korrekt erklärt (Verbindung zu Kraft/Bewegung)</td><td><span class="points" id="pts3-4">1 Pt.</span></td></tr>
+      </table>
+    </div>
+    <div class="ai-feedback" id="fb3">
+      <div class="ai-score" id="score3"></div>
+      <div class="ai-fb-text" id="fbtext3"></div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 4 -->
+  <div class="task-card" id="card4">
+    <div class="task-num">Aufgabe 4 · 4 Punkte</div>
+    <div class="task-title">Beschreibe den Unterschied zwischen Masse und Gewichtskraft.</div>
+    <div class="task-desc">Erkläre beide Begriffe mit Definitionen, Formeln und Einheiten. Warum hat ein Astronaut im Weltall keine Gewichtskraft, aber trotzdem Masse?</div>
+    <span class="textarea-label">Deine Erklärung:</span>
+    <textarea id="t4" placeholder="Masse ist …, Gewichtskraft ist …" oninput="updateProgress()"></textarea>
+    <div class="char-count" id="cc4">0 Zeichen</div>
+    <div class="rubric-section">
+      <h4>Bewertungsrubrik</h4>
+      <table class="rubric-table">
+        <tr><th>Kriterium</th><th style="width:80px">Punkte</th></tr>
+        <tr><td>Masse korrekt definiert (Trägheit, Einheit kg, konstant überall)</td><td><span class="points" id="pts4-1">1 Pt.</span></td></tr>
+        <tr><td>Gewichtskraft korrekt definiert ($F_G = m \cdot g$, Einheit N, ortsabhängig)</td><td><span class="points" id="pts4-2">1 Pt.</span></td></tr>
+        <tr><td>Unterschied klar: Masse = unveränderlich; $F_G$ = abhängig von $g$</td><td><span class="points" id="pts4-3">1 Pt.</span></td></tr>
+        <tr><td>Weltall-Situation physikalisch korrekt erklärt ($g \approx 0$ im Weltall)</td><td><span class="points" id="pts4-4">1 Pt.</span></td></tr>
+      </table>
+    </div>
+    <div class="ai-feedback" id="fb4">
+      <div class="ai-score" id="score4"></div>
+      <div class="ai-fb-text" id="fbtext4"></div>
+    </div>
+  </div>
+
+  <!-- Aufgabe 5 -->
+  <div class="task-card" id="card5">
+    <div class="task-num">Aufgabe 5 · 4 Punkte</div>
+    <div class="task-title">Schreibe eine vollständige Argumentationskette zur folgenden Frage.</div>
+    <div class="task-desc">Nutze das Schema: <em>These → Begründung → Formel → Ergebnis.</em></div>
+    <div class="context-box">
+      <strong>Frage:</strong> Ein Körper der Masse $m = 4\,\text{kg}$ wird mit der Kraft $F = 20\,\text{N}$ beschleunigt. Wie groß ist die Beschleunigung? Begründe warum du so rechnest.
+    </div>
+    <span class="textarea-label">Deine Argumentationskette:</span>
+    <textarea id="t5" placeholder="These: Um die Beschleunigung zu berechnen …&#10;Begründung: …&#10;Formel: …&#10;Ergebnis: …" oninput="updateProgress()"></textarea>
+    <div class="char-count" id="cc5">0 Zeichen</div>
+    <div class="rubric-section">
+      <h4>Bewertungsrubrik</h4>
+      <table class="rubric-table">
+        <tr><th>Kriterium</th><th style="width:80px">Punkte</th></tr>
+        <tr><td>These: Ziel der Berechnung klar formuliert</td><td><span class="points" id="pts5-1">1 Pt.</span></td></tr>
+        <tr><td>Begründung: Verweis auf $F = m \cdot a$ und 2. Newtonsches Gesetz</td><td><span class="points" id="pts5-2">1 Pt.</span></td></tr>
+        <tr><td>Formel korrekt umgestellt: $a = F / m = 20\,\text{N} / 4\,\text{kg}$</td><td><span class="points" id="pts5-3">1 Pt.</span></td></tr>
+        <tr><td>Ergebnis mit Einheit: $a = 5\,\text{m/s}^2$</td><td><span class="points" id="pts5-4">1 Pt.</span></td></tr>
+      </table>
+    </div>
+    <div class="ai-feedback" id="fb5">
+      <div class="ai-score" id="score5"></div>
+      <div class="ai-fb-text" id="fbtext5"></div>
+    </div>
+  </div>
+
+  <div class="submit-area">
+    <div class="btn-row">
+      <button class="btn-ai" id="btnEval" onclick="requestEvaluation()" disabled>✦ KI-Bewertung anfordern</button>
+      <button class="btn-retry" id="btnRetry" style="display:none" onclick="resetTest()">🔄 Nochmal versuchen</button>
+    </div>
+    <div class="loading-hint" id="loadingHint">⏳ KI wertet aus … das dauert ca. 10–15 Sekunden.</div>
+    <p style="font-size:.82rem;color:#94a3b8;margin-top:10px" id="submitHint">Beantworte alle 5 Aufgaben, um die KI-Bewertung zu starten.</p>
+  </div>
+</div>
+
+<div style="text-align:center;padding:8px;font-size:0.7rem;color:#94a3b8;margin-top:8px">Gate-Test D2→D3 · v5</div>
+
+<script>
+const WEBHOOK_URL = "https://hook.eu2.make.com/ucp5woga4t7shqejvtys8vfm94ikf411";
+const textIds = ['t1','t2','t3','t4','t5'];
+let evaluated = false;
+
+// SCORM
+const SCORM = (() => {
+  let api = null, initialized = false;
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) win = win.parent;
+      else if (win.opener) win = win.opener;
+      else break;
+    }
+    return win ? win.API : null;
+  }
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
+        }
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.texts) {
+              textIds.forEach((id, i) => {
+                if (saved.texts[i]) document.getElementById(id).value = saved.texts[i];
+              });
+              updateProgress();
+            }
+          } catch(e) {}
+        }
+      }
+    } catch(e) {}
+  }
+  function save(score, passed) {
+    if (!api || !initialized) return;
+    try {
+      const texts = textIds.map(id => document.getElementById(id).value);
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ texts }));
+      if (score !== undefined) {
+        api.LMSSetValue('cmi.core.score.raw', String(Math.round(score / 20 * 100)));
+        api.LMSSetValue('cmi.core.score.min', '0');
+        api.LMSSetValue('cmi.core.score.max', '100');
+        api.LMSSetValue('cmi.core.lesson_status', passed ? 'passed' : 'failed');
+      }
+      api.LMSCommit('');
+    } catch(e) {}
+  }
+  function finish() {
+    if (!api || !initialized) return;
+    try {
+      const texts = textIds.map(id => document.getElementById(id).value);
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ texts }));
+      api.LMSCommit('');
+      api.LMSFinish('');
+    } catch(e) {}
+  }
+  return { init, save, finish };
+})();
+
+function updateProgress() {
+  let filled = 0;
+  textIds.forEach((id, i) => {
+    const v = document.getElementById(id).value.trim();
+    const cc = document.getElementById('cc' + (i + 1));
+    if (cc) cc.textContent = v.length + ' Zeichen';
+    if (v.length > 20) filled++;
+  });
+  document.getElementById('progFill').style.width = (filled / 5 * 100) + '%';
+  document.getElementById('progInfo').textContent = filled + ' von 5 ausgefüllt';
+  const btn = document.getElementById('btnEval');
+  if (!evaluated) btn.disabled = filled < 5;
+}
+
+async function requestEvaluation() {
+  const btn = document.getElementById('btnEval');
+  const loading = document.getElementById('loadingHint');
+  const hint = document.getElementById('submitHint');
+
+  btn.disabled = true;
+  loading.classList.add('show');
+  hint.style.display = 'none';
+
+  const answers = textIds.map(id => document.getElementById(id).value.trim());
+
+  const systemPrompt = `Du bist ein Physiklehrer (Sek II) und bewertest Schülerantworten anhand einer Rubrik.
+Sei fair aber präzise. Gib konstruktives, knappes Feedback auf Deutsch.
+Antworte NUR mit validem JSON, ohne Markdown-Codeblöcke.`;
+
+  const userPrompt = `Bewerte die folgenden 5 Schülerantworten anhand der Rubriken. Jede Aufgabe gibt 0–4 Punkte.
+
+AUFGABE 1: Unterschied Geschwindigkeit vs. Beschleunigung
+Rubrik: (1) Geschwindigkeit v=s/t korrekt, (2) Beschleunigung a=Δv/Δt korrekt, (3) Unterschied klar benannt, (4) Beispiele gegeben
+Antwort: "${answers[0]}"
+
+AUFGABE 2: Energieerhaltungssatz / freier Fall
+Rubrik: (1) Energieerhaltung als Prinzip (E_ges=const), (2) E_pot nimmt ab / E_kin nimmt zu, (3) Formeln E_pot=mgh und E_kin=½mv² genannt, (4) Klare Fachsprache
+Antwort: "${answers[1]}"
+
+AUFGABE 3: Newtons 1. Gesetz (Trägheitsprinzip)
+Rubrik: (1) Formulierung des Gesetzes korrekt, (2) Begriff Trägheit korrekt verwendet, (3) Alltagsbeispiel genannt, (4) Beispiel physikalisch korrekt erklärt
+Antwort: "${answers[2]}"
+
+AUFGABE 4: Masse vs. Gewichtskraft
+Rubrik: (1) Masse korrekt (Trägheit, kg, überall konstant), (2) Gewichtskraft korrekt (F_G=m·g, N, ortsabhängig), (3) Unterschied klar, (4) Weltall-Situation erklärt (g≈0)
+Antwort: "${answers[3]}"
+
+AUFGABE 5: Argumentationskette F=20N, m=4kg → a=?
+Rubrik: (1) These formuliert, (2) F=m·a und 2. Newtonsches Gesetz genannt, (3) a=F/m=20/4 korrekt umgestellt, (4) Ergebnis a=5 m/s² mit Einheit
+Antwort: "${answers[4]}"
+
+Antworte mit diesem JSON-Format:
+{
+  "aufgaben": [
+    {"punkte": 3, "feedback": "Kurzes Feedback auf Deutsch (1-2 Sätze)"},
+    {"punkte": 2, "feedback": "..."},
+    {"punkte": 4, "feedback": "..."},
+    {"punkte": 1, "feedback": "..."},
+    {"punkte": 3, "feedback": "..."}
+  ]
+}`;
+
+  try {
+    const response = await fetch(WEBHOOK_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        messages: [
+          { role: 'system', content: systemPrompt },
+          { role: 'user', content: userPrompt }
+        ]
+      })
+    });
+
+    if (!response.ok) throw new Error('HTTP ' + response.status);
+    const raw = await response.text();
+
+    // Parse JSON — strip markdown fences if present
+    let data;
+    try {
+      const cleaned = raw.replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
+      data = JSON.parse(cleaned);
+    } catch(e) {
+      throw new Error('Ungültige Antwort vom Server');
+    }
+
+    showResults(data);
+
+  } catch(err) {
+    loading.classList.remove('show');
+    btn.disabled = false;
+    hint.style.display = '';
+    hint.textContent = '⚠️ Fehler: ' + err.message + ' – bitte nochmal versuchen.';
+    hint.style.color = '#ef4444';
+  }
+}
+
+function showResults(data) {
+  const aufgaben = data.aufgaben;
+  let total = 0;
+
+  aufgaben.forEach((a, i) => {
+    const n = i + 1;
+    const pts = Math.max(0, Math.min(4, a.punkte));
+    total += pts;
+
+    const fb = document.getElementById('fb' + n);
+    const scoreEl = document.getElementById('score' + n);
+    const textEl = document.getElementById('fbtext' + n);
+    const card = document.getElementById('card' + n);
+
+    const cls = pts >= 3 ? 'pass' : pts >= 2 ? 'partial' : 'fail';
+    fb.className = 'ai-feedback show ' + cls;
+    scoreEl.className = 'ai-score ' + cls;
+    scoreEl.textContent = '✦ ' + pts + ' / 4 Punkte';
+    textEl.textContent = a.feedback;
+    card.classList.add('evaluated');
+
+    // Mark criteria points as earned/not
+    for (let c = 1; c <= 4; c++) {
+      const el = document.getElementById('pts' + n + '-' + c);
+      if (el && c <= pts) el.classList.add('earned');
+    }
+
+    // Disable textarea
+    document.getElementById('t' + n).disabled = true;
+  });
+
+  const passed = total >= 15;
+
+  // Total result box
+  const box = document.getElementById('totalResult');
+  const icon = document.getElementById('totalIcon');
+  const scoreEl = document.getElementById('totalScore');
+  const badge = document.getElementById('totalBadge');
+  const msg = document.getElementById('totalMsg');
+
+  box.classList.add('show');
+  icon.textContent = passed ? '🎉' : '💪';
+  scoreEl.textContent = total + ' / 20 Punkte';
+  scoreEl.className = 'total-score ' + (passed ? 'pass' : 'fail');
+  badge.textContent = passed ? 'Bestanden ✓' : 'Noch nicht bestanden';
+  badge.className = 'total-badge ' + (passed ? 'pass' : 'fail');
+  msg.textContent = passed
+    ? 'Sehr gut! Du hast den Gate-Test bestanden und kannst mit Level 3 weitermachen.'
+    : 'Du hast ' + total + ' von 15 benötigten Punkten. Schau dir das Feedback an und wiederhole die schwachen Stellen aus Level 2.';
+
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  // Buttons
+  document.getElementById('loadingHint').classList.remove('show');
+  document.getElementById('btnEval').style.display = 'none';
+  document.getElementById('btnRetry').style.display = '';
+  document.getElementById('submitHint').style.display = 'none';
+
+  evaluated = true;
+  SCORM.save(total, passed);
+  if (typeof MathJax !== 'undefined') MathJax.typesetPromise([box, ...Array.from(document.querySelectorAll('.ai-feedback'))]);
+}
+
+function resetTest() {
+  evaluated = false;
+  textIds.forEach(id => {
+    const el = document.getElementById(id);
+    el.value = '';
+    el.disabled = false;
+  });
+  for (let n = 1; n <= 5; n++) {
+    document.getElementById('fb' + n).className = 'ai-feedback';
+    document.getElementById('card' + n).classList.remove('evaluated');
+    for (let c = 1; c <= 4; c++) {
+      const el = document.getElementById('pts' + n + '-' + c);
+      if (el) el.classList.remove('earned');
+    }
+  }
+  document.getElementById('totalResult').classList.remove('show');
+  document.getElementById('btnEval').style.display = '';
+  document.getElementById('btnEval').disabled = true;
+  document.getElementById('btnRetry').style.display = 'none';
+  document.getElementById('submitHint').style.display = '';
+  document.getElementById('submitHint').textContent = 'Beantworte alle 5 Aufgaben, um die KI-Bewertung zu starten.';
+  document.getElementById('submitHint').style.color = '';
+  updateProgress();
+  window.scrollTo(0, 0);
+}
+
+document.addEventListener('DOMContentLoaded', () => {
+  MathJax.startup.promise.then(() => MathJax.typesetPromise());
+  SCORM.init();
+  updateProgress();
+});
+window.addEventListener('beforeunload', () => SCORM.finish());
+</script>
+</body>
+</html>

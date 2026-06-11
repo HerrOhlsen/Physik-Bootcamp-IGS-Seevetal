@@ -1,0 +1,1597 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Physik Bootcamp — Track B2: Rechnen & Einheiten</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #6668a0;
+
+  --accent: #16a34a;
+  --accent-bright: #4ade80;
+  --accent-glow: rgba(22, 163, 74, 0.35);
+  --accent-deep: #15803d;
+  --accent-subtle: rgba(22, 163, 74, 0.08);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-glow: rgba(52, 211, 153, 0.25);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(74, 222, 128, 0.15);
+  --border-strong: rgba(74, 222, 128, 0.3);
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-xl: 28px; --r-full: 100px;
+
+  --shadow-sm: 0 2px 8px rgba(0,0,0,0.2);
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+html { scroll-behavior: smooth; height: 100%; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+  min-height: 100vh;
+}
+input, textarea, select { font-size: 16px; }
+button, [onclick] {
+  touch-action: manipulation;
+  -webkit-tap-highlight-color: transparent;
+}
+
+/* ══════════════════════════════════════════
+   ANIMATED BACKGROUND CANVAS
+   ══════════════════════════════════════════ */
+#bg-canvas {
+  position: fixed;
+  top: 0; left: 0;
+  width: 100%; height: 100%;
+  z-index: 0;
+  opacity: 1;
+  transition: opacity 0.8s ease;
+}
+#bg-canvas.dimmed { opacity: 0.15; }
+#bg-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREEN SYSTEM
+   ══════════════════════════════════════════ */
+.screen {
+  display: none;
+  position: relative;
+  z-index: 1;
+  min-height: 100vh;
+}
+.screen.active {
+  display: block;
+  animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1);
+}
+@keyframes screenIn {
+  from { opacity: 0; transform: translateY(24px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+
+/* ══════════════════════════════════════════
+   LANDING PAGE
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  min-height: 100vh;
+  padding: 40px 20px;
+  position: relative;
+}
+.landing-header {
+  text-align: center;
+  margin-bottom: 48px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.2s both;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(30px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.track-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  background: rgba(21, 128, 61, 0.3);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--accent);
+  color: var(--accent-bright);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  padding: 8px 20px;
+  border-radius: var(--r-full);
+  margin-bottom: 24px;
+}
+.landing-title {
+  font-size: clamp(2.4rem, 6vw, 4rem);
+  font-weight: 900;
+  line-height: 1.05;
+  letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-bright) 50%, #86efac 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 16px;
+}
+.landing-sub {
+  color: var(--ink-muted);
+  font-size: 1.1rem;
+  font-weight: 400;
+  max-width: 480px;
+  margin: 0 auto 20px;
+  line-height: 1.6;
+}
+.landing-meta {
+  display: flex;
+  justify-content: center;
+  gap: 28px;
+  flex-wrap: wrap;
+}
+.l-meta {
+  font-size: 0.8rem;
+  color: var(--ink-dim);
+  font-weight: 500;
+}
+.l-meta .val {
+  color: var(--accent-bright);
+  font-weight: 700;
+  font-family: var(--mono);
+}
+
+/* Overall progress */
+.overall-progress {
+  width: 100%;
+  max-width: 640px;
+  margin-bottom: 40px;
+  animation: fadeUp 0.8s cubic-bezier(0.22, 1, 0.36, 1) 0.4s both;
+}
+.op-bar-wrap {
+  display: flex;
+  align-items: center;
+  gap: 14px;
+}
+.op-track {
+  flex: 1;
+  height: 6px;
+  background: rgba(255,255,255,0.06);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.op-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright), #86efac);
+  border-radius: var(--r-full);
+  transition: width 0.8s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.op-label {
+  font-family: var(--mono);
+  font-size: 0.75rem;
+  color: var(--ink-muted);
+  white-space: nowrap;
+}
+
+/* Module cards grid */
+.module-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+  gap: 16px;
+  width: 100%;
+  max-width: 920px;
+}
+.mod-card {
+  background: var(--bg-glass);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 28px;
+  cursor: pointer;
+  transition: all 0.35s cubic-bezier(0.22, 1, 0.36, 1);
+  position: relative;
+  overflow: hidden;
+}
+.mod-card::before {
+  content: '';
+  position: absolute;
+  inset: -1px;
+  border-radius: var(--r-lg);
+  padding: 1px;
+  background: linear-gradient(135deg, var(--accent) 0%, transparent 50%);
+  -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+  -webkit-mask-composite: xor;
+  mask-composite: exclude;
+  opacity: 0;
+  transition: opacity 0.35s;
+  pointer-events: none;
+}
+.mod-card:hover {
+  transform: translateY(-4px);
+  border-color: var(--border-strong);
+  box-shadow: var(--shadow-lg), var(--glow);
+}
+.mod-card:hover::before { opacity: 1; }
+.mod-card.completed { border-color: var(--ok-border); }
+.mod-card.completed::after {
+  content: '\2713';
+  position: absolute;
+  top: 16px; right: 16px;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--ok);
+  color: #0c0c1d;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 800;
+  font-size: 0.85rem;
+}
+.mc-num {
+  font-family: var(--mono);
+  font-size: 0.65rem;
+  font-weight: 700;
+  color: var(--accent);
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  margin-bottom: 8px;
+}
+.mc-title {
+  font-size: 1.15rem;
+  font-weight: 700;
+  color: #fff;
+  margin-bottom: 6px;
+  letter-spacing: -0.01em;
+}
+.mc-desc {
+  font-size: 0.82rem;
+  color: var(--ink-muted);
+  margin-bottom: 14px;
+  line-height: 1.5;
+}
+.mc-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+.mc-time {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+}
+.mc-status {
+  font-size: 0.7rem;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: var(--r-full);
+  background: var(--accent-subtle);
+  color: var(--accent-bright);
+  border: 1px solid var(--border);
+}
+.mc-status.done {
+  background: var(--ok-bg);
+  color: var(--ok);
+  border-color: var(--ok-border);
+}
+.mod-card:nth-child(1) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both; }
+.mod-card:nth-child(2) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.6s both; }
+.mod-card:nth-child(3) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.7s both; }
+.mod-card:nth-child(4) { animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.8s both; }
+
+/* Footer */
+.landing-footer {
+  margin-top: 48px;
+  font-size: 0.72rem;
+  color: var(--ink-dim);
+  font-family: var(--mono);
+  animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 1s both;
+}
+
+/* ══════════════════════════════════════════
+   MODULE PAGE LAYOUT
+   ══════════════════════════════════════════ */
+.module-page { background: var(--bg-deep); position: relative; }
+.module-page::before {
+  content: '';
+  position: fixed; inset: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(22,163,74,0.05) 1px, transparent 0);
+  background-size: 32px 32px;
+  pointer-events: none; z-index: 0;
+}
+
+/* Top navbar */
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg-glass-heavy);
+  backdrop-filter: blur(16px);
+  -webkit-backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border);
+  padding: 0 20px;
+}
+.top-nav-inner {
+  max-width: 820px;
+  margin: 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  height: 56px;
+}
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px;
+  background: none;
+  border: 1px solid var(--border);
+  color: var(--ink-muted);
+  font-family: var(--font);
+  font-size: 0.78rem;
+  font-weight: 600;
+  padding: 6px 14px;
+  border-radius: var(--r-md);
+  cursor: pointer;
+  transition: all 0.2s;
+  flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent); }
+.nav-title {
+  font-size: 0.85rem; font-weight: 600; color: var(--ink);
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.nav-progress {
+  margin-left: auto;
+  display: flex; align-items: center; gap: 10px; flex-shrink: 0;
+}
+.nav-progress-track {
+  width: 80px; height: 4px;
+  background: var(--bg-elevated);
+  border-radius: var(--r-full);
+  overflow: hidden;
+}
+.nav-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright));
+  border-radius: var(--r-full);
+  transition: width 0.6s cubic-bezier(0.22, 1, 0.36, 1);
+}
+.nav-progress-text {
+  font-family: var(--mono);
+  font-size: 0.7rem;
+  color: var(--ink-dim);
+  white-space: nowrap;
+}
+
+/* Module content */
+.mod-content {
+  position: relative; z-index: 1;
+  max-width: 780px;
+  margin: 0 auto;
+  padding: 0 20px 100px;
+}
+
+/* ══════════════════════════════════════════
+   MODULE COMPONENTS
+   ══════════════════════════════════════════ */
+.hero {
+  padding: 52px 0 36px;
+  text-align: center;
+}
+.hero-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-size: 0.72rem; font-weight: 700;
+  letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 16px;
+  border-radius: var(--r-full);
+  margin-bottom: 18px;
+  border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem);
+  font-weight: 900; line-height: 1.1; letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  background-clip: text;
+  margin-bottom: 10px;
+}
+.hero-sub {
+  color: var(--ink-muted); font-size: 1rem;
+  max-width: 480px; margin: 0 auto 20px;
+}
+.hero-meta {
+  display: flex; justify-content: center; gap: 20px; flex-wrap: wrap;
+}
+.meta-chip {
+  font-size: 0.78rem; color: var(--ink-muted); font-weight: 500;
+}
+.meta-chip .val {
+  color: var(--accent-bright); font-weight: 700; font-family: var(--mono);
+}
+
+/* Glass cards */
+.glass {
+  background: var(--bg-glass);
+  backdrop-filter: blur(12px);
+  -webkit-backdrop-filter: blur(12px);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  padding: 24px;
+  margin-bottom: 20px;
+}
+.glass p { color: var(--ink); }
+.glass p + p { margin-top: 10px; }
+.glass ul { padding-left: 20px; }
+.glass li { margin-bottom: 6px; color: var(--ink); }
+.glass strong { color: #fff; }
+
+/* Chapter sections */
+.chapter { margin-top: 40px; }
+
+/* Exercise cards */
+.exercise-card {
+  background: var(--bg-surface);
+  border: 1px solid var(--border);
+  border-radius: var(--r-lg);
+  margin-bottom: 16px;
+  overflow: hidden;
+  transition: border-color 0.3s;
+}
+.exercise-card.solved { border-color: var(--ok-border); }
+.exercise-card.wrong-state { border-color: var(--err-border); }
+.ex-header {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px;
+  background: var(--bg-card);
+  border-bottom: 1px solid var(--border);
+}
+.ex-num {
+  display: flex; align-items: center; justify-content: center;
+  width: 28px; height: 28px;
+  border-radius: 50%;
+  background: var(--accent-deep);
+  color: var(--accent-bright);
+  font-family: var(--mono); font-size: 0.75rem; font-weight: 700;
+  flex-shrink: 0;
+}
+.ex-title { font-weight: 600; font-size: 0.9rem; color: var(--ink); }
+.ex-tag {
+  margin-left: auto;
+  font-family: var(--mono); font-size: 0.6rem; font-weight: 600;
+  color: var(--accent); background: var(--accent-subtle);
+  padding: 2px 8px; border-radius: var(--r-full);
+  letter-spacing: 0.05em; text-transform: uppercase;
+}
+.ex-body { padding: 20px; }
+.ex-question { color: var(--ink); margin-bottom: 16px; line-height: 1.6; }
+
+/* Answer inputs */
+.answer-row {
+  display: flex; gap: 8px; align-items: center; flex-wrap: wrap;
+}
+.answer-input {
+  flex: 1; min-width: 160px;
+  padding: 10px 14px;
+  background: var(--bg-deep);
+  border: 2px solid var(--border-strong);
+  border-radius: var(--r-md);
+  color: var(--ink);
+  font-family: var(--mono); font-size: 1rem;
+  outline: none; transition: all 0.2s;
+}
+.answer-input::placeholder { color: var(--ink-dim); }
+.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.answer-input.correct { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.answer-input.incorrect { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+.answer-unit { font-size: 0.8rem; color: var(--ink-dim); }
+
+/* Buttons */
+.btn-check {
+  display: inline-flex; align-items: center; gap: 6px;
+  padding: 10px 18px;
+  background: var(--accent-deep);
+  border: 1px solid var(--accent);
+  color: #fff;
+  font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-check:hover { background: var(--accent); transform: translateY(-1px); }
+.btn-hint {
+  display: inline-flex; align-items: center; gap: 4px;
+  padding: 8px 14px;
+  background: none;
+  border: 1px dashed var(--border-strong);
+  color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.8rem;
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.btn-hint:hover { border-color: var(--warn); color: var(--warn); }
+
+/* Hint & Feedback */
+.hint-box {
+  display: none; margin-top: 12px; padding: 12px 16px;
+  background: var(--warn-bg);
+  border: 1px solid rgba(251, 191, 36, 0.2);
+  border-radius: var(--r-md);
+  font-size: 0.85rem; color: var(--warn);
+}
+.hint-box.open { display: block; }
+.fb-block {
+  margin-top: 12px; padding: 10px 14px;
+  border-radius: var(--r-md);
+  font-size: 0.85rem; display: none;
+}
+.fb-block.correct {
+  display: block;
+  background: var(--ok-bg); color: var(--ok);
+  border: 1px solid var(--ok-border);
+}
+.fb-block.incorrect {
+  display: block;
+  background: var(--err-bg); color: var(--err);
+  border: 1px solid var(--err-border);
+}
+
+/* Option pills (MC) */
+.opt-pills { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 12px; }
+.opt-pill {
+  padding: 10px 20px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  font-family: var(--mono); font-size: 0.9rem; font-weight: 600;
+  color: var(--ink); cursor: pointer; transition: all 0.2s;
+}
+.opt-pill:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.opt-pill.selected { border-color: var(--accent); background: var(--accent-deep); color: #fff; }
+
+/* MC options (card-style) */
+.mc-options {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  margin-bottom: 12px;
+}
+@media (max-width: 540px) { .mc-options { grid-template-columns: 1fr; } }
+.mc-pill {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 14px 18px;
+  background: var(--bg-card);
+  border: 2px solid var(--border);
+  border-radius: var(--r-md);
+  cursor: pointer; transition: all 0.2s;
+}
+.mc-pill:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.mc-pill.selected-correct { border-color: var(--ok); background: var(--ok-bg); pointer-events: none; }
+.mc-pill.selected-correct .mc-marker { background: var(--ok); border-color: var(--ok); color: #fff; }
+.mc-pill.selected-correct .mc-explanation { display: block; }
+.mc-pill.selected-wrong { border-color: var(--err); background: var(--err-bg); pointer-events: none; }
+.mc-pill.selected-wrong .mc-marker { background: var(--err); border-color: var(--err); color: #fff; }
+.mc-pill.selected-wrong .mc-explanation { display: block; }
+.mc-pill.disabled { pointer-events: none; opacity: 0.5; }
+.mc-marker {
+  width: 26px; height: 26px; border-radius: 50%;
+  border: 2px solid var(--ink-dim);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 0.7rem; font-weight: 700; flex-shrink: 0;
+  margin-top: 1px; transition: all 0.2s; color: var(--ink-muted);
+}
+.mc-text { flex: 1; font-size: 0.9rem; color: var(--ink); }
+.mc-explanation {
+  font-size: 0.8rem; color: var(--ink-muted); margin-top: 6px; display: none;
+}
+
+/* Result button */
+.btn-result {
+  display: flex; align-items: center; justify-content: center; gap: 10px;
+  width: 100%; max-width: 360px;
+  margin: 32px auto 0;
+  padding: 16px 28px;
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent));
+  border: none; border-radius: var(--r-lg);
+  color: #fff;
+  font-family: var(--font); font-size: 1.05rem; font-weight: 700;
+  cursor: pointer; transition: all 0.3s;
+}
+.btn-result:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 8px 30px rgba(22, 163, 74, 0.4);
+}
+
+/* Compare grid */
+.compare-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 16px 0;
+}
+@media (max-width: 540px) { .compare-grid { grid-template-columns: 1fr; } }
+.compare-card {
+  border-radius: var(--r-lg); padding: 18px 20px; border: 1px solid;
+}
+.compare-card.wrong { background: var(--err-bg); border-color: rgba(248,113,113,0.3); }
+.compare-card.right { background: var(--ok-bg); border-color: rgba(52,211,153,0.3); }
+.compare-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.06em; margin-bottom: 8px; }
+.compare-card.wrong .compare-label { color: var(--err); }
+.compare-card.right .compare-label { color: var(--ok); }
+.compare-body { font-size: 0.9rem; line-height: 1.7; color: var(--ink-muted); }
+
+/* GGL Schema */
+.ggl-schema {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin: 20px 0;
+}
+@media (max-width: 540px) { .ggl-schema { grid-template-columns: 1fr; } }
+.ggl-card { border-radius: var(--r-lg); padding: 16px 20px; border: 1px solid; }
+.ggl-card.gegeben { background: rgba(59,130,246,0.1); border-color: rgba(59,130,246,0.3); color: #93c5fd; }
+.ggl-card.gesucht { background: rgba(251,191,36,0.1); border-color: rgba(251,191,36,0.3); color: #fde68a; }
+.ggl-card.formel { background: rgba(22,163,74,0.1); border-color: var(--border-strong); color: var(--accent-bright); }
+.ggl-card.loesung { background: var(--ok-bg); border-color: rgba(52,211,153,0.3); color: var(--ok); }
+.ggl-card-label { font-size: 0.7rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 6px; opacity: 0.8; }
+.ggl-card-body { font-size: 0.85rem; line-height: 1.6; }
+
+/* Callout */
+.callout {
+  display: flex; gap: 12px; align-items: flex-start;
+  padding: 16px 20px; border-radius: var(--r-md); margin: 16px 0; border: 1px solid;
+}
+.callout-icon { font-size: 1.2rem; flex-shrink: 0; }
+.callout-body { flex: 1; }
+.callout-title { font-weight: 600; margin-bottom: 4px; }
+.callout.warning { background: var(--warn-bg); border-color: rgba(251,191,36,0.2); color: var(--warn); }
+.callout.warning strong { color: #fcd34d; }
+.callout.success { background: var(--ok-bg); border-color: rgba(52,211,153,0.2); color: var(--ok); }
+.callout.info { background: rgba(56,189,248,0.08); border-color: rgba(56,189,248,0.2); color: #38bdf8; }
+
+/* Walkthrough */
+.wt-container {
+  background: var(--bg-surface); border: 1px solid var(--border);
+  border-radius: var(--r-lg); overflow: hidden; margin: 16px 0;
+}
+.wt-progress-dots {
+  display: flex; justify-content: center; gap: 8px; padding: 12px;
+}
+.wt-dot {
+  width: 8px; height: 8px; border-radius: 50%;
+  background: var(--ink-dim); border: none; cursor: pointer;
+  transition: all 0.2s;
+}
+.wt-dot.active { background: var(--accent); transform: scale(1.3); }
+.wt-slide-area { position: relative; min-height: 200px; }
+.wt-slide {
+  display: none; padding: 24px; animation: fadeIn 0.3s ease;
+}
+.wt-slide.active { display: block; }
+.wt-slide h3 { font-size: 1.1rem; font-weight: 700; color: #fff; margin-bottom: 12px; }
+.wt-slide-tag {
+  font-family: var(--mono); font-size: 0.65rem; color: var(--accent);
+  text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 8px;
+}
+.wt-slide p { color: var(--ink-muted); margin-bottom: 10px; }
+.wt-slide ul { padding-left: 20px; margin-bottom: 10px; }
+.wt-slide li { color: var(--ink-muted); margin-bottom: 4px; }
+.wt-nav-bar {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 20px; border-top: 1px solid var(--border);
+}
+.wt-arrow {
+  background: none; border: 1px solid var(--border); color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.8rem; font-weight: 600;
+  padding: 8px 16px; border-radius: var(--r-md); cursor: pointer;
+  transition: all 0.2s;
+}
+.wt-arrow:disabled { opacity: 0.3; cursor: default; }
+.wt-arrow.primary { border-color: var(--accent); color: var(--accent-bright); }
+.wt-arrow.primary:hover { background: var(--accent-deep); }
+.wt-counter {
+  font-family: var(--mono); font-size: 0.75rem; color: var(--ink-dim);
+}
+
+/* Formula box */
+.formula-box {
+  background: var(--bg-deep);
+  border: 1px solid var(--border-strong);
+  border-radius: var(--r-md);
+  padding: 18px; margin: 16px 0;
+  text-align: center; position: relative;
+}
+.formula-box::after {
+  content: '';
+  position: absolute; bottom: 0; left: 20%; right: 20%;
+  height: 2px;
+  background: linear-gradient(90deg, transparent, var(--accent), transparent);
+}
+.formula-box .formula-label {
+  position: absolute; top: 6px; right: 10px;
+  font-family: var(--mono); font-size: 0.6rem; color: var(--ink-dim);
+  text-transform: uppercase; letter-spacing: 0.1em;
+}
+
+/* Probe chain (B2.3) */
+.probe-chain { display: flex; flex-direction: column; gap: 8px; margin: 16px 0; }
+.probe-step {
+  display: flex; gap: 14px; align-items: center;
+  padding: 14px 18px; border-radius: var(--r-md); border: 1px solid var(--border);
+}
+.probe-step.step-given { background: rgba(59,130,246,0.08); border-color: rgba(59,130,246,0.25); }
+.probe-step.step-calc { background: rgba(22,163,74,0.08); border-color: rgba(22,163,74,0.25); }
+.probe-step.result-ok { background: var(--ok-bg); border-color: var(--ok); }
+.probe-step.result-err { background: var(--err-bg); border-color: var(--err); }
+.probe-icon { font-size: 1.1rem; width: 28px; flex-shrink: 0; text-align: center; font-weight: 700; color: var(--ink-muted); }
+.probe-step.result-ok .probe-icon { color: var(--ok); }
+.probe-step.result-err .probe-icon { color: var(--err); }
+.probe-text { font-size: 0.9rem; line-height: 1.6; flex: 1; color: var(--ink); }
+
+/* Ref grid (B2.4) */
+.ref-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 16px 0; }
+@media (max-width: 540px) { .ref-grid { grid-template-columns: 1fr; } }
+.ref-col strong { display: block; color: var(--accent-bright); font-size: 0.8rem; text-transform: uppercase; letter-spacing: 0.08em; margin-bottom: 8px; }
+.ref-col { font-size: 0.9rem; color: var(--ink-muted); line-height: 1.9; }
+
+/* MC grid (B2.4) */
+.mc-grid {
+  display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 12px;
+}
+@media (max-width: 540px) { .mc-grid { grid-template-columns: 1fr; } }
+.mc-grid .mc-pill .mc-label { flex: 1; font-size: 0.9rem; color: var(--ink); }
+
+/* Table */
+.table-wrap { overflow-x: auto; margin: 16px 0; }
+.si-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; }
+.si-table th, .si-table td { padding: 10px 14px; border-bottom: 1px solid var(--border); text-align: left; }
+.si-table th { color: var(--accent-bright); font-weight: 700; font-family: var(--mono); font-size: 0.7rem; letter-spacing: 0.08em; text-transform: uppercase; }
+.si-table td { color: var(--ink-muted); }
+.si-table td:first-child { font-weight: 600; color: var(--ink); }
+.si-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+/* Solution table */
+.solution-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 16px 0; border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+.solution-table thead tr { background: var(--bg-card); }
+.solution-table th { padding: 12px 16px; text-align: left; font-weight: 700; font-size: 0.7rem; color: var(--accent-bright); text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); }
+.solution-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--ink-muted); }
+.solution-table td:first-child { font-weight: 600; color: var(--ink); }
+.solution-table tbody tr:nth-child(even) { background: rgba(255,255,255,0.02); }
+
+/* Summary table */
+.summary-table { width: 100%; border-collapse: collapse; font-size: 0.85rem; margin: 16px 0; border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; }
+.summary-table thead tr { background: var(--bg-card); }
+.summary-table th { padding: 12px 16px; text-align: left; font-weight: 700; font-size: 0.7rem; color: var(--accent-bright); text-transform: uppercase; letter-spacing: 0.1em; border-bottom: 1px solid var(--border); }
+.summary-table td { padding: 10px 16px; border-bottom: 1px solid var(--border); color: var(--ink-muted); }
+.summary-table td:first-child { font-weight: 600; color: var(--ink); font-family: var(--mono); }
+
+/* Extra section */
+.extra-section {
+  margin-top: 32px; border: 1px solid var(--border);
+  border-radius: var(--r-md); background: var(--bg-deep); overflow: hidden;
+}
+.extra-toggle {
+  display: flex; align-items: center; gap: 10px;
+  padding: 14px 20px; cursor: pointer;
+  font-size: 0.92rem; font-weight: 600; color: var(--ink-muted);
+  list-style: none; user-select: none;
+}
+.extra-toggle::-webkit-details-marker { display: none; }
+.extra-section[open] .extra-toggle { color: var(--ink); background: var(--bg-card); border-bottom: 1px solid var(--border); }
+.extra-icon { font-size: 1.1rem; font-weight: 700; color: var(--accent); transition: transform 0.2s; display: inline-block; width: 18px; text-align: center; }
+.extra-section[open] .extra-icon { transform: rotate(45deg); }
+.extra-count { font-size: 0.78rem; font-weight: 400; color: var(--ink-dim); margin-left: auto; }
+.extra-intro { padding: 12px 20px 4px; font-size: 0.85rem; color: var(--ink-muted); border-bottom: 1px solid var(--border); margin-bottom: 8px; }
+.extra-card { border-left: 3px solid #555; opacity: 0.9; }
+.extra-card .ex-num { background: #555; }
+.extra-tag { background: color-mix(in srgb, var(--accent) 15%, transparent); color: var(--accent); }
+.extra-btn { background: var(--bg-card); border: 1px solid var(--border-strong); color: var(--ink-muted); }
+.extra-btn:hover { background: #444; color: var(--ink); }
+
+/* Responsive */
+@keyframes fadeIn { from{opacity:0;transform:translateY(4px)} to{opacity:1;transform:translateY(0)} }
+@media (max-width: 640px) {
+  .hero { padding: 40px 0 28px; }
+  .hero h1 { font-size: 1.8rem; }
+  .glass { padding: 16px; }
+  .wt-slide { padding: 20px; }
+  .answer-row { flex-direction: column; align-items: stretch; }
+  .answer-input { min-width: 0; }
+}
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════
+     ANIMATED BACKGROUND CANVAS
+     ══════════════════════════════════════════ -->
+<canvas id="bg-canvas"></canvas>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 0: LANDING PAGE
+     ══════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">TRACK B2</div>
+      <h1 class="landing-title">Rechnen &<br>Einheiten</h1>
+      <p class="landing-sub">Mehrstufige Berechnungen, Rechenfehler und Einheiten-Analyse</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">4</span> Module</span>
+        <span class="l-meta"><span class="val">25</span> Aufgaben</span>
+        <span class="l-meta"><span class="val">~95 min</span> Dauer</span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track"><div class="op-fill" id="opFill"></div></div>
+        <span class="op-label" id="opLabel">0 / 4 Module</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card" onclick="openModule(0)" id="card-0">
+        <div class="mc-num">B2.1</div>
+        <div class="mc-title">Mehrstufige Berechnung</div>
+        <div class="mc-desc">Die GGL-Methode für strukturierte Physikaufgaben</div>
+        <div class="mc-footer">
+          <span class="mc-time">25 min</span>
+          <span class="mc-status" id="status-0">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(1)" id="card-1">
+        <div class="mc-num">B2.2</div>
+        <div class="mc-title">Typische Rechenfehler</div>
+        <div class="mc-desc">Einheitenfehler, falsches Runden und Stolperfallen erkennen</div>
+        <div class="mc-footer">
+          <span class="mc-time">20 min</span>
+          <span class="mc-status" id="status-1">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(2)" id="card-2">
+        <div class="mc-num">B2.3</div>
+        <div class="mc-title">Einheiten-Analyse</div>
+        <div class="mc-desc">Die Dimensionsprobe: Formeln und Ergebnisse prüfen</div>
+        <div class="mc-footer">
+          <span class="mc-time">20 min</span>
+          <span class="mc-status" id="status-2">Starten</span>
+        </div>
+      </div>
+      <div class="mod-card" onclick="openModule(3)" id="card-3">
+        <div class="mc-num">B2.4</div>
+        <div class="mc-title">Übungsrunde</div>
+        <div class="mc-desc">10 gemischte Aufgaben aus allen Level-2-Themen</div>
+        <div class="mc-footer">
+          <span class="mc-time">30 min</span>
+          <span class="mc-status" id="status-3">Starten</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="landing-footer">Track B2 &middot; v4</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 1: MODULE B2.1 - Mehrstufige Berechnung
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-0">
+  <div class="module-page">
+    <nav class="top-nav"><div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+      <span class="nav-title">B2.1 &mdash; Mehrstufige Berechnung</span>
+      <div class="nav-progress"><div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div><span class="nav-progress-text" id="prog-text-0">0 / 5</span></div>
+    </div></nav>
+    <div class="mod-content">
+      <section class="hero"><div class="hero-badge">B2.1</div><h1>Mehrstufige<br>Berechnung</h1><p class="hero-sub">Die Gegeben-Gesucht-Lösung-Methode für strukturierte Physikaufgaben</p></section>
+
+      <!-- GGL-Methode Erklärung -->
+      <section class="chapter">
+        <div class="glass">
+          <p>Physikaufgaben bestehen oft aus mehreren Schritten - Einheiten umrechnen, Formel anwenden, Ergebnis angeben. Ohne Struktur entstehen dabei typische Flüchtigkeitsfehler.</p>
+          <p>Die <strong>GGL-Methode</strong> (Gegeben - Gesucht - Lösung) ist ein bewährtes Schema, das in jeder Klausur funktioniert:</p>
+        </div>
+        <div class="ggl-schema">
+          <div class="ggl-card gegeben"><div class="ggl-card-label">&#9312; Gegeben</div><div class="ggl-card-body">Alle bekannten Größen mit Einheit notieren - und <strong style="color:inherit;">sofort in SI-Einheiten umrechnen</strong>.</div></div>
+          <div class="ggl-card gesucht"><div class="ggl-card-label">&#9313; Gesucht</div><div class="ggl-card-body">Die gesuchte Größe benennen und ihre Einheit vorab hinschreiben.</div></div>
+          <div class="ggl-card formel"><div class="ggl-card-label">&#9314; Formel</div><div class="ggl-card-body">Die passende Formel in Buchstaben schreiben, ggf. nach der Gesuchten umstellen.</div></div>
+          <div class="ggl-card loesung"><div class="ggl-card-label">&#9315; Lösung</div><div class="ggl-card-body">Werte <em>mit Einheiten</em> einsetzen, ausrechnen und das Ergebnis sinnvoll runden.</div></div>
+        </div>
+        <div class="callout warning"><span class="callout-icon">&#9888;&#65039;</span><div class="callout-body"><div class="callout-title">Die häufigste Fehlerquelle: Einheiten nicht umrechnen</div>Wer mit „90 km/h" und „30 s" direkt rechnet, bekommt eine sinnlose Zahl. <strong>Immer zuerst in SI umrechnen</strong> (m/s und s), dann erst einsetzen.</div></div>
+      </section>
+
+      <!-- Walkthrough -->
+      <section class="chapter">
+        <div class="glass" style="margin-bottom:20px;">
+          <p><strong>Beispiel:</strong> Ein Auto fährt 90 km/h für 30 Sekunden. Welchen Weg legt es zurück?</p>
+        </div>
+        <div class="wt-container">
+          <div class="wt-progress-dots">
+            <button class="wt-dot active" onclick="goSlide(0,0)"></button>
+            <button class="wt-dot" onclick="goSlide(0,1)"></button>
+            <button class="wt-dot" onclick="goSlide(0,2)"></button>
+            <button class="wt-dot" onclick="goSlide(0,3)"></button>
+          </div>
+          <div class="wt-slide-area" id="wt0-area">
+            <div class="wt-slide active" data-slide="0"><div class="wt-slide-tag">Schritt 1 / 4</div><h3>Gegeben - mit SI-Umrechnung</h3><ul><li>$v = 90\,\text{km/h} = \frac{90}{3{,}6}\,\text{m/s} = 25\,\text{m/s}$</li><li>$t = 30\,\text{s}$ (bereits in SI)</li></ul></div>
+            <div class="wt-slide" data-slide="1"><div class="wt-slide-tag">Schritt 2 / 4</div><h3>Gesucht</h3><p>Gesucht: Zurückgelegter Weg $s$ in Metern (m)</p></div>
+            <div class="wt-slide" data-slide="2"><div class="wt-slide-tag">Schritt 3 / 4</div><h3>Formel</h3><div class="formula-box"><span class="formula-label">Weg</span>$$s = v \cdot t$$</div></div>
+            <div class="wt-slide" data-slide="3"><div class="wt-slide-tag">Schritt 4 / 4</div><h3>Lösung</h3><p>$s = 25\,\frac{\text{m}}{\text{s}} \cdot 30\,\text{s} = 750\,\text{m}$</p><div class="callout success"><span class="callout-icon">&#9989;</span><div class="callout-body">Das Auto legt in 30 s einen Weg von <strong style="color:inherit;">750 m</strong> zurück.</div></div></div>
+          </div>
+          <div class="wt-nav-bar"><button class="wt-arrow" id="wt0Prev" onclick="prevSlideM(0)" disabled>&#8592; Zurück</button><span class="wt-counter" id="wt0Counter">1 / 4</span><button class="wt-arrow primary" id="wt0Next" onclick="nextSlideM(0)">Weiter &#8594;</button></div>
+        </div>
+      </section>
+
+      <!-- Aufgaben -->
+      <section class="chapter" style="margin-top:40px;">
+        <div class="exercise-card" id="m0-ex1"><div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Warmup: Fallgeschwindigkeit</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Ein Stein fällt 3 Sekunden. $g = 10\,\text{m/s}^2$. Welche Geschwindigkeit hat er beim Aufprall? ($v = g \cdot t$)</p>
+            <div class="opt-pills"><button class="opt-pill" onclick="selOpt(this,'m0-a1','3.3')">3,3 m/s</button><button class="opt-pill" onclick="selOpt(this,'m0-a1','10')">10 m/s</button><button class="opt-pill" onclick="selOpt(this,'m0-a1','30')">30 m/s</button><button class="opt-pill" onclick="selOpt(this,'m0-a1','300')">300 m/s</button></div>
+            <input type="hidden" id="m0-a1" value=""><button class="btn-check" onclick="checkMC(0,1,'m0-a1','m0-fb1','30')">Prüfen</button><div class="fb-block" id="m0-fb1"></div></div></div>
+
+        <div class="exercise-card" id="m0-ex2"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Einfache GGL-Aufgabe</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">Ein Radfahrer fährt 2 Stunden mit 15 km/h. <strong>Welchen Weg legt er zurück?</strong> (Ergebnis in km)</p>
+            <div class="answer-row"><input class="answer-input" id="m0-a2" placeholder="Ergebnis"><span class="answer-unit">km</span><button class="btn-check" onclick="checkInput(0,2,'m0-a2','m0-fb2','30|30.0|30,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m0-h2')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m0-h2">$s = v \cdot t = 15\,\text{km/h} \cdot 2\,\text{h} = ?$</div><div class="fb-block" id="m0-fb2"></div></div></div>
+
+        <div class="exercise-card" id="m0-ex3"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Einheit zuerst umrechnen!</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">Ein Auto fährt mit 72 km/h. Welchen Weg legt es in <strong>45 Sekunden</strong> zurück? (Ergebnis in m)</p>
+            <div class="answer-row"><input class="answer-input" id="m0-a3" placeholder="Ergebnis"><span class="answer-unit">m</span><button class="btn-check" onclick="checkInput(0,3,'m0-a3','m0-fb3','900|900.0|900,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m0-h3')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m0-h3">$v = 72 \div 3{,}6 = 20\,\text{m/s}$. Dann $s = 20 \cdot 45 = ?$</div><div class="fb-block" id="m0-fb3"></div></div></div>
+
+        <div class="exercise-card" id="m0-ex4"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Kraft berechnen</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Masse $m = 4\,\text{kg}$, Beschleunigung $a = 3\,\text{m/s}^2$. Welche Kraft wirkt? ($F = m \cdot a$)</p>
+            <div class="opt-pills"><button class="opt-pill" onclick="selOpt(this,'m0-a4','1.33')">1,33 N</button><button class="opt-pill" onclick="selOpt(this,'m0-a4','7')">7 N</button><button class="opt-pill" onclick="selOpt(this,'m0-a4','12')">12 N</button><button class="opt-pill" onclick="selOpt(this,'m0-a4','120')">120 N</button></div>
+            <input type="hidden" id="m0-a4" value=""><button class="btn-check" onclick="checkMC(0,4,'m0-a4','m0-fb4','12')">Prüfen</button><div class="fb-block" id="m0-fb4"></div></div></div>
+
+        <div class="exercise-card" id="m0-ex5"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Mehrstufig: Leistung eines Krans</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">Kran hebt $m = 500\,\text{kg}$ um $h = 8\,\text{m}$ in $t = 40\,\text{s}$. Berechne die Leistung. ($g = 10\,\text{m/s}^2$)</p>
+            <div class="answer-row"><input class="answer-input" id="m0-a5" placeholder="Ergebnis"><span class="answer-unit">W</span><button class="btn-check" onclick="checkInput(0,5,'m0-a5','m0-fb5','1000|1000.0|1000,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m0-h5')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m0-h5">Schritt 1: $W = m \cdot g \cdot h = 500 \cdot 10 \cdot 8 = 40\,000\,\text{J}$. Schritt 2: $P = W/t = 40\,000 / 40 = ?$</div><div class="fb-block" id="m0-fb5"></div></div></div>
+
+        <button class="btn-result" onclick="showResult(0)">Ergebnis anzeigen</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 2: MODULE B2.2 - Typische Rechenfehler
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-1">
+  <div class="module-page">
+    <nav class="top-nav"><div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+      <span class="nav-title">B2.2 &mdash; Typische Rechenfehler</span>
+      <div class="nav-progress"><div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div><span class="nav-progress-text" id="prog-text-1">0 / 5</span></div>
+    </div></nav>
+    <div class="mod-content">
+      <section class="hero"><div class="hero-badge">B2.2</div><h1>Typische<br>Rechenfehler</h1><p class="hero-sub">Einheitenfehler, falsches Runden und klassische Stolperfallen erkennen</p></section>
+
+      <!-- Erklärungen -->
+      <section class="chapter">
+        <div class="glass"><p><strong style="color:var(--accent-bright);">Fehler 1: Einheiten nicht umrechnen</strong></p>
+          <div class="compare-grid"><div class="compare-card wrong"><div class="compare-label">Falsch</div><div class="compare-body">$v = 72\,\text{km/h}$, $t = 20\,\text{s}$ → $s = 72 \cdot 20 = 1440$ — Was ist die Einheit?</div></div><div class="compare-card right"><div class="compare-label">Richtig</div><div class="compare-body">$v = 72\,\text{km/h} = 20\,\text{m/s}$ → $s = 20 \cdot 20 = 400\,\text{m}$</div></div></div></div>
+        <div class="glass"><p><strong style="color:var(--accent-bright);">Fehler 2: Falsches Runden</strong></p><p><strong>Faustregel:</strong> Das Ergebnis darf nicht genauer aussehen als die Werte, die in die Rechnung eingegangen sind. Wenn deine Ausgangswerte 2–3 signifikante Stellen haben, hat dein Ergebnis auch höchstens so viele.</p><p style="font-size:.88rem;color:var(--ink-muted);margin-top:6px;">Beispiel: „Bremsweg bei 120 km/h und $a = -3\,\text{m/s}^2$?" — Beide Werte haben höchstens 3 Stellen → Ergebnis: $s \approx 185\,\text{m}$, nicht $185{,}185185...\,\text{m}$.</p>
+          <div class="compare-grid"><div class="compare-card wrong"><div class="compare-label">Falsch</div><div class="compare-body">$v = 21{,}428571...\,\text{m/s}$<br><span style="font-size:.82rem;">Taschenrechner-Ergebnis einfach abschreiben</span></div></div><div class="compare-card right"><div class="compare-label">Richtig</div><div class="compare-body">$v \approx 21{,}4\,\text{m/s}$<br><span style="font-size:.82rem;">Sinnvoll runden — nicht genauer als die Eingangswerte</span></div></div></div></div>
+        <div class="glass"><p><strong style="color:var(--accent-bright);">Fehler 3: Zu früh runden</strong></p><p>Erst am Ende runden, nicht bei Zwischenergebnissen!</p></div>
+        <div class="glass"><p><strong style="color:var(--accent-bright);">Fehler 4: Falsche Formel oder Größen verwechseln</strong></p><p>Dimensionsanalyse hilft, solche Fehler zu entdecken.</p></div>
+      </section>
+
+      <!-- Aufgaben -->
+      <section class="chapter" style="margin-top:40px;">
+        <div class="exercise-card" id="m1-ex1"><div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Fehler identifizieren</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Schüler rechnet: „54 km/h für 10 s → $s = 54 \cdot 10 = 540$ m." Was ist der Fehler?</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a1','A')"><div class="mc-marker">A</div><div><div class="mc-text">Die Formel $s = v \cdot t$ ist falsch</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a1','B')"><div class="mc-marker">B</div><div><div class="mc-text">km/h wurde nicht in m/s umgerechnet</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a1','C')"><div class="mc-marker">C</div><div><div class="mc-text">Die Zeit muss in Minuten umgerechnet werden</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a1','D')"><div class="mc-marker">D</div><div><div class="mc-text">Das Ergebnis wurde nicht gerundet</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m1-a1" value=""><button class="btn-check" onclick="checkMC(1,1,'m1-a1','m1-fb1','B')">Prüfen</button><div class="fb-block" id="m1-fb1"></div></div></div>
+
+        <div class="exercise-card" id="m1-ex2"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Korrektes Ergebnis berechnen</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">Auto fährt 54 km/h für 10 Sekunden. Wie viele Meter legt es tatsächlich zurück?</p>
+            <div class="answer-row"><input class="answer-input" id="m1-a2" placeholder="Ergebnis"><span class="answer-unit">m</span><button class="btn-check" onclick="checkInput(1,2,'m1-a2','m1-fb2','150|150.0|150,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m1-h2')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m1-h2">$v = 54 \div 3{,}6 = 15\,\text{m/s}$. Dann: $s = 15 \cdot 10 = ?$</div><div class="fb-block" id="m1-fb2"></div></div></div>
+
+        <div class="exercise-card" id="m1-ex3"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Clever runden</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Du rechnest $v = \frac{255}{12} = 21{,}25\,\text{m/s}$. Die Eingangswerte haben 3 Stellen. Welche Angabe ist am sinnvollsten?</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a3','A')"><div class="mc-marker">A</div><div><div class="mc-text">21 m/s</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a3','B')"><div class="mc-marker">B</div><div><div class="mc-text">21,3 m/s</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a3','C')"><div class="mc-marker">C</div><div><div class="mc-text">21,25 m/s</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a3','D')"><div class="mc-marker">D</div><div><div class="mc-text">21,250 m/s</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m1-a3" value=""><button class="btn-check" onclick="checkMC(1,3,'m1-a3','m1-fb3','B')">Prüfen</button><div class="fb-block" id="m1-fb3"></div></div></div>
+
+        <div class="exercise-card" id="m1-ex4"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Welcher Fehlertyp liegt vor?</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Schülerin rechnet: „$E_{kin} = m \cdot v = 2 \cdot 6 = 12\,\text{J}$". Was ist falsch?</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a4','A')"><div class="mc-marker">A</div><div><div class="mc-text">Einheit der Masse ist falsch</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a4','B')"><div class="mc-marker">B</div><div><div class="mc-text">Sie hat falsch gerundet</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a4','C')"><div class="mc-marker">C</div><div><div class="mc-text">Falsche Formel ($mv$ statt $\frac{1}{2}mv^2$)</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m1-a4','D')"><div class="mc-marker">D</div><div><div class="mc-text">Einheit der Geschwindigkeit ist falsch</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m1-a4" value=""><button class="btn-check" onclick="checkMC(1,4,'m1-a4','m1-fb4','C')">Prüfen</button><div class="fb-block" id="m1-fb4"></div></div></div>
+
+        <div class="exercise-card" id="m1-ex5"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Richtiges Ergebnis</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">Berechne die kinetische Energie korrekt: $m = 2\,\text{kg}$, $v = 6\,\text{m/s}$, $E_{kin} = \frac{1}{2}mv^2$</p>
+            <div class="answer-row"><input class="answer-input" id="m1-a5" placeholder="Ergebnis"><span class="answer-unit">J</span><button class="btn-check" onclick="checkInput(1,5,'m1-a5','m1-fb5','36|36.0|36,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m1-h5')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m1-h5">$E_{kin} = \frac{1}{2} \cdot 2 \cdot 6^2 = 1 \cdot 36 = ?$</div><div class="fb-block" id="m1-fb5"></div></div></div>
+
+        <button class="btn-result" onclick="showResult(1)">Ergebnis anzeigen</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 3: MODULE B2.3 - Einheiten-Analyse
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-2">
+  <div class="module-page">
+    <nav class="top-nav"><div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+      <span class="nav-title">B2.3 &mdash; Einheiten-Analyse</span>
+      <div class="nav-progress"><div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-2"></div></div><span class="nav-progress-text" id="prog-text-2">0 / 5</span></div>
+    </div></nav>
+    <div class="mod-content">
+      <section class="hero"><div class="hero-badge">B2.3</div><h1>Einheiten-Analyse</h1><p class="hero-sub">Die Dimensionsprobe: Einheiten als Werkzeug zum Prüfen von Formeln</p></section>
+
+      <!-- Erklärungen -->
+      <section class="chapter">
+        <div class="glass"><p>Die <strong>Dimensionsprobe</strong> prüft, ob eine Formel physikalisch sinnvoll ist: <em>Beide Seiten einer Gleichung müssen dieselbe Einheit haben</em>.</p></div>
+        <div class="glass"><p><strong>Anwendung:</strong> Ist $E = m + v$ korrekt?</p></div>
+        <div class="probe-chain">
+          <div class="probe-step step-given"><div class="probe-icon">1</div><div class="probe-text">$[E] = [m] + [v] = \text{kg} + \text{m/s}$</div></div>
+          <div class="probe-step step-calc"><div class="probe-icon">2</div><div class="probe-text">Man kann kg und m/s <strong>nicht addieren</strong>!</div></div>
+          <div class="probe-step result-err"><div class="probe-icon">X</div><div class="probe-text"><strong>Probe fehlgeschlagen</strong> — Formel kann nicht korrekt sein.</div></div>
+        </div>
+        <div class="glass"><p>Die korrekte Formel $E_{kin} = \frac{1}{2}mv^2$ besteht die Probe:</p></div>
+        <div class="probe-chain">
+          <div class="probe-step step-given"><div class="probe-icon">1</div><div class="probe-text">$[E_{kin}] = [m] \cdot [v]^2 = \text{kg} \cdot \frac{\text{m}^2}{\text{s}^2}$</div></div>
+          <div class="probe-step step-calc"><div class="probe-icon">2</div><div class="probe-text">$\frac{\text{kg} \cdot \text{m}^2}{\text{s}^2} = \text{J}$ &#10003;</div></div>
+          <div class="probe-step result-ok"><div class="probe-icon">OK</div><div class="probe-text"><strong>Probe bestanden</strong></div></div>
+        </div>
+        <div class="glass"><p><strong>Einheiten kürzen:</strong></p>
+          <div class="formula-box"><span class="formula-label">Beispiel</span>$$s = v \cdot t = 20\,\frac{\text{m}}{\text{s}} \cdot 5\,\text{s} = 100\,\text{m}$$</div></div>
+        <div class="callout warning"><span class="callout-icon">!</span><div class="callout-body"><div class="callout-title">Wann die Probe nichts nützt</div>Die Dimensionsprobe prüft nur die <em>Struktur</em>, nicht Zahlenwerte. $2mv^2$ statt $\frac{1}{2}mv^2$ wird nicht erkannt!</div></div>
+      </section>
+
+      <!-- Aufgaben -->
+      <section class="chapter" style="margin-top:40px;">
+        <div class="exercise-card" id="m2-ex1"><div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Formel prüfen: Kraft</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Welche Formel für $F$ ist <strong>dimensionsrichtig</strong>?</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a1','A')"><div class="mc-marker">A</div><div><div class="mc-text">$F = m \cdot v$</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a1','B')"><div class="mc-marker">B</div><div><div class="mc-text">$F = m \cdot a$</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a1','C')"><div class="mc-marker">C</div><div><div class="mc-text">$F = m \cdot s$</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a1','D')"><div class="mc-marker">D</div><div><div class="mc-text">$F = m + a$</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m2-a1" value=""><button class="btn-check" onclick="checkMC(2,1,'m2-a1','m2-fb1','B')">Prüfen</button><div class="fb-block" id="m2-fb1"></div></div></div>
+
+        <div class="exercise-card" id="m2-ex2"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Einheiten kürzen</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Was ergibt $\dfrac{\text{kg} \cdot \frac{\text{m}^2}{\text{s}^2}}{\text{s}}$?</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a2','A')"><div class="mc-marker">A</div><div><div class="mc-text">J (Joule)</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a2','B')"><div class="mc-marker">B</div><div><div class="mc-text">W (Watt)</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a2','C')"><div class="mc-marker">C</div><div><div class="mc-text">N (Newton)</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a2','D')"><div class="mc-marker">D</div><div><div class="mc-text">Pa (Pascal)</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m2-a2" value=""><button class="btn-check" onclick="checkMC(2,2,'m2-a2','m2-fb2','B')">Prüfen</button><div class="fb-block" id="m2-fb2"></div></div></div>
+
+        <div class="exercise-card" id="m2-ex3"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Dimensionsprobe: Energie</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">$E = m \cdot g \cdot h$. Welche Einheit ergibt die Dimensionsprobe? ($[m]=\text{kg}$, $[g]=\text{m/s}^2$, $[h]=\text{m}$)</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a3','A')"><div class="mc-marker">A</div><div><div class="mc-text">N – Formel ist falsch</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a3','B')"><div class="mc-marker">B</div><div><div class="mc-text">W – Formel ist falsch</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a3','C')"><div class="mc-marker">C</div><div><div class="mc-text">J – Formel ist korrekt</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a3','D')"><div class="mc-marker">D</div><div><div class="mc-text">Pa – Formel ist falsch</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m2-a3" value=""><button class="btn-check" onclick="checkMC(2,3,'m2-a3','m2-fb3','C')">Prüfen</button><div class="fb-block" id="m2-fb3"></div></div></div>
+
+        <div class="exercise-card" id="m2-ex4"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Einheit eines Ergebnisses</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">$\frac{F}{A} = \frac{200\,\text{N}}{0{,}5\,\text{m}^2}$ — Welche SI-Einheit?</p>
+            <div class="answer-row"><input class="answer-input" id="m2-a4" placeholder="Einheit"><button class="btn-check" onclick="checkInput(2,4,'m2-a4','m2-fb4','Pa|pascal|Pascal|N/m²|N/m^2|N/m2')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m2-h4')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m2-h4">$\frac{\text{N}}{\text{m}^2}$ = welcher Einheitenname?</div><div class="fb-block" id="m2-fb4"></div></div></div>
+
+        <div class="exercise-card" id="m2-ex5"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Fehler durch Dimensionsprobe</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Schüler rechnet Weg: $s = \frac{F}{t} = \frac{60\,\text{N}}{3\,\text{s}} = 20$. Was zeigt die Dimensionsprobe?</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a5','A')"><div class="mc-marker">A</div><div><div class="mc-text">N/s ist korrekt für einen Weg</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a5','B')"><div class="mc-marker">B</div><div><div class="mc-text">Ergebnis hat die Einheit m – Formel richtig</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a5','C')"><div class="mc-marker">C</div><div><div class="mc-text">Probe zeigt Fehler: N/s ist kein Weg</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m2-a5','D')"><div class="mc-marker">D</div><div><div class="mc-text">Ergebnis müsste nur gerundet werden</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m2-a5" value=""><button class="btn-check" onclick="checkMC(2,5,'m2-a5','m2-fb5','C')">Prüfen</button><div class="fb-block" id="m2-fb5"></div></div></div>
+
+        <button class="btn-result" onclick="showResult(2)">Ergebnis anzeigen</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     SCREEN 4: MODULE B2.4 - Übungsrunde
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-3">
+  <div class="module-page">
+    <nav class="top-nav"><div class="top-nav-inner">
+      <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+      <span class="nav-title">B2.4 &mdash; Übungsrunde</span>
+      <div class="nav-progress"><div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-3"></div></div><span class="nav-progress-text" id="prog-text-3">0 / 10</span></div>
+    </div></nav>
+    <div class="mod-content">
+      <section class="hero"><div class="hero-badge">B2.4</div><h1>Übungsrunde</h1><p class="hero-sub">10 gemischte Aufgaben — alle Themen aus Track B Level 2</p></section>
+
+      <!-- Schnell-Referenz -->
+      <section class="chapter">
+        <div class="glass"><p><strong>Schnell-Referenz:</strong></p>
+          <div class="ref-grid" style="margin-top:16px;">
+            <div class="ref-col"><strong>Formeln</strong>$s = v \cdot t$<br>$v = \frac{s}{t}$<br>$a = \frac{\Delta v}{t}$<br>$F = m \cdot a$<br>$W = F \cdot s = m \cdot g \cdot h$<br>$P = \frac{W}{t}$<br>$E_{kin} = \frac{1}{2}mv^2$<br>$p = \frac{F}{A}$</div>
+            <div class="ref-col"><strong>Einheiten</strong>$[\text{N}] = \text{kg·m/s}^2$<br>$[\text{J}] = \frac{\text{kg·m}^2}{\text{s}^2}$<br>$[\text{W}] = \text{J/s}$<br>$[\text{Pa}] = \text{N/m}^2$<br>$g = 10\,\text{m/s}^2$<br>$1\,\text{km/h} = \frac{1}{3{,}6}\,\text{m/s}$</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- Aufgaben 1-5 -->
+      <section class="chapter" style="margin-top:40px;">
+        <div class="exercise-card" id="m3-ex1"><div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Einheit umrechnen</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">Rechne $108\,\text{km/h}$ in m/s um.</p>
+            <div class="answer-row"><input class="answer-input" id="m3-a1" placeholder="Ergebnis"><span class="answer-unit">m/s</span><button class="btn-check" onclick="checkInput(3,1,'m3-a1','m3-fb1','30|30.0|30,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h1')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m3-h1">$v = 108 \div 3{,}6 = ?$</div><div class="fb-block" id="m3-fb1"></div></div></div>
+
+        <div class="exercise-card" id="m3-ex2"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Weg berechnen</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">ICE fährt mit 250 km/h. Welchen Weg legt er in 12 Minuten zurück? (Ergebnis in km)</p>
+            <div class="answer-row"><input class="answer-input" id="m3-a2" placeholder="Ergebnis"><span class="answer-unit">km</span><button class="btn-check" onclick="checkInput(3,2,'m3-a2','m3-fb2','50|50.0|50,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h2')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m3-h2">12 min = 0,2 h. Dann $s = 250 \cdot 0{,}2 = ?$</div><div class="fb-block" id="m3-fb2"></div></div></div>
+
+        <div class="exercise-card" id="m3-ex3"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Beschleunigung</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Sportwagen: 0 auf 100 km/h in 5 s. Mittlere Beschleunigung?</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a3','A')"><div class="mc-marker">A</div><div><div class="mc-text">20 m/s²</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a3','B')"><div class="mc-marker">B</div><div><div class="mc-text">5,6 m/s²</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a3','C')"><div class="mc-marker">C</div><div><div class="mc-text">0,5 m/s²</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a3','D')"><div class="mc-marker">D</div><div><div class="mc-text">100 m/s²</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m3-a3" value=""><button class="btn-check" onclick="checkMC(3,3,'m3-a3','m3-fb3','B')">Prüfen</button><div class="fb-block" id="m3-fb3"></div></div></div>
+
+        <div class="exercise-card" id="m3-ex4"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Kraft</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">$m = 8\,\text{kg}$, $a = 2{,}5\,\text{m/s}^2$. Wie groß ist die Kraft?</p>
+            <div class="answer-row"><input class="answer-input" id="m3-a4" placeholder="Ergebnis"><span class="answer-unit">N</span><button class="btn-check" onclick="checkInput(3,4,'m3-a4','m3-fb4','20|20.0|20,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h4')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m3-h4">$F = m \cdot a = 8 \cdot 2{,}5 = ?$</div><div class="fb-block" id="m3-fb4"></div></div></div>
+
+        <div class="exercise-card" id="m3-ex5"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Hubarbeit</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">30-kg-Sack um 1,5 m anheben. Welche Energie? ($g = 10\,\text{m/s}^2$)</p>
+            <div class="answer-row"><input class="answer-input" id="m3-a5" placeholder="Ergebnis"><span class="answer-unit">J</span><button class="btn-check" onclick="checkInput(3,5,'m3-a5','m3-fb5','450|450.0|450,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h5')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m3-h5">$W = m \cdot g \cdot h = 30 \cdot 10 \cdot 1{,}5 = ?$</div><div class="fb-block" id="m3-fb5"></div></div></div>
+
+        <!-- Aufgaben 6-10 -->
+        <div class="exercise-card" id="m3-ex6"><div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Kinetische Energie</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Ball ($m = 0{,}5\,\text{kg}$, $v = 10\,\text{m/s}$). Kinetische Energie?</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a6','A')"><div class="mc-marker">A</div><div><div class="mc-text">5 J</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a6','B')"><div class="mc-marker">B</div><div><div class="mc-text">25 J</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a6','C')"><div class="mc-marker">C</div><div><div class="mc-text">50 J</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a6','D')"><div class="mc-marker">D</div><div><div class="mc-text">500 J</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m3-a6" value=""><button class="btn-check" onclick="checkMC(3,6,'m3-a6','m3-fb6','B')">Prüfen</button><div class="fb-block" id="m3-fb6"></div></div></div>
+
+        <div class="exercise-card" id="m3-ex7"><div class="ex-header"><span class="ex-num">7</span><span class="ex-title">Leistung</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">Motor verrichtet in 4 Minuten eine Arbeit von 96 000 J. Leistung?</p>
+            <div class="answer-row"><input class="answer-input" id="m3-a7" placeholder="Ergebnis"><span class="answer-unit">W</span><button class="btn-check" onclick="checkInput(3,7,'m3-a7','m3-fb7','400|400.0|400,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h7')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m3-h7">$t = 4 \cdot 60 = 240\,\text{s}$. $P = 96000 \div 240 = ?$</div><div class="fb-block" id="m3-fb7"></div></div></div>
+
+        <div class="exercise-card" id="m3-ex8"><div class="ex-header"><span class="ex-num">8</span><span class="ex-title">Druck</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">$F = 600\,\text{N}$, $A = 0{,}3\,\text{m}^2$. Wie groß ist der Druck?</p>
+            <div class="answer-row"><input class="answer-input" id="m3-a8" placeholder="Ergebnis"><span class="answer-unit">Pa</span><button class="btn-check" onclick="checkInput(3,8,'m3-a8','m3-fb8','2000|2000.0|2000,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h8')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m3-h8">$p = F / A = 600 / 0{,}3 = ?$</div><div class="fb-block" id="m3-fb8"></div></div></div>
+
+        <div class="exercise-card" id="m3-ex9"><div class="ex-header"><span class="ex-num">9</span><span class="ex-title">Fehler finden</span><span class="ex-tag">MC</span></div>
+          <div class="ex-body"><p class="ex-question">Schüler: „36 km/h für 20 s → $s = 36 \cdot 20 = 720\,\text{m}$". Was ist der Fehler?</p>
+            <div class="mc-options">
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a9','A')"><div class="mc-marker">A</div><div><div class="mc-text">Falsche Formel — korrekt: 180 m</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a9','B')"><div class="mc-marker">B</div><div><div class="mc-text">km/h nicht umgerechnet — korrekt: 200 m</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a9','C')"><div class="mc-marker">C</div><div><div class="mc-text">Einheit falsch — korrekt: 0,72 km</div><div class="mc-explanation"></div></div></div>
+              <div class="mc-pill" onclick="selMCpill(this,'m3-a9','D')"><div class="mc-marker">D</div><div><div class="mc-text">Zeit nicht umgerechnet — korrekt: 43 200 m</div><div class="mc-explanation"></div></div></div>
+            </div>
+            <input type="hidden" id="m3-a9" value=""><button class="btn-check" onclick="checkMC(3,9,'m3-a9','m3-fb9','B')">Prüfen</button><div class="fb-block" id="m3-fb9"></div></div></div>
+
+        <div class="exercise-card" id="m3-ex10"><div class="ex-header"><span class="ex-num">10</span><span class="ex-title">Mehrstufig: Bremszeit</span><span class="ex-tag">Eingabe</span></div>
+          <div class="ex-body"><p class="ex-question">Auto fährt $v = 20\,\text{m/s}$, bremst mit $a = -5\,\text{m/s}^2$ bis Stillstand. Wie lange dauert das? ($t = \frac{\Delta v}{|a|}$)</p>
+            <div class="answer-row"><input class="answer-input" id="m3-a10" placeholder="Ergebnis"><span class="answer-unit">s</span><button class="btn-check" onclick="checkInput(3,10,'m3-a10','m3-fb10','4|4.0|4,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h10')">&#128161; Tipp</button></div>
+            <div class="hint-box" id="m3-h10">$t = \frac{20-0}{5} = ?$</div><div class="fb-block" id="m3-fb10"></div></div></div>
+
+        <button class="btn-result" onclick="showResult(3)">Ergebnis anzeigen</button>
+      </section>
+    </div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     JAVASCRIPT
+     ══════════════════════════════════════════ -->
+<script>
+/* ────────────────────────────────────────────
+   STATE
+   ──────────────────────────────────────────── */
+const MODULE_EX_COUNTS = [5, 5, 5, 10];
+let moduleStates = [false, false, false, false];
+let exerciseStates = {};
+
+/* Walkthrough state per module */
+const wtSlides = { 0: { current: 0, total: 4 } };
+
+/* ────────────────────────────────────────────
+   SCORM 1.2 API
+   ──────────────────────────────────────────── */
+const SCORM = (() => {
+  let api = null, initialized = false;
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) win = win.parent;
+      else if (win.opener) win = win.opener;
+      else break;
+    }
+    return win ? win.API : null;
+  }
+  function init() {
+    try {
+      api = findAPI(window);
+      if (api) {
+        api.LMSInitialize('');
+        initialized = true;
+        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
+        if (bookmark) {
+          try {
+            const saved = JSON.parse(bookmark);
+            if (saved.moduleStates) moduleStates = saved.moduleStates;
+            if (saved.exerciseStates) exerciseStates = saved.exerciseStates;
+          } catch(e) {}
+        }
+        const status = api.LMSGetValue('cmi.core.lesson_status');
+        if (status === 'not attempted') {
+          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+          api.LMSCommit('');
+        }
+      }
+    } catch(e) { console.log('SCORM init:', e); }
+  }
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ moduleStates, exerciseStates }));
+      let total = 0, solved = 0;
+      for (const key in exerciseStates) { total++; if (exerciseStates[key]) solved++; }
+      const score = total > 0 ? Math.round((solved / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+      if (moduleStates.every(s => s)) api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      api.LMSCommit('');
+    } catch(e) { console.log('SCORM save:', e); }
+  }
+  function finish() {
+    if (!api || !initialized) return;
+    try { save(); api.LMSFinish(''); } catch(e) {}
+  }
+  return { init, save, finish };
+})();
+
+/* ────────────────────────────────────────────
+   SCREEN NAVIGATION
+   ──────────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  const s = document.getElementById(id);
+  if (s) s.classList.add('active');
+  window.scrollTo(0, 0);
+  const canvas = document.getElementById('bg-canvas');
+  if (id === 'screen-landing') {
+    canvas.classList.remove('dimmed', 'hidden');
+  } else {
+    canvas.classList.add('hidden');
+  }
+}
+
+function openModule(idx) {
+  showScreen('screen-mod-' + idx);
+  restoreModuleState(idx);
+  setTimeout(() => MathJax?.typesetPromise?.(), 100);
+}
+
+function goLanding() {
+  showScreen('screen-landing');
+  updateLanding();
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   EXERCISE SYSTEM
+   ──────────────────────────────────────────── */
+function normalize(v) {
+  return v.trim().replace(/\s+/g, '').toLowerCase()
+    .replace(/,/g, '.').replace(/\u00d7/g, '*').replace(/\u00b7/g, '*').replace(/\u00f7/g, '/').replace(/\u22c5/g, '*');
+}
+
+function selOpt(btn, hiddenId, val) {
+  btn.closest('.opt-pills').querySelectorAll('.opt-pill').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById(hiddenId).value = val;
+}
+
+function selMCpill(btn, hiddenId, val) {
+  btn.closest('.mc-options').querySelectorAll('.mc-pill').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById(hiddenId).value = val;
+}
+
+function checkMC(mod, ex, inputId, fbId, correctVal) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = document.getElementById(inputId).value;
+  if (!val) return;
+  const fb = document.getElementById(fbId);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+  if (val === correctVal) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Nicht ganz - versuche es nochmal.';
+    card.classList.add('wrong-state');
+  }
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function checkInput(mod, ex, inputId, fbId, patterns) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = normalize(document.getElementById(inputId).value);
+  if (!val) return;
+  const accepted = patterns.split('|').map(normalize);
+  const correct = accepted.some(p => val === p);
+  const fb = document.getElementById(fbId);
+  const inp = document.getElementById(inputId);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+
+  if (correct) {
+    fb.className = 'fb-block correct';
+    fb.innerHTML = '&#10003; Richtig!';
+    inp.className = 'answer-input correct';
+    card.classList.add('solved');
+    exerciseStates[key] = true;
+  } else {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = '&#10007; Noch nicht ganz - schau dir den Tipp an.';
+    inp.className = 'answer-input incorrect';
+    card.classList.add('wrong-state');
+  }
+  updateModuleProgress(mod);
+  MathJax?.typesetPromise?.([fb]);
+  SCORM.save();
+}
+
+function toggleHint(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+/* ────────────────────────────────────────────
+   PROGRESS TRACKING
+   ──────────────────────────────────────────── */
+function updateModuleProgress(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const pct = (solved / total) * 100;
+  const fill = document.getElementById('prog-fill-' + mod);
+  const text = document.getElementById('prog-text-' + mod);
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = solved + ' / ' + total;
+
+  if (solved === total) {
+    moduleStates[mod] = true;
+  }
+}
+
+function updateLanding() {
+  const completedCount = moduleStates.filter(Boolean).length;
+  const opFill = document.getElementById('opFill');
+  const opLabel = document.getElementById('opLabel');
+  if (opFill) opFill.style.width = (completedCount / 4 * 100) + '%';
+  if (opLabel) opLabel.textContent = completedCount + ' / 4 Module';
+
+  for (let i = 0; i < 4; i++) {
+    const card = document.getElementById('card-' + i);
+    const status = document.getElementById('status-' + i);
+    if (moduleStates[i]) {
+      card.classList.add('completed');
+      status.textContent = 'Erledigt';
+      status.classList.add('done');
+    } else {
+      card.classList.remove('completed');
+      let started = false;
+      for (let e = 1; e <= MODULE_EX_COUNTS[i]; e++) {
+        if (exerciseStates[i + '-' + e]) { started = true; break; }
+      }
+      status.textContent = started ? 'Angefangen' : 'Starten';
+      status.classList.remove('done');
+    }
+  }
+}
+
+function restoreModuleState(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) {
+      const card = document.getElementById('m' + mod + '-ex' + i);
+      const fb = document.getElementById('m' + mod + '-fb' + i);
+      if (card) card.classList.add('solved');
+      if (fb) {
+        fb.className = 'fb-block correct';
+        fb.innerHTML = '&#10003; Richtig!';
+      }
+    }
+  }
+  updateModuleProgress(mod);
+}
+
+function showResult(mod) {
+  const total = MODULE_EX_COUNTS[mod];
+  let solved = 0;
+  for (let i = 1; i <= total; i++) {
+    if (exerciseStates[mod + '-' + i]) solved++;
+  }
+  const modNames = ['B2.1', 'B2.2', 'B2.3', 'B2.4'];
+  let msg;
+  if (solved === total) {
+    msg = 'Modul ' + modNames[mod] + ' abgeschlossen! Alle ' + total + ' Aufgaben richtig.';
+    moduleStates[mod] = true;
+  } else if (solved === 0) {
+    msg = 'Noch keine Aufgabe gelöst. Versuche es!';
+  } else {
+    msg = solved + ' von ' + total + ' Aufgaben richtig. Weiter so!';
+  }
+  alert(msg);
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   WALKTHROUGH (B2.1)
+   ──────────────────────────────────────────── */
+function goSlide(mod, n) {
+  const wt = wtSlides[mod];
+  if (!wt) return;
+  wt.current = n;
+  const area = document.getElementById('wt' + mod + '-area');
+  if (!area) return;
+  area.querySelectorAll('.wt-slide').forEach(s => s.classList.remove('active'));
+  const slide = area.querySelector('.wt-slide[data-slide="' + n + '"]');
+  if (slide) { slide.classList.add('active'); MathJax?.typesetPromise?.([slide]); }
+  const dots = area.closest('.wt-container').querySelectorAll('.wt-dot');
+  dots.forEach((d, i) => d.classList.toggle('active', i === n));
+  document.getElementById('wt' + mod + 'Prev').disabled = n === 0;
+  document.getElementById('wt' + mod + 'Counter').textContent = (n + 1) + ' / ' + wt.total;
+}
+function nextSlideM(mod) { const wt = wtSlides[mod]; if (wt && wt.current < wt.total - 1) goSlide(mod, wt.current + 1); }
+function prevSlideM(mod) { const wt = wtSlides[mod]; if (wt && wt.current > 0) goSlide(mod, wt.current - 1); }
+
+/* ────────────────────────────────────────────
+   ANIMATED BACKGROUND (WebGL Colored Rings)
+   ──────────────────────────────────────────── */
+(function() {
+  const canvas = document.getElementById('bg-canvas');
+  const gl = canvas.getContext('webgl');
+  if (!gl) return;
+  const vs = `attribute vec2 p;void main(){gl_Position=vec4(p,0,1);}`;
+  const fs = `
+precision highp float;
+uniform vec2 resolution;
+uniform float time;
+void main(void) {
+  vec2 uv = (gl_FragCoord.xy * 2.0 - resolution.xy) / min(resolution.x, resolution.y);
+  float t = time*0.05;
+  float lineWidth = 0.002;
+  vec3 color = vec3(0.0);
+  for(int j = 0; j < 3; j++){
+    for(int i=0; i < 5; i++){
+      color[j] += lineWidth*float(i*i) / abs(fract(t - 0.01*float(j)+float(i)*0.01)*5.0 - length(uv) + mod(uv.x+uv.y, 0.2));
+    }
+  }
+  gl_FragColor = vec4(color,1.0);
+}`;
+  function compileShader(src, type) {
+    const s = gl.createShader(type);
+    gl.shaderSource(s, src);
+    gl.compileShader(s);
+    return s;
+  }
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compileShader(vs, gl.VERTEX_SHADER));
+  gl.attachShader(prog, compileShader(fs, gl.FRAGMENT_SHADER));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+  const buf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, buf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1,1,-1,-1,1,1,1]), gl.STATIC_DRAW);
+  const pLoc = gl.getAttribLocation(prog, 'p');
+  gl.enableVertexAttribArray(pLoc);
+  gl.vertexAttribPointer(pLoc, 2, gl.FLOAT, false, 0, 0);
+  const uTime = gl.getUniformLocation(prog, 'time');
+  const uRes = gl.getUniformLocation(prog, 'resolution');
+  function resize() {
+    canvas.width = window.innerWidth;
+    canvas.height = window.innerHeight;
+    gl.viewport(0, 0, canvas.width, canvas.height);
+  }
+  function draw(t) {
+    gl.uniform1f(uTime, t * 0.001);
+    gl.uniform2f(uRes, canvas.width, canvas.height);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(draw);
+  }
+  window.addEventListener('resize', resize);
+  resize();
+  requestAnimationFrame(draw);
+})();
+
+/* ────────────────────────────────────────────
+   INIT
+   ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  SCORM.init();
+  updateLanding();
+});
+window.addEventListener('beforeunload', () => {
+  SCORM.finish();
+});
+</script>
+</body>
+</html>
