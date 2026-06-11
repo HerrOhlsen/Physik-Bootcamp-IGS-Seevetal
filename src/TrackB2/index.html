@@ -965,27 +965,27 @@ button, [onclick] {
         <div class="exercise-card" id="m0-ex1"><div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Warmup: Fallgeschwindigkeit</span><span class="ex-tag">MC</span></div>
           <div class="ex-body"><p class="ex-question">Ein Stein fällt 3 Sekunden. $g = 10\,\text{m/s}^2$. Welche Geschwindigkeit hat er beim Aufprall? ($v = g \cdot t$)</p>
             <div class="opt-pills"><button class="opt-pill" onclick="selOpt(this,'m0-a1','3.3')">3,3 m/s</button><button class="opt-pill" onclick="selOpt(this,'m0-a1','10')">10 m/s</button><button class="opt-pill" onclick="selOpt(this,'m0-a1','30')">30 m/s</button><button class="opt-pill" onclick="selOpt(this,'m0-a1','300')">300 m/s</button></div>
-            <input type="hidden" id="m0-a1" value=""><button class="btn-check" onclick="checkMC(0,1,'m0-a1','m0-fb1','30')">Prüfen</button><div class="fb-block" id="m0-fb1"></div></div></div>
+            <input type="hidden" id="m0-a1" value=""><button class="btn-check" onclick="checkMC(0,1,'m0-a1','m0-fb1','30')">Prüfen</button><div class="fb-block" aria-live="polite" id="m0-fb1"></div></div></div>
 
         <div class="exercise-card" id="m0-ex2"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Einfache GGL-Aufgabe</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">Ein Radfahrer fährt 2 Stunden mit 15 km/h. <strong>Welchen Weg legt er zurück?</strong> (Ergebnis in km)</p>
             <div class="answer-row"><input class="answer-input" id="m0-a2" placeholder="Ergebnis"><span class="answer-unit">km</span><button class="btn-check" onclick="checkInput(0,2,'m0-a2','m0-fb2','30|30.0|30,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m0-h2')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m0-h2">$s = v \cdot t = 15\,\text{km/h} \cdot 2\,\text{h} = ?$</div><div class="fb-block" id="m0-fb2"></div></div></div>
+            <div class="hint-box" id="m0-h2">$s = v \cdot t = 15\,\text{km/h} \cdot 2\,\text{h} = ?$</div><div class="fb-block" aria-live="polite" id="m0-fb2"></div></div></div>
 
         <div class="exercise-card" id="m0-ex3"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Einheit zuerst umrechnen!</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">Ein Auto fährt mit 72 km/h. Welchen Weg legt es in <strong>45 Sekunden</strong> zurück? (Ergebnis in m)</p>
             <div class="answer-row"><input class="answer-input" id="m0-a3" placeholder="Ergebnis"><span class="answer-unit">m</span><button class="btn-check" onclick="checkInput(0,3,'m0-a3','m0-fb3','900|900.0|900,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m0-h3')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m0-h3">$v = 72 \div 3{,}6 = 20\,\text{m/s}$. Dann $s = 20 \cdot 45 = ?$</div><div class="fb-block" id="m0-fb3"></div></div></div>
+            <div class="hint-box" id="m0-h3">$v = 72 \div 3{,}6 = 20\,\text{m/s}$. Dann $s = 20 \cdot 45 = ?$</div><div class="fb-block" aria-live="polite" id="m0-fb3"></div></div></div>
 
         <div class="exercise-card" id="m0-ex4"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Kraft berechnen</span><span class="ex-tag">MC</span></div>
           <div class="ex-body"><p class="ex-question">Masse $m = 4\,\text{kg}$, Beschleunigung $a = 3\,\text{m/s}^2$. Welche Kraft wirkt? ($F = m \cdot a$)</p>
             <div class="opt-pills"><button class="opt-pill" onclick="selOpt(this,'m0-a4','1.33')">1,33 N</button><button class="opt-pill" onclick="selOpt(this,'m0-a4','7')">7 N</button><button class="opt-pill" onclick="selOpt(this,'m0-a4','12')">12 N</button><button class="opt-pill" onclick="selOpt(this,'m0-a4','120')">120 N</button></div>
-            <input type="hidden" id="m0-a4" value=""><button class="btn-check" onclick="checkMC(0,4,'m0-a4','m0-fb4','12')">Prüfen</button><div class="fb-block" id="m0-fb4"></div></div></div>
+            <input type="hidden" id="m0-a4" value=""><button class="btn-check" onclick="checkMC(0,4,'m0-a4','m0-fb4','12')">Prüfen</button><div class="fb-block" aria-live="polite" id="m0-fb4"></div></div></div>
 
         <div class="exercise-card" id="m0-ex5"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Mehrstufig: Leistung eines Krans</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">Kran hebt $m = 500\,\text{kg}$ um $h = 8\,\text{m}$ in $t = 40\,\text{s}$. Berechne die Leistung. ($g = 10\,\text{m/s}^2$)</p>
             <div class="answer-row"><input class="answer-input" id="m0-a5" placeholder="Ergebnis"><span class="answer-unit">W</span><button class="btn-check" onclick="checkInput(0,5,'m0-a5','m0-fb5','1000|1000.0|1000,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m0-h5')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m0-h5">Schritt 1: $W = m \cdot g \cdot h = 500 \cdot 10 \cdot 8 = 40\,000\,\text{J}$. Schritt 2: $P = W/t = 40\,000 / 40 = ?$</div><div class="fb-block" id="m0-fb5"></div></div></div>
+            <div class="hint-box" id="m0-h5">Schritt 1: $W = m \cdot g \cdot h = 500 \cdot 10 \cdot 8 = 40\,000\,\text{J}$. Schritt 2: $P = W/t = 40\,000 / 40 = ?$</div><div class="fb-block" aria-live="polite" id="m0-fb5"></div></div></div>
 
         <button class="btn-result" onclick="showResult(0)">Ergebnis anzeigen</button>
       </section>
@@ -1026,12 +1026,12 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m1-a1','C')"><div class="mc-marker">C</div><div><div class="mc-text">Die Zeit muss in Minuten umgerechnet werden</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m1-a1','D')"><div class="mc-marker">D</div><div><div class="mc-text">Das Ergebnis wurde nicht gerundet</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m1-a1" value=""><button class="btn-check" onclick="checkMC(1,1,'m1-a1','m1-fb1','B')">Prüfen</button><div class="fb-block" id="m1-fb1"></div></div></div>
+            <input type="hidden" id="m1-a1" value=""><button class="btn-check" onclick="checkMC(1,1,'m1-a1','m1-fb1','B')">Prüfen</button><div class="fb-block" aria-live="polite" id="m1-fb1"></div></div></div>
 
         <div class="exercise-card" id="m1-ex2"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Korrektes Ergebnis berechnen</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">Auto fährt 54 km/h für 10 Sekunden. Wie viele Meter legt es tatsächlich zurück?</p>
             <div class="answer-row"><input class="answer-input" id="m1-a2" placeholder="Ergebnis"><span class="answer-unit">m</span><button class="btn-check" onclick="checkInput(1,2,'m1-a2','m1-fb2','150|150.0|150,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m1-h2')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m1-h2">$v = 54 \div 3{,}6 = 15\,\text{m/s}$. Dann: $s = 15 \cdot 10 = ?$</div><div class="fb-block" id="m1-fb2"></div></div></div>
+            <div class="hint-box" id="m1-h2">$v = 54 \div 3{,}6 = 15\,\text{m/s}$. Dann: $s = 15 \cdot 10 = ?$</div><div class="fb-block" aria-live="polite" id="m1-fb2"></div></div></div>
 
         <div class="exercise-card" id="m1-ex3"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Clever runden</span><span class="ex-tag">MC</span></div>
           <div class="ex-body"><p class="ex-question">Du rechnest $v = \frac{255}{12} = 21{,}25\,\text{m/s}$. Die Eingangswerte haben 3 Stellen. Welche Angabe ist am sinnvollsten?</p>
@@ -1041,7 +1041,7 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m1-a3','C')"><div class="mc-marker">C</div><div><div class="mc-text">21,25 m/s</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m1-a3','D')"><div class="mc-marker">D</div><div><div class="mc-text">21,250 m/s</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m1-a3" value=""><button class="btn-check" onclick="checkMC(1,3,'m1-a3','m1-fb3','B')">Prüfen</button><div class="fb-block" id="m1-fb3"></div></div></div>
+            <input type="hidden" id="m1-a3" value=""><button class="btn-check" onclick="checkMC(1,3,'m1-a3','m1-fb3','B')">Prüfen</button><div class="fb-block" aria-live="polite" id="m1-fb3"></div></div></div>
 
         <div class="exercise-card" id="m1-ex4"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Welcher Fehlertyp liegt vor?</span><span class="ex-tag">MC</span></div>
           <div class="ex-body"><p class="ex-question">Schülerin rechnet: „$E_{kin} = m \cdot v = 2 \cdot 6 = 12\,\text{J}$". Was ist falsch?</p>
@@ -1051,12 +1051,12 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m1-a4','C')"><div class="mc-marker">C</div><div><div class="mc-text">Falsche Formel ($mv$ statt $\frac{1}{2}mv^2$)</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m1-a4','D')"><div class="mc-marker">D</div><div><div class="mc-text">Einheit der Geschwindigkeit ist falsch</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m1-a4" value=""><button class="btn-check" onclick="checkMC(1,4,'m1-a4','m1-fb4','C')">Prüfen</button><div class="fb-block" id="m1-fb4"></div></div></div>
+            <input type="hidden" id="m1-a4" value=""><button class="btn-check" onclick="checkMC(1,4,'m1-a4','m1-fb4','C')">Prüfen</button><div class="fb-block" aria-live="polite" id="m1-fb4"></div></div></div>
 
         <div class="exercise-card" id="m1-ex5"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Richtiges Ergebnis</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">Berechne die kinetische Energie korrekt: $m = 2\,\text{kg}$, $v = 6\,\text{m/s}$, $E_{kin} = \frac{1}{2}mv^2$</p>
             <div class="answer-row"><input class="answer-input" id="m1-a5" placeholder="Ergebnis"><span class="answer-unit">J</span><button class="btn-check" onclick="checkInput(1,5,'m1-a5','m1-fb5','36|36.0|36,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m1-h5')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m1-h5">$E_{kin} = \frac{1}{2} \cdot 2 \cdot 6^2 = 1 \cdot 36 = ?$</div><div class="fb-block" id="m1-fb5"></div></div></div>
+            <div class="hint-box" id="m1-h5">$E_{kin} = \frac{1}{2} \cdot 2 \cdot 6^2 = 1 \cdot 36 = ?$</div><div class="fb-block" aria-live="polite" id="m1-fb5"></div></div></div>
 
         <button class="btn-result" onclick="showResult(1)">Ergebnis anzeigen</button>
       </section>
@@ -1107,7 +1107,7 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m2-a1','C')"><div class="mc-marker">C</div><div><div class="mc-text">$F = m \cdot s$</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m2-a1','D')"><div class="mc-marker">D</div><div><div class="mc-text">$F = m + a$</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m2-a1" value=""><button class="btn-check" onclick="checkMC(2,1,'m2-a1','m2-fb1','B')">Prüfen</button><div class="fb-block" id="m2-fb1"></div></div></div>
+            <input type="hidden" id="m2-a1" value=""><button class="btn-check" onclick="checkMC(2,1,'m2-a1','m2-fb1','B')">Prüfen</button><div class="fb-block" aria-live="polite" id="m2-fb1"></div></div></div>
 
         <div class="exercise-card" id="m2-ex2"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Einheiten kürzen</span><span class="ex-tag">MC</span></div>
           <div class="ex-body"><p class="ex-question">Was ergibt $\dfrac{\text{kg} \cdot \frac{\text{m}^2}{\text{s}^2}}{\text{s}}$?</p>
@@ -1117,7 +1117,7 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m2-a2','C')"><div class="mc-marker">C</div><div><div class="mc-text">N (Newton)</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m2-a2','D')"><div class="mc-marker">D</div><div><div class="mc-text">Pa (Pascal)</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m2-a2" value=""><button class="btn-check" onclick="checkMC(2,2,'m2-a2','m2-fb2','B')">Prüfen</button><div class="fb-block" id="m2-fb2"></div></div></div>
+            <input type="hidden" id="m2-a2" value=""><button class="btn-check" onclick="checkMC(2,2,'m2-a2','m2-fb2','B')">Prüfen</button><div class="fb-block" aria-live="polite" id="m2-fb2"></div></div></div>
 
         <div class="exercise-card" id="m2-ex3"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Dimensionsprobe: Energie</span><span class="ex-tag">MC</span></div>
           <div class="ex-body"><p class="ex-question">$E = m \cdot g \cdot h$. Welche Einheit ergibt die Dimensionsprobe? ($[m]=\text{kg}$, $[g]=\text{m/s}^2$, $[h]=\text{m}$)</p>
@@ -1127,12 +1127,12 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m2-a3','C')"><div class="mc-marker">C</div><div><div class="mc-text">J – Formel ist korrekt</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m2-a3','D')"><div class="mc-marker">D</div><div><div class="mc-text">Pa – Formel ist falsch</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m2-a3" value=""><button class="btn-check" onclick="checkMC(2,3,'m2-a3','m2-fb3','C')">Prüfen</button><div class="fb-block" id="m2-fb3"></div></div></div>
+            <input type="hidden" id="m2-a3" value=""><button class="btn-check" onclick="checkMC(2,3,'m2-a3','m2-fb3','C')">Prüfen</button><div class="fb-block" aria-live="polite" id="m2-fb3"></div></div></div>
 
         <div class="exercise-card" id="m2-ex4"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Einheit eines Ergebnisses</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">$\frac{F}{A} = \frac{200\,\text{N}}{0{,}5\,\text{m}^2}$ — Welche SI-Einheit?</p>
             <div class="answer-row"><input class="answer-input" id="m2-a4" placeholder="Einheit"><button class="btn-check" onclick="checkInput(2,4,'m2-a4','m2-fb4','Pa|pascal|Pascal|N/m²|N/m^2|N/m2')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m2-h4')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m2-h4">$\frac{\text{N}}{\text{m}^2}$ = welcher Einheitenname?</div><div class="fb-block" id="m2-fb4"></div></div></div>
+            <div class="hint-box" id="m2-h4">$\frac{\text{N}}{\text{m}^2}$ = welcher Einheitenname?</div><div class="fb-block" aria-live="polite" id="m2-fb4"></div></div></div>
 
         <div class="exercise-card" id="m2-ex5"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Fehler durch Dimensionsprobe</span><span class="ex-tag">MC</span></div>
           <div class="ex-body"><p class="ex-question">Schüler rechnet Weg: $s = \frac{F}{t} = \frac{60\,\text{N}}{3\,\text{s}} = 20$. Was zeigt die Dimensionsprobe?</p>
@@ -1142,7 +1142,7 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m2-a5','C')"><div class="mc-marker">C</div><div><div class="mc-text">Probe zeigt Fehler: N/s ist kein Weg</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m2-a5','D')"><div class="mc-marker">D</div><div><div class="mc-text">Ergebnis müsste nur gerundet werden</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m2-a5" value=""><button class="btn-check" onclick="checkMC(2,5,'m2-a5','m2-fb5','C')">Prüfen</button><div class="fb-block" id="m2-fb5"></div></div></div>
+            <input type="hidden" id="m2-a5" value=""><button class="btn-check" onclick="checkMC(2,5,'m2-a5','m2-fb5','C')">Prüfen</button><div class="fb-block" aria-live="polite" id="m2-fb5"></div></div></div>
 
         <button class="btn-result" onclick="showResult(2)">Ergebnis anzeigen</button>
       </section>
@@ -1178,12 +1178,12 @@ button, [onclick] {
         <div class="exercise-card" id="m3-ex1"><div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Einheit umrechnen</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">Rechne $108\,\text{km/h}$ in m/s um.</p>
             <div class="answer-row"><input class="answer-input" id="m3-a1" placeholder="Ergebnis"><span class="answer-unit">m/s</span><button class="btn-check" onclick="checkInput(3,1,'m3-a1','m3-fb1','30|30.0|30,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h1')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m3-h1">$v = 108 \div 3{,}6 = ?$</div><div class="fb-block" id="m3-fb1"></div></div></div>
+            <div class="hint-box" id="m3-h1">$v = 108 \div 3{,}6 = ?$</div><div class="fb-block" aria-live="polite" id="m3-fb1"></div></div></div>
 
         <div class="exercise-card" id="m3-ex2"><div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Weg berechnen</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">ICE fährt mit 250 km/h. Welchen Weg legt er in 12 Minuten zurück? (Ergebnis in km)</p>
             <div class="answer-row"><input class="answer-input" id="m3-a2" placeholder="Ergebnis"><span class="answer-unit">km</span><button class="btn-check" onclick="checkInput(3,2,'m3-a2','m3-fb2','50|50.0|50,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h2')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m3-h2">12 min = 0,2 h. Dann $s = 250 \cdot 0{,}2 = ?$</div><div class="fb-block" id="m3-fb2"></div></div></div>
+            <div class="hint-box" id="m3-h2">12 min = 0,2 h. Dann $s = 250 \cdot 0{,}2 = ?$</div><div class="fb-block" aria-live="polite" id="m3-fb2"></div></div></div>
 
         <div class="exercise-card" id="m3-ex3"><div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Beschleunigung</span><span class="ex-tag">MC</span></div>
           <div class="ex-body"><p class="ex-question">Sportwagen: 0 auf 100 km/h in 5 s. Mittlere Beschleunigung?</p>
@@ -1193,17 +1193,17 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m3-a3','C')"><div class="mc-marker">C</div><div><div class="mc-text">0,5 m/s²</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m3-a3','D')"><div class="mc-marker">D</div><div><div class="mc-text">100 m/s²</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m3-a3" value=""><button class="btn-check" onclick="checkMC(3,3,'m3-a3','m3-fb3','B')">Prüfen</button><div class="fb-block" id="m3-fb3"></div></div></div>
+            <input type="hidden" id="m3-a3" value=""><button class="btn-check" onclick="checkMC(3,3,'m3-a3','m3-fb3','B')">Prüfen</button><div class="fb-block" aria-live="polite" id="m3-fb3"></div></div></div>
 
         <div class="exercise-card" id="m3-ex4"><div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Kraft</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">$m = 8\,\text{kg}$, $a = 2{,}5\,\text{m/s}^2$. Wie groß ist die Kraft?</p>
             <div class="answer-row"><input class="answer-input" id="m3-a4" placeholder="Ergebnis"><span class="answer-unit">N</span><button class="btn-check" onclick="checkInput(3,4,'m3-a4','m3-fb4','20|20.0|20,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h4')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m3-h4">$F = m \cdot a = 8 \cdot 2{,}5 = ?$</div><div class="fb-block" id="m3-fb4"></div></div></div>
+            <div class="hint-box" id="m3-h4">$F = m \cdot a = 8 \cdot 2{,}5 = ?$</div><div class="fb-block" aria-live="polite" id="m3-fb4"></div></div></div>
 
         <div class="exercise-card" id="m3-ex5"><div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Hubarbeit</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">30-kg-Sack um 1,5 m anheben. Welche Energie? ($g = 10\,\text{m/s}^2$)</p>
             <div class="answer-row"><input class="answer-input" id="m3-a5" placeholder="Ergebnis"><span class="answer-unit">J</span><button class="btn-check" onclick="checkInput(3,5,'m3-a5','m3-fb5','450|450.0|450,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h5')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m3-h5">$W = m \cdot g \cdot h = 30 \cdot 10 \cdot 1{,}5 = ?$</div><div class="fb-block" id="m3-fb5"></div></div></div>
+            <div class="hint-box" id="m3-h5">$W = m \cdot g \cdot h = 30 \cdot 10 \cdot 1{,}5 = ?$</div><div class="fb-block" aria-live="polite" id="m3-fb5"></div></div></div>
 
         <!-- Aufgaben 6-10 -->
         <div class="exercise-card" id="m3-ex6"><div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Kinetische Energie</span><span class="ex-tag">MC</span></div>
@@ -1214,17 +1214,17 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m3-a6','C')"><div class="mc-marker">C</div><div><div class="mc-text">50 J</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m3-a6','D')"><div class="mc-marker">D</div><div><div class="mc-text">500 J</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m3-a6" value=""><button class="btn-check" onclick="checkMC(3,6,'m3-a6','m3-fb6','B')">Prüfen</button><div class="fb-block" id="m3-fb6"></div></div></div>
+            <input type="hidden" id="m3-a6" value=""><button class="btn-check" onclick="checkMC(3,6,'m3-a6','m3-fb6','B')">Prüfen</button><div class="fb-block" aria-live="polite" id="m3-fb6"></div></div></div>
 
         <div class="exercise-card" id="m3-ex7"><div class="ex-header"><span class="ex-num">7</span><span class="ex-title">Leistung</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">Motor verrichtet in 4 Minuten eine Arbeit von 96 000 J. Leistung?</p>
             <div class="answer-row"><input class="answer-input" id="m3-a7" placeholder="Ergebnis"><span class="answer-unit">W</span><button class="btn-check" onclick="checkInput(3,7,'m3-a7','m3-fb7','400|400.0|400,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h7')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m3-h7">$t = 4 \cdot 60 = 240\,\text{s}$. $P = 96000 \div 240 = ?$</div><div class="fb-block" id="m3-fb7"></div></div></div>
+            <div class="hint-box" id="m3-h7">$t = 4 \cdot 60 = 240\,\text{s}$. $P = 96000 \div 240 = ?$</div><div class="fb-block" aria-live="polite" id="m3-fb7"></div></div></div>
 
         <div class="exercise-card" id="m3-ex8"><div class="ex-header"><span class="ex-num">8</span><span class="ex-title">Druck</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">$F = 600\,\text{N}$, $A = 0{,}3\,\text{m}^2$. Wie groß ist der Druck?</p>
             <div class="answer-row"><input class="answer-input" id="m3-a8" placeholder="Ergebnis"><span class="answer-unit">Pa</span><button class="btn-check" onclick="checkInput(3,8,'m3-a8','m3-fb8','2000|2000.0|2000,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h8')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m3-h8">$p = F / A = 600 / 0{,}3 = ?$</div><div class="fb-block" id="m3-fb8"></div></div></div>
+            <div class="hint-box" id="m3-h8">$p = F / A = 600 / 0{,}3 = ?$</div><div class="fb-block" aria-live="polite" id="m3-fb8"></div></div></div>
 
         <div class="exercise-card" id="m3-ex9"><div class="ex-header"><span class="ex-num">9</span><span class="ex-title">Fehler finden</span><span class="ex-tag">MC</span></div>
           <div class="ex-body"><p class="ex-question">Schüler: „36 km/h für 20 s → $s = 36 \cdot 20 = 720\,\text{m}$". Was ist der Fehler?</p>
@@ -1234,12 +1234,12 @@ button, [onclick] {
               <div class="mc-pill" onclick="selMCpill(this,'m3-a9','C')"><div class="mc-marker">C</div><div><div class="mc-text">Einheit falsch — korrekt: 0,72 km</div><div class="mc-explanation"></div></div></div>
               <div class="mc-pill" onclick="selMCpill(this,'m3-a9','D')"><div class="mc-marker">D</div><div><div class="mc-text">Zeit nicht umgerechnet — korrekt: 43 200 m</div><div class="mc-explanation"></div></div></div>
             </div>
-            <input type="hidden" id="m3-a9" value=""><button class="btn-check" onclick="checkMC(3,9,'m3-a9','m3-fb9','B')">Prüfen</button><div class="fb-block" id="m3-fb9"></div></div></div>
+            <input type="hidden" id="m3-a9" value=""><button class="btn-check" onclick="checkMC(3,9,'m3-a9','m3-fb9','B')">Prüfen</button><div class="fb-block" aria-live="polite" id="m3-fb9"></div></div></div>
 
         <div class="exercise-card" id="m3-ex10"><div class="ex-header"><span class="ex-num">10</span><span class="ex-title">Mehrstufig: Bremszeit</span><span class="ex-tag">Eingabe</span></div>
           <div class="ex-body"><p class="ex-question">Auto fährt $v = 20\,\text{m/s}$, bremst mit $a = -5\,\text{m/s}^2$ bis Stillstand. Wie lange dauert das? ($t = \frac{\Delta v}{|a|}$)</p>
             <div class="answer-row"><input class="answer-input" id="m3-a10" placeholder="Ergebnis"><span class="answer-unit">s</span><button class="btn-check" onclick="checkInput(3,10,'m3-a10','m3-fb10','4|4.0|4,0')">Prüfen</button><button class="btn-hint" onclick="toggleHint('m3-h10')">&#128161; Tipp</button></div>
-            <div class="hint-box" id="m3-h10">$t = \frac{20-0}{5} = ?$</div><div class="fb-block" id="m3-fb10"></div></div></div>
+            <div class="hint-box" id="m3-h10">$t = \frac{20-0}{5} = ?$</div><div class="fb-block" aria-live="polite" id="m3-fb10"></div></div></div>
 
         <button class="btn-result" onclick="showResult(3)">Ergebnis anzeigen</button>
       </section>

@@ -1074,7 +1074,7 @@ button, [onclick] {
               <button class="btn-hint" onclick="toggleHint('m0-h1')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m0-h1">$v$ verdreifacht sich (30→90 km/h, Faktor 3). Da $s \sim v^2$: Faktor $3^2 = 9$.</div>
-            <div class="fb-block" id="m0-fb1"></div>
+            <div class="fb-block" aria-live="polite" id="m0-fb1"></div>
           </div>
         </div>
 
@@ -1099,7 +1099,7 @@ button, [onclick] {
               <button class="btn-hint" onclick="toggleHint('m0-h2')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m0-h2">Faktor: 150/50 = 3. Da $F_L \sim v^2$: $F_L$ ändert sich um $3^2 = 9$. Also $F_{L2} = 9 \times 120\,\text{N}$.</div>
-            <div class="fb-block" id="m0-fb2"></div>
+            <div class="fb-block" aria-live="polite" id="m0-fb2"></div>
           </div>
         </div>
 
@@ -1124,7 +1124,7 @@ button, [onclick] {
               <button class="btn-hint" onclick="toggleHint('m0-h3')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m0-h3">Faktor für $v$: $\frac{1}{2}$. Da $E_{kin} \sim v^2$: $\left(\frac{1}{2}\right)^2 = \frac{1}{4}$.</div>
-            <div class="fb-block" id="m0-fb3"></div>
+            <div class="fb-block" aria-live="polite" id="m0-fb3"></div>
           </div>
         </div>
 
@@ -1149,7 +1149,7 @@ button, [onclick] {
               <button class="btn-hint" onclick="toggleHint('m0-h4')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m0-h4">$T \sim \sqrt{m} = m^{\frac{1}{2}}$, also $n = \frac{1}{2}$. Faktor für $T = 9^{\frac{1}{2}} = 3$.</div>
-            <div class="fb-block" id="m0-fb4"></div>
+            <div class="fb-block" aria-live="polite" id="m0-fb4"></div>
           </div>
         </div>
 
@@ -1174,7 +1174,7 @@ button, [onclick] {
               <button class="btn-hint" onclick="toggleHint('m0-h5')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m0-h5">Rechne getrennt: $v$ verdoppelt → $F_L \times 4$ (wegen $v^2$). $A$ halbiert → $F_L \times \frac{1}{2}$. Gesamt: $4 \cdot \frac{1}{2} = ?$</div>
-            <div class="fb-block" id="m0-fb5"></div>
+            <div class="fb-block" aria-live="polite" id="m0-fb5"></div>
           </div>
         </div>
 
@@ -1193,7 +1193,7 @@ button, [onclick] {
               <input class="answer-input" id="m0-eA1" placeholder="Zahl eingeben…">
               <button class="btn-check extra-btn" onclick="checkExtra('m0-eA1','m0-eFb1','4|vierfach','&#10003; Richtig! Faktor 4. $\\sqrt{4l} = 2\\sqrt{l}$ → $T$ verdoppelt sich.','&#10007; Welcher Faktor $k$ ergibt $k^{0{,}5} = 2$? → $k = 4$.')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m0-eFb1"></div>
+            <div class="fb-block" aria-live="polite" id="m0-eFb1"></div>
           </div>
         </div>
         <div class="exercise-card extra-card">
@@ -1204,7 +1204,7 @@ button, [onclick] {
               <input class="answer-input" id="m0-eA2" placeholder="z.B. 1/9">
               <button class="btn-check extra-btn" onclick="checkExtra('m0-eA2','m0-eFb2','1/9|einneuntel|neuntel|0.11|0,11','&#10003; Richtig! $F_G$ wird auf ein Neuntel.','&#10007; $r \\times 3$ → $F_G \\times \\frac{1}{3^2} = \\frac{1}{9}$.')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m0-eFb2"></div>
+            <div class="fb-block" aria-live="polite" id="m0-eFb2"></div>
           </div>
         </div>
         <div class="exercise-card extra-card">
@@ -1215,7 +1215,7 @@ button, [onclick] {
               <input class="answer-input" id="m0-eA3" placeholder="Zahl eingeben…">
               <button class="btn-check extra-btn" onclick="checkExtra('m0-eA3','m0-eFb3','1|unverändert','&#10003; Richtig! $4 \\cdot \\frac{1}{4} = 1$ — $E_{kin}$ bleibt unverändert!','&#10007; $m \\times 4$ → Faktor 4. $v \\times \\frac{1}{2}$ bei $v^2$ → Faktor $\\frac{1}{4}$. Gesamt: $4 \\times \\frac{1}{4} = 1$.')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m0-eFb3"></div>
+            <div class="fb-block" aria-live="polite" id="m0-eFb3"></div>
           </div>
         </div>
       </details>
@@ -1326,7 +1326,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m1-a1" value="">
             <button class="btn-check" onclick="checkMC(1,1,'m1-a1','m1-fb1','B')">Prüfen</button>
-            <div class="fb-block" id="m1-fb1"></div>
+            <div class="fb-block" aria-live="polite" id="m1-fb1"></div>
           </div>
         </div>
 
@@ -1342,7 +1342,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m1-a2" value="">
             <button class="btn-check" onclick="checkMC(1,2,'m1-a2','m1-fb2','C')">Prüfen</button>
-            <div class="fb-block" id="m1-fb2"></div>
+            <div class="fb-block" aria-live="polite" id="m1-fb2"></div>
           </div>
         </div>
 
@@ -1358,7 +1358,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m1-a3" value="">
             <button class="btn-check" onclick="checkMC(1,3,'m1-a3','m1-fb3','C')">Prüfen</button>
-            <div class="fb-block" id="m1-fb3"></div>
+            <div class="fb-block" aria-live="polite" id="m1-fb3"></div>
           </div>
         </div>
 
@@ -1374,7 +1374,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m1-a4" value="">
             <button class="btn-check" onclick="checkMC(1,4,'m1-a4','m1-fb4','A')">Prüfen</button>
-            <div class="fb-block" id="m1-fb4"></div>
+            <div class="fb-block" aria-live="polite" id="m1-fb4"></div>
           </div>
         </div>
 
@@ -1390,7 +1390,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m1-a5" value="">
             <button class="btn-check" onclick="checkMC(1,5,'m1-a5','m1-fb5','A')">Prüfen</button>
-            <div class="fb-block" id="m1-fb5"></div>
+            <div class="fb-block" aria-live="polite" id="m1-fb5"></div>
           </div>
         </div>
 
@@ -1409,7 +1409,7 @@ button, [onclick] {
               <input class="answer-input" id="m1-eA1" placeholder="Antwort eingeben…">
               <button class="btn-check extra-btn" onclick="checkExtra('m1-eA1','m1-eFb1','quadratisch|z-quadrat','&#10003; Richtig! $K \\sim Z^2$ — quadratischer Zusammenhang.','&#10007; $Z$ steht im Zähler mit Potenz 2 → quadratischer Zusammenhang.')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m1-eFb1"></div>
+            <div class="fb-block" aria-live="polite" id="m1-eFb1"></div>
           </div>
         </div>
         <div class="exercise-card extra-card">
@@ -1420,7 +1420,7 @@ button, [onclick] {
               <input class="answer-input" id="m1-eA2" placeholder="Antwort eingeben…">
               <button class="btn-check extra-btn" onclick="checkExtra('m1-eA2','m1-eFb2','unverändert|gleich|1','&#10003; Richtig! $Q$ bleibt unverändert, da $F$ im gleichen Verhältnis wächst.','&#10007; $G \\sim F$ → $\\frac{2G}{2F} = \\frac{G}{F}$ — unverändert!')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m1-eFb2"></div>
+            <div class="fb-block" aria-live="polite" id="m1-eFb2"></div>
           </div>
         </div>
       </details>
@@ -1548,7 +1548,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m2-a1" value="">
             <button class="btn-check" onclick="checkMC(2,1,'m2-a1','m2-fb1','A')">Prüfen</button>
-            <div class="fb-block" id="m2-fb1"></div>
+            <div class="fb-block" aria-live="polite" id="m2-fb1"></div>
           </div>
         </div>
 
@@ -1564,7 +1564,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m2-a2" value="">
             <button class="btn-check" onclick="checkMC(2,2,'m2-a2','m2-fb2','B')">Prüfen</button>
-            <div class="fb-block" id="m2-fb2"></div>
+            <div class="fb-block" aria-live="polite" id="m2-fb2"></div>
           </div>
         </div>
 
@@ -1580,7 +1580,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m2-a3" value="">
             <button class="btn-check" onclick="checkMC(2,3,'m2-a3','m2-fb3','A')">Prüfen</button>
-            <div class="fb-block" id="m2-fb3"></div>
+            <div class="fb-block" aria-live="polite" id="m2-fb3"></div>
           </div>
         </div>
 
@@ -1596,7 +1596,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m2-a4" value="">
             <button class="btn-check" onclick="checkMC(2,4,'m2-a4','m2-fb4','A')">Prüfen</button>
-            <div class="fb-block" id="m2-fb4"></div>
+            <div class="fb-block" aria-live="polite" id="m2-fb4"></div>
           </div>
         </div>
 
@@ -1612,7 +1612,7 @@ button, [onclick] {
             </div>
             <input type="hidden" id="m2-a5" value="">
             <button class="btn-check" onclick="checkMC(2,5,'m2-a5','m2-fb5','C')">Prüfen</button>
-            <div class="fb-block" id="m2-fb5"></div>
+            <div class="fb-block" aria-live="polite" id="m2-fb5"></div>
           </div>
         </div>
 
@@ -1631,7 +1631,7 @@ button, [onclick] {
               <input class="answer-input" id="m2-eA1" placeholder="ja oder nein">
               <button class="btn-check extra-btn" onclick="checkExtra('m2-eA1','m2-eFb1','nein|falsch|no','&#10003; Richtig! Überproportional = Kurve, keine Gerade.','&#10007; Proportionalität verlangt eine Ursprungsgerade.')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m2-eFb1"></div>
+            <div class="fb-block" aria-live="polite" id="m2-eFb1"></div>
           </div>
         </div>
         <div class="exercise-card extra-card">
@@ -1642,7 +1642,7 @@ button, [onclick] {
               <input class="answer-input" id="m2-eA2" placeholder="ja oder nein">
               <button class="btn-check extra-btn" onclick="checkExtra('m2-eA2','m2-eFb2','ja|richtig|yes','&#10003; Richtig! $U = R \\cdot I$ mit konstantem $R$ → Ursprungsgerade.','&#10007; $U = R \\cdot I$ bei konstantem $R$ → Proportionalität!')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m2-eFb2"></div>
+            <div class="fb-block" aria-live="polite" id="m2-eFb2"></div>
           </div>
         </div>
       </details>
@@ -1728,7 +1728,7 @@ button, [onclick] {
               <button class="btn-hint" onclick="toggleHint('m3-h1')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m3-h1">$m$ steht als Faktor vor der Klammer — dividiere beide Seiten durch die gesamte Klammer.</div>
-            <div class="fb-block" id="m3-fb1"></div>
+            <div class="fb-block" aria-live="polite" id="m3-fb1"></div>
           </div>
         </div>
 
@@ -1750,7 +1750,7 @@ button, [onclick] {
               <button class="btn-hint" onclick="toggleHint('m3-h2')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m3-h2">Bringe beide $m$-Terme auf eine Seite, klammere $m$ aus, dann dividiere.</div>
-            <div class="fb-block" id="m3-fb2"></div>
+            <div class="fb-block" aria-live="polite" id="m3-fb2"></div>
           </div>
         </div>
 
@@ -1770,7 +1770,7 @@ button, [onclick] {
               <button class="btn-hint" onclick="toggleHint('m3-h3')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m3-h3">Zuerst durch $m$ kürzen, dann $v_0^2$ freistellen, dann Wurzel ziehen. Achtung: $\sqrt{a-b} \neq \sqrt{a} - \sqrt{b}$!</div>
-            <div class="fb-block" id="m3-fb3"></div>
+            <div class="fb-block" aria-live="polite" id="m3-fb3"></div>
           </div>
         </div>
 
@@ -1790,7 +1790,7 @@ button, [onclick] {
               <button class="btn-hint" onclick="toggleHint('m3-h4')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m3-h4">Schreibe in Standardform $at^2+bt+c=0$: $a=\frac{g}{2}$, $b=-v_0\sin\alpha$, $c=-h$. Setze in die Lösungsformel ein.</div>
-            <div class="fb-block" id="m3-fb4"></div>
+            <div class="fb-block" aria-live="polite" id="m3-fb4"></div>
           </div>
         </div>
 
@@ -1810,7 +1810,7 @@ button, [onclick] {
               <input class="answer-input" id="m3-eA1" placeholder="Formel eingeben…">
               <button class="btn-check extra-btn" onclick="checkExtra('m3-eA1','m3-eFb1','E/(v²/2+gh)|E/(v^2/2+gh)|2E/(v²+2gh)|2E/(v^2+2gh)','&#10003; Richtig! Die Klammer bleibt als Ganzes im Nenner.','&#10007; Dividiere beide Seiten durch die komplette Klammer.')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m3-eFb1"></div>
+            <div class="fb-block" aria-live="polite" id="m3-eFb1"></div>
           </div>
         </div>
         <div class="exercise-card extra-card">
@@ -1822,7 +1822,7 @@ button, [onclick] {
               <input class="answer-input" id="m3-eA2" placeholder="Formel eingeben…">
               <button class="btn-check extra-btn" onclick="checkExtra('m3-eA2','m3-eFb2','√(2E/m)|sqrt(2E/m)|√(2Ekin/m)','&#10003; Richtig! $v = \\sqrt{\\frac{2E_{kin}}{m}}$.','&#10007; $v^2 = \\frac{2E}{m}$, dann Wurzel: $v = \\sqrt{\\frac{2E}{m}}$.')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m3-eFb2"></div>
+            <div class="fb-block" aria-live="polite" id="m3-eFb2"></div>
           </div>
         </div>
         <div class="exercise-card extra-card">
@@ -1834,7 +1834,7 @@ button, [onclick] {
               <input class="answer-input" id="m3-eA3" placeholder="Formel eingeben…">
               <button class="btn-check extra-btn" onclick="checkExtra('m3-eA3','m3-eFb3','√(2h/g)|sqrt(2h/g)','&#10003; Richtig! $t = \\sqrt{\\frac{2h}{g}}$.','&#10007; $t^2 = \\frac{2h}{g}$, dann $t = \\sqrt{\\frac{2h}{g}}$.')">Prüfen</button>
             </div>
-            <div class="fb-block" id="m3-eFb3"></div>
+            <div class="fb-block" aria-live="polite" id="m3-eFb3"></div>
           </div>
         </div>
       </details>
