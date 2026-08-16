@@ -609,6 +609,9 @@ button, [onclick] {
   cursor: pointer; transition: all 0.2s;
 }
 .mc-pill:hover { border-color: var(--accent); background: var(--bg-elevated); }
+.mc-pill.selected { border-color: var(--accent); background: var(--accent-deep); }
+.mc-pill.selected .mc-marker { background: var(--accent); border-color: var(--accent-bright); color: #fff; }
+.mc-pill.selected .mc-text { color: #fff; }
 .mc-pill.selected-correct { border-color: var(--ok); background: var(--ok-bg); pointer-events: none; }
 .mc-pill.selected-correct .mc-marker { background: var(--ok); border-color: var(--ok); color: #fff; }
 .mc-pill.selected-correct .mc-explanation { display: block; }
