@@ -1939,8 +1939,6 @@ let moduleStates = [false, false, false];
 let exerciseStates = {};
 let currentScreen = 'landing';
 
-const WEBHOOK_URL = "https://hook.eu2.make.com/ucp5woga4t7shqejvtys8vfm94ikf411";
-
 // Exercise definitions per module
 const exercises = {
   // Module 0 (D1.1): MC, MC, text, text, MC
@@ -2429,33 +2427,6 @@ if (scrambleEl) {
     counter = (counter + 1) % phrases.length;
   };
   setTimeout(nextPhrase, 1500);
-}
-
-// ══════════════════════════════════════════
-// KI FEEDBACK
-// ══════════════════════════════════════════
-async function getKIFeedback(textareaId, feedbackDivId, systemPrompt) {
-  const ta = document.getElementById(textareaId);
-  const fb = document.getElementById(feedbackDivId);
-  const text = ta.value.trim();
-  if (!text) { fb.innerHTML = '<span style="color:#f59e0b">Bitte schreibe zuerst deinen Text.</span>'; return; }
-  fb.innerHTML = '<span class="loading"><span class="spinner"></span> Die KI denkt nach...</span>';
-  try {
-    const res = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system_prompt: systemPrompt, user_text: text })
-    });
-    const raw = await res.text();
-    let feedbackText = '';
-    try {
-      const json = JSON.parse(raw);
-      feedbackText = json.choices?.[0]?.message?.content || json.content || raw;
-    } catch(e) { feedbackText = raw; }
-    fb.innerHTML = '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:16px;line-height:1.7;white-space:pre-wrap;color:#e2e8f0">' + feedbackText + '</div>';
-  } catch(err) {
-    fb.innerHTML = '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:16px;color:#fca5a5">Fehler: ' + err.message + '</div>';
-  }
 }
 
 // ══════════════════════════════════════════

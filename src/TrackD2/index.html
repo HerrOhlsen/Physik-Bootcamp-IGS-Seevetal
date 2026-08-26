@@ -1354,7 +1354,7 @@ button, [onclick] {
           <div class="ex-body">
             <p class="ex-question">Erkläre den Energieerhaltungssatz am Beispiel eines Balls, der eine Rampe hinunterrollt. Verwende die Begriffe potenzielle Energie, kinetische Energie und Energieumwandlung.</p>
             <textarea id="ki-text-0" rows="5" style="width:100%;padding:12px;border:2px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.06);color:#e2e8f0;font-family:inherit;font-size:16px;resize:vertical;min-height:120px" placeholder="Schreibe hier deine Antwort..."></textarea>
-            <button class="btn-check" style="margin-top:8px" onclick="getKIFeedback('ki-text-0','ki-fb-0',KI_PROMPTS[0])">KI-Feedback holen</button>
+            <button class="btn-check" style="margin-top:8px" onclick="getKIFeedback('ki-text-0','ki-fb-0','pb-trackd2-1')">KI-Feedback holen</button>
             <div id="ki-fb-0" style="margin-top:12px"></div>
           </div>
         </div>
@@ -1671,7 +1671,7 @@ button, [onclick] {
           <div class="ex-body">
             <p class="ex-question">Argumentiere nach dem Schema These-Begründung-Formel-Ergebnis: Warum ist der Bremsweg bei doppelter Geschwindigkeit viermal so lang?</p>
             <textarea id="ki-text-1" rows="5" style="width:100%;padding:12px;border:2px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.06);color:#e2e8f0;font-family:inherit;font-size:16px;resize:vertical;min-height:120px" placeholder="Schreibe hier deine Antwort..."></textarea>
-            <button class="btn-check" style="margin-top:8px" onclick="getKIFeedback('ki-text-1','ki-fb-1',KI_PROMPTS[1])">KI-Feedback holen</button>
+            <button class="btn-check" style="margin-top:8px" onclick="getKIFeedback('ki-text-1','ki-fb-1','pb-trackd2-2')">KI-Feedback holen</button>
             <div id="ki-fb-1" style="margin-top:12px"></div>
           </div>
         </div>
@@ -1969,7 +1969,7 @@ button, [onclick] {
           <div class="ex-body">
             <p class="ex-question">Schreibe eine Klausurantwort: Erkläre, warum ein Fallschirmspringer nach dem Öffnen des Fallschirms langsamer wird, obwohl die Gravitation weiterhin nach unten zieht.</p>
             <textarea id="ki-text-2" rows="5" style="width:100%;padding:12px;border:2px solid rgba(255,255,255,0.15);border-radius:8px;background:rgba(255,255,255,0.06);color:#e2e8f0;font-family:inherit;font-size:16px;resize:vertical;min-height:120px" placeholder="Schreibe hier deine Antwort..."></textarea>
-            <button class="btn-check" style="margin-top:8px" onclick="getKIFeedback('ki-text-2','ki-fb-2',KI_PROMPTS[2])">KI-Feedback holen</button>
+            <button class="btn-check" style="margin-top:8px" onclick="getKIFeedback('ki-text-2','ki-fb-2','pb-trackd2-3')">KI-Feedback holen</button>
             <div id="ki-fb-2" style="margin-top:12px"></div>
           </div>
         </div>
@@ -2332,35 +2332,62 @@ function filterCat(cat, btn) {
 /* ────────────────────────────────────────────
    KI FEEDBACK
    ──────────────────────────────────────────── */
-const WEBHOOK_URL = "https://hook.eu2.make.com/ucp5woga4t7shqejvtys8vfm94ikf411";
+// KI-Feedback läuft über die eigene Edge Function (Supabase, EU Frankfurt) zum
+// IONOS AI Model Hub (Berlin). Make.com ist damit als Auftragsverarbeiter raus.
+// Systemprompt, Rubrik und Erwartungshorizont liegen serverseitig in ki_prompts
+// und werden über die modul_id nachgeschlagen; im Client steht nur noch der
+// sichtbare Arbeitsauftrag. Spec: Poolzeit-Repo,
+// docs/specs/2026-08-22-ki-feedback-design.md
+const KI_URL = "https://wyvjgcxfyserubtgkink.supabase.co/functions/v1/ki-feedback";
+const KI_KEY = "sb_publishable_vs6Dt-kOErLDbSAK7gEqeA_HWt2E9Fq";
 
-const KI_PROMPTS = [
-  `Du bist ein Physiklehrer (Jg. 11). Prüfe: 1) Korrekte Verwendung von 'potenzielle Energie' und 'kinetische Energie'? 2) 'Energie wird UMGEWANDELT' (nicht 'verbraucht')? 3) Oben E_pot max, unten E_kin max? 4) Reibung/Wärme erwähnt? Feedback auf Deutsch, max 150 Wörter.`,
-  `Du bist ein Physiklehrer (Jg. 11). Prüfe: 1) THESE formuliert? 2) Physikalische BEGRÜNDUNG (quadratische Abhängigkeit)? 3) FORMEL s=v²/(2a) korrekt? 4) ERGEBNIS (2²=4) nachgerechnet? Prüfe Fachsprache: 'Bremsweg', 'quadratisch proportional'. Feedback auf Deutsch, max 150 Wörter.`,
-  `Du bist ein Physiklehrer (Jg. 11). Prüfe Klausurantwort: 1) Gravitationskraft UND Luftwiderstand benannt? 2) Kräftegleichgewicht / resultierende Kraft erklärt? 3) Fachbegriffe: Luftwiderstand, Gravitationskraft, resultierende Kraft? 4) Logischer Aufbau? 5) Sachlich, keine Umgangssprache? Feedback auf Deutsch, max 200 Wörter.`
-];
+// Moodle-Nutzerkennung für Rate Limit und Log der Function. Der SCORM-Player
+// liefert die Seite same-origin aus, deshalb ist M.cfg.userId aus dem Frame
+// erreichbar. Ohne LMS (lokaler Test) bleibt es beim dev-Namen; die Function
+// akzeptiert beide Formen, alles andere weist sie mit 400 ab.
+function kiUserName() {
+  const wins = [];
+  try { wins.push(window); } catch(e) {}
+  try { if (window.parent && window.parent !== window) wins.push(window.parent); } catch(e) {}
+  try { if (window.top && window.top !== window) wins.push(window.top); } catch(e) {}
+  for (const w of wins) {
+    try {
+      const m = w.M;
+      if (m && m.cfg && m.cfg.userId && /^\d{1,20}$/.test(String(m.cfg.userId))) return 'moodle_' + m.cfg.userId;
+    } catch(e) {}
+  }
+  return 'dev_bootcamp';
+}
 
-async function getKIFeedback(textareaId, feedbackDivId, systemPrompt) {
+async function kiFeedback(modulId, text) {
+  const res = await fetch(KI_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': KI_KEY },
+    body: JSON.stringify({ modul_id: modulId, user_name: kiUserName(), text: text })
+  });
+  let j = null;
+  try { j = await res.json(); } catch(e) {}
+  // Die Fehlertexte der Function sind schülertauglich formuliert und werden
+  // durchgereicht, statt sie durch einen technischen Text zu ersetzen.
+  if (!res.ok || !j || !j.ok) throw new Error((j && j.error) || 'Das Feedback ist gerade nicht erreichbar.');
+  return j.feedback;
+}
+
+async function getKIFeedback(textareaId, feedbackDivId, modulId) {
   const ta = document.getElementById(textareaId);
   const fb = document.getElementById(feedbackDivId);
   const text = ta.value.trim();
   if (!text) { fb.innerHTML = '<span style="color:#f59e0b">Bitte schreibe zuerst deinen Text.</span>'; return; }
   fb.innerHTML = '<span class="loading"><span class="spinner"></span> Die KI denkt nach...</span>';
   try {
-    const res = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ system_prompt: systemPrompt, user_text: text })
-    });
-    const raw = await res.text();
-    let feedbackText = '';
-    try {
-      const json = JSON.parse(raw);
-      feedbackText = json.choices?.[0]?.message?.content || json.content || raw;
-    } catch(e) { feedbackText = raw; }
-    fb.innerHTML = '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:16px;line-height:1.7;white-space:pre-wrap;color:#e2e8f0">' + feedbackText + '</div>';
+    const feedbackText = await kiFeedback(modulId, text);
+    // Als Text setzen, nicht als HTML: das Modell liefert Freitext, der auch
+    // spitze Klammern enthalten darf.
+    fb.innerHTML = '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:16px;line-height:1.7;white-space:pre-wrap;color:#e2e8f0"></div>';
+    fb.firstChild.textContent = feedbackText;
   } catch(err) {
-    fb.innerHTML = '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:16px;color:#fca5a5">Fehler: ' + err.message + '</div>';
+    fb.innerHTML = '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:16px;color:#fca5a5"></div>';
+    fb.firstChild.textContent = err.message;
   }
 }
 

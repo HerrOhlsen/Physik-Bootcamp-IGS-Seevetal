@@ -396,7 +396,46 @@ textarea:disabled{background:rgba(255,255,255,0.03);color:var(--ink-muted);borde
 <div style="text-align:center;padding:8px;font-size:0.7rem;color:#94a3b8;margin-top:8px">Gate-Test D2→D3 · v5</div>
 
 <script>
-const WEBHOOK_URL = "https://hook.eu2.make.com/ucp5woga4t7shqejvtys8vfm94ikf411";
+// KI-Feedback läuft über die eigene Edge Function (Supabase, EU Frankfurt) zum
+// IONOS AI Model Hub (Berlin). Make.com ist damit als Auftragsverarbeiter raus.
+// Systemprompt, Rubrik und Erwartungshorizont liegen serverseitig in ki_prompts
+// und werden über die modul_id nachgeschlagen; im Client steht nur noch der
+// sichtbare Arbeitsauftrag. Spec: Poolzeit-Repo,
+// docs/specs/2026-08-22-ki-feedback-design.md
+const KI_URL = "https://wyvjgcxfyserubtgkink.supabase.co/functions/v1/ki-feedback";
+const KI_KEY = "sb_publishable_vs6Dt-kOErLDbSAK7gEqeA_HWt2E9Fq";
+
+// Moodle-Nutzerkennung für Rate Limit und Log der Function. Der SCORM-Player
+// liefert die Seite same-origin aus, deshalb ist M.cfg.userId aus dem Frame
+// erreichbar. Ohne LMS (lokaler Test) bleibt es beim dev-Namen; die Function
+// akzeptiert beide Formen, alles andere weist sie mit 400 ab.
+function kiUserName() {
+  const wins = [];
+  try { wins.push(window); } catch(e) {}
+  try { if (window.parent && window.parent !== window) wins.push(window.parent); } catch(e) {}
+  try { if (window.top && window.top !== window) wins.push(window.top); } catch(e) {}
+  for (const w of wins) {
+    try {
+      const m = w.M;
+      if (m && m.cfg && m.cfg.userId && /^\d{1,20}$/.test(String(m.cfg.userId))) return 'moodle_' + m.cfg.userId;
+    } catch(e) {}
+  }
+  return 'dev_bootcamp';
+}
+
+async function kiFeedback(modulId, text) {
+  const res = await fetch(KI_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': KI_KEY },
+    body: JSON.stringify({ modul_id: modulId, user_name: kiUserName(), text: text })
+  });
+  let j = null;
+  try { j = await res.json(); } catch(e) {}
+  // Die Fehlertexte der Function sind schülertauglich formuliert und werden
+  // durchgereicht, statt sie durch einen technischen Text zu ersetzen.
+  if (!res.ok || !j || !j.ok) throw new Error((j && j.error) || 'Das Feedback ist gerade nicht erreichbar.');
+  return j.feedback;
+}
 const textIds = ['t1','t2','t3','t4','t5'];
 let evaluated = false;
 
@@ -490,82 +529,23 @@ async function requestEvaluation() {
 
   const answers = textIds.map(id => document.getElementById(id).value.trim());
 
-  const systemPrompt = `Du bist ein Physiklehrer (Sek II) und bewertest Schülerantworten anhand einer Rubrik.
-Sei fair aber präzise. Gib konstruktives, knappes Feedback auf Deutsch.
-Antworte NUR mit validem JSON, ohne Markdown-Codeblöcke.`;
-
-  const userPrompt = `Bewerte die folgenden 5 Schülerantworten anhand der Rubriken. Jede Aufgabe gibt 0–4 Punkte.
-
-AUFGABE 1: Unterschied Geschwindigkeit vs. Beschleunigung
-Rubrik: (1) Geschwindigkeit v=s/t korrekt, (2) Beschleunigung a=Δv/Δt korrekt, (3) Unterschied klar benannt, (4) Beispiele gegeben
-Antwort: "${answers[0]}"
-
-AUFGABE 2: Energieerhaltungssatz / freier Fall
-Rubrik: (1) Energieerhaltung als Prinzip (E_ges=const), (2) E_pot nimmt ab / E_kin nimmt zu, (3) Formeln E_pot=mgh und E_kin=½mv² genannt, (4) Klare Fachsprache
-Antwort: "${answers[1]}"
-
-AUFGABE 3: Newtons 1. Gesetz (Trägheitsprinzip)
-Rubrik: (1) Formulierung des Gesetzes korrekt, (2) Begriff Trägheit korrekt verwendet, (3) Alltagsbeispiel genannt, (4) Beispiel physikalisch korrekt erklärt
-Antwort: "${answers[2]}"
-
-AUFGABE 4: Masse vs. Gewichtskraft
-Rubrik: (1) Masse korrekt (Trägheit, kg, überall konstant), (2) Gewichtskraft korrekt (F_G=m·g, N, ortsabhängig), (3) Unterschied klar, (4) Weltall-Situation erklärt (g≈0)
-Antwort: "${answers[3]}"
-
-AUFGABE 5: Argumentationskette F=20N, m=4kg → a=?
-Rubrik: (1) These formuliert, (2) F=m·a und 2. Newtonsches Gesetz genannt, (3) a=F/m=20/4 korrekt umgestellt, (4) Ergebnis a=5 m/s² mit Einheit
-Antwort: "${answers[4]}"
-
-Antworte mit diesem JSON-Format:
-{
-  "aufgaben": [
-    {"punkte": 3, "feedback": "Kurzes Feedback auf Deutsch (1-2 Sätze)"},
-    {"punkte": 2, "feedback": "..."},
-    {"punkte": 4, "feedback": "..."},
-    {"punkte": 1, "feedback": "..."},
-    {"punkte": 3, "feedback": "..."}
-  ]
-}`;
+  // Nur die Antworten verlassen den Browser. Rubrik, Punkteschlüssel und das
+  // geforderte JSON-Format stehen serverseitig im Prompt zu pb-gate-d2d3.
+  const text = answers.map((a, i) => 'AUFGABE ' + (i + 1) + ':\n' + a).join('\n\n');
 
   try {
-    // The Make.com fallback route expects {system_prompt, user_text}, not an
-    // OpenAI messages array. Whitespace is collapsed because the scenario
-    // interpolates the fields into a JSON body where raw newlines break parsing.
-    const response = await fetch(WEBHOOK_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        system_prompt: systemPrompt.replace(/\s+/g, ' ').trim(),
-        user_text: userPrompt.replace(/\s+/g, ' ').trim()
-      })
-    });
+    const roh = await kiFeedback('pb-gate-d2d3', text);
 
-    if (!response.ok) throw new Error('HTTP ' + response.status);
-    const raw = await response.text();
-    if (raw.trim() === 'Accepted') throw new Error('KI-Dienst ist gerade nicht aktiv');
-
-    // Unwrap the webhook envelope (shape varies), then parse the rubric JSON.
+    // Das Modell soll reines JSON liefern. Markdown-Zäune und Begleitsätze
+    // trotzdem abstreifen: ein Modellwechsel in ki_config ändert den Stil,
+    // ohne dass jemand dieses Modul anfasst.
     let data = null;
     try {
-      let content = raw;
-      try {
-        const wrapper = JSON.parse(raw);
-        if (wrapper && Array.isArray(wrapper.aufgaben)) {
-          data = wrapper;
-        } else if (wrapper) {
-          content = wrapper.response || wrapper.text || wrapper.content
-            || (wrapper.choices && wrapper.choices[0] && wrapper.choices[0].message && wrapper.choices[0].message.content)
-            || raw;
-        }
-      } catch(e) { /* raw is not JSON, treat it as the model output itself */ }
-      if (!data) {
-        // Strip markdown fences if present
-        const cleaned = String(content).replace(/```json\n?/g, '').replace(/```\n?/g, '').trim();
-        data = JSON.parse(cleaned);
-      }
+      const s = String(roh);
+      data = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}') + 1));
       if (!Array.isArray(data.aufgaben) || data.aufgaben.length !== 5) throw new Error('shape');
     } catch(e) {
-      throw new Error('Ungültige Antwort vom Server');
+      throw new Error('Die Bewertung kam unvollständig zurück. Bitte noch einmal versuchen.');
     }
 
     showResults(data);
@@ -574,7 +554,7 @@ Antworte mit diesem JSON-Format:
     loading.classList.remove('show');
     btn.disabled = false;
     hint.style.display = '';
-    hint.textContent = '⚠️ Fehler: ' + err.message + ' – bitte nochmal versuchen.';
+    hint.textContent = '⚠️ ' + err.message;
     hint.style.color = '#ef4444';
   }
 }

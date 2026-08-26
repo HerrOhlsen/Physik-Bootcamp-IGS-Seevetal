@@ -49,6 +49,37 @@ Pakete werden als **Download-Pakettyp** eingebunden:
 
 Kurs: seevetal.moodle-nds.de, Kurs-ID 347.
 
+## KI-Feedback
+
+Drei Stellen holen KI-Rückmeldung: die drei Schreibaufgaben in **TrackD2** und der
+**Gate-Test D2→D3**, der fünf Antworten mit 0 bis 4 Punkten bewertet.
+
+Die Kette ist seit 26.08.2026: SCORM in Moodle → Edge Function `ki-feedback`
+(Supabase, EU Frankfurt) → IONOS AI Model Hub (Berlin). Vorher lief das über einen
+Make.com-Webhook; der ist raus, damit ein Auftragsverarbeiter weniger in der Kette
+steht. Function, Datenmodell und Absicherung sind im Poolzeit-Repo beschrieben:
+`docs/specs/2026-08-22-ki-feedback-design.md`.
+
+**Systemprompt und Erwartungshorizont stehen nicht mehr im HTML**, sondern
+serverseitig in der Tabelle `ki_prompts`. Der Client schickt nur `modul_id`,
+`user_name` (`moodle_<id>` aus `M.cfg.userId`) und den Schülertext.
+
+| modul_id | Stelle |
+|---|---|
+| `pb-trackd2-1` | TrackD2, KI-Aufgabe D2.1 (Energieerhaltung an der Rampe) |
+| `pb-trackd2-2` | TrackD2, KI-Aufgabe D2.2 (Argumentation Bremsweg) |
+| `pb-trackd2-3` | TrackD2, KI-Aufgabe D2.3 (Klausurantwort Fallschirmspringer) |
+| `pb-gate-d2d3` | Gate-Test D2→D3, Punktbewertung als JSON |
+
+Wer eine Aufgabe inhaltlich ändert, muss die passende Zeile in `ki_prompts`
+mitziehen. Fehlt die Zeile, antwortet die Function mit 404 und die SuS lesen
+„Für diese Aufgabe ist kein Feedback hinterlegt".
+
+Das Modell steht in `ki_config` (aktuell Mistral Small 24B Instruct). Ein
+Modellwechsel ist ein `UPDATE`, kein neuer Build: die SCORM-Pakete müssen dafür
+nicht angefasst werden. Dasselbe gilt für den Notaus (`ki_config.aktiv = false`)
+und die Tages- und Monatsbudgets.
+
 ## Rollback
 
 Jeder Stand ist über git rückholbar:
