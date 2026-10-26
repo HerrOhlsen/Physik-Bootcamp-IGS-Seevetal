@@ -1,0 +1,1358 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Physik Bootcamp · Track F1: Pfeile &amp; Kräfte</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ── iOS-Kompatibilität ─────────────────────────────────────── */
+input, textarea, select { font-size: 16px; }
+html { height: 100%; }
+body { min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
+button, [onclick], .opt-pill, .mod-card, svg.grid-svg { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* ── Ende iOS-Kompatibilität ────────────────────────────────── */
+
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #8587b8;
+
+  --accent: #e11d48;
+  --accent-bright: #fb7185;
+  --accent-glow: rgba(225, 29, 72, 0.35);
+  --accent-deep: #9f1239;
+  --accent-subtle: rgba(225, 29, 72, 0.10);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(251, 113, 133, 0.16);
+  --border-strong: rgba(251, 113, 133, 0.32);
+
+  /* vector colours, shared by SVG boards and text */
+  --v1: #60a5fa;
+  --v2: #fbbf24;
+  --vres: #c084fc;
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-full: 100px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+}
+
+#bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; transition: opacity 0.8s ease; }
+#bg-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREENS
+   ══════════════════════════════════════════ */
+.screen { display: none; position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; }
+.screen.active { display: block; animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes screenIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+
+/* ══════════════════════════════════════════
+   LANDING
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100vh; min-height: 100dvh; padding: 40px 20px;
+}
+.landing-header { text-align: center; margin-bottom: 44px; animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.2s both; }
+.track-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(159, 18, 57, 0.35);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--accent); color: var(--accent-bright);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 8px 20px; border-radius: var(--r-full); margin-bottom: 24px;
+}
+.landing-title {
+  font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 900; line-height: 1.05; letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-bright) 55%, #fecdd3 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 16px;
+}
+.landing-sub { color: var(--ink-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto 20px; line-height: 1.6; }
+.landing-meta { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; }
+.l-meta { font-size: 0.8rem; color: var(--ink-dim); font-weight: 500; }
+.l-meta .val { color: var(--accent-bright); font-weight: 700; font-family: var(--mono); }
+
+.overall-progress { width: 100%; max-width: 640px; margin-bottom: 36px; animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.4s both; }
+.op-bar-wrap { display: flex; align-items: center; gap: 14px; }
+.op-track { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: var(--r-full); overflow: hidden; }
+.op-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright)); border-radius: var(--r-full); transition: width 0.8s; }
+.op-label { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-muted); white-space: nowrap; }
+
+.module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%; max-width: 920px; }
+.mod-card {
+  background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid var(--border); border-radius: var(--r-lg);
+  padding: 28px; cursor: pointer; position: relative;
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), border-color 0.35s, box-shadow 0.35s;
+  animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both;
+}
+.mod-card:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: var(--shadow-lg), var(--glow); }
+.mod-card.soon { cursor: default; opacity: 0.55; }
+.mod-card.soon:hover { transform: none; box-shadow: none; border-color: var(--border); }
+.mod-card.completed { border-color: var(--ok-border); }
+.mod-card.completed::after {
+  content: '\2713'; position: absolute; top: 16px; right: 16px; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--ok); color: #0c0c1d; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem;
+}
+.mc-num { font-family: var(--mono); font-size: 0.65rem; font-weight: 700; color: var(--accent-bright); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+.mc-title { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.mc-desc { font-size: 0.82rem; color: var(--ink-muted); margin-bottom: 14px; line-height: 1.5; }
+.mc-footer { display: flex; align-items: center; justify-content: space-between; }
+.mc-time { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-dim); }
+.mc-status { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: var(--r-full); background: var(--accent-subtle); color: var(--accent-bright); border: 1px solid var(--border); }
+.mc-status.done { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-border); }
+.landing-footer { margin-top: 44px; font-size: 0.72rem; color: var(--ink-dim); font-family: var(--mono); }
+
+/* ══════════════════════════════════════════
+   MODULE PAGE
+   ══════════════════════════════════════════ */
+.module-page { background: var(--bg-deep); position: relative; min-height: 100vh; min-height: 100dvh; }
+.module-page::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(225,29,72,0.06) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg-glass-heavy);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border); padding: 0 16px;
+}
+.top-nav-inner { max-width: 820px; margin: 0 auto; display: flex; align-items: center; gap: 16px; height: 56px; }
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px; background: none;
+  border: 1px solid var(--border); color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.8rem; font-weight: 600;
+  padding: 8px 14px; min-height: 44px; border-radius: var(--r-md); cursor: pointer; flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent-bright); }
+.nav-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-progress { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.nav-progress-track { width: 80px; height: 4px; background: var(--bg-elevated); border-radius: var(--r-full); overflow: hidden; }
+.nav-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright)); transition: width 0.6s; }
+.nav-progress-text { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-dim); white-space: nowrap; }
+
+.mod-content { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 0 16px 100px; }
+.hero { padding: 48px 0 28px; text-align: center; }
+.hero-badge {
+  display: inline-flex; background: var(--accent-deep); color: #ffe4e6;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 16px; border-radius: var(--r-full); margin-bottom: 18px; border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 900; line-height: 1.1; letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px;
+}
+.hero-sub { color: var(--ink-muted); max-width: 500px; margin: 0 auto 18px; }
+.hero-meta { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+.meta-chip { font-size: 0.78rem; color: var(--ink-muted); font-weight: 500; }
+.meta-chip .val { color: var(--accent-bright); font-weight: 700; font-family: var(--mono); }
+
+.kompetenzen {
+  text-align: left; max-width: 560px; margin: 24px auto 0;
+  background: var(--bg-glass); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 20px;
+}
+.kompetenzen h3 { font-size: 0.72rem; font-family: var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-bright); margin-bottom: 6px; }
+.kompetenzen li { font-size: 0.9rem; color: var(--ink); margin-left: 18px; }
+
+.glass {
+  background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--border); border-radius: var(--r-lg); padding: 22px; margin-bottom: 18px;
+}
+.glass p + p { margin-top: 10px; }
+.chapter { margin-top: 40px; }
+.chapter-label { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.chapter-num {
+  display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent-deep); border: 2px solid var(--accent); color: #ffe4e6;
+  font-family: var(--mono); font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+}
+.chapter-title { font-size: 1.3rem; font-weight: 800; color: #fff; }
+
+.c1 { color: var(--v1); font-weight: 700; }
+.c2 { color: var(--v2); font-weight: 700; }
+.cr { color: var(--vres); font-weight: 700; }
+
+.callout-v2 { display: flex; gap: 12px; align-items: flex-start; padding: 16px 20px; border-radius: var(--r-md); margin: 16px 0; }
+.callout-v2 .icon { font-size: 1.2rem; flex-shrink: 0; }
+.callout-v2 .title { font-weight: 700; margin-bottom: 4px; }
+.callout-v2.info { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.2); }
+.callout-v2.info .body { color: #bae6fd; } .callout-v2.info .title { color: #38bdf8; }
+.callout-v2.warning { background: var(--warn-bg); border: 1px solid rgba(251,191,36,0.2); }
+.callout-v2.warning .body { color: #fde68a; } .callout-v2.warning .title { color: #fcd34d; }
+
+/* Walkthrough */
+.wt-container { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; margin: 16px 0; }
+.wt-slide { padding: 20px 22px 6px; }
+.wt-slide-tag { font-family: var(--mono); font-size: 0.65rem; color: var(--accent-bright); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+.wt-text { min-height: 4.5em; }
+.wt-nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--border); }
+.wt-arrow {
+  background: none; border: 1px solid var(--border); color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+  padding: 10px 16px; min-height: 44px; border-radius: var(--r-md); cursor: pointer;
+}
+.wt-arrow:disabled { opacity: 0.3; cursor: default; }
+.wt-arrow.primary { border-color: var(--accent); color: var(--accent-bright); }
+.wt-counter { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-dim); }
+
+/* Angle slider demo */
+.slider-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.slider-row input[type=range] { flex: 1; min-width: 200px; accent-color: var(--accent); height: 32px; }
+.readout { font-family: var(--mono); font-size: 0.95rem; }
+.readout b { color: var(--vres); }
+
+/* Exercise cards */
+.exercise-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg); margin-bottom: 16px; transition: border-color 0.3s; }
+.exercise-card.solved { border-color: var(--ok-border); }
+.exercise-card.wrong-state { border-color: var(--err-border); }
+.ex-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; background: var(--bg-card); border-bottom: 1px solid var(--border); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.ex-num {
+  display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent-deep); color: #ffe4e6; font-family: var(--mono); font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+}
+.ex-title { font-weight: 600; font-size: 0.92rem; }
+.ex-tag { margin-left: auto; font-family: var(--mono); font-size: 0.6rem; font-weight: 600; color: var(--accent-bright); background: var(--accent-subtle); padding: 2px 8px; border-radius: var(--r-full); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+.ex-body { padding: 20px; }
+.ex-question { margin-bottom: 14px; line-height: 1.6; }
+
+.answer-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.answer-prefix { font-weight: 600; font-size: 1.05rem; color: var(--vres); }
+.answer-input {
+  flex: 1; min-width: 140px; max-width: 220px; padding: 10px 14px; min-height: 44px;
+  background: var(--bg-deep); border: 2px solid var(--border-strong); border-radius: var(--r-md);
+  color: var(--ink); font-family: var(--mono); font-size: 16px; outline: none;
+}
+.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.answer-input.correct { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.answer-input.incorrect { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+.answer-unit { color: var(--ink-muted); }
+
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.btn-check {
+  display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; min-height: 44px;
+  background: var(--accent-deep); border: 1px solid var(--accent); color: #fff;
+  font-family: var(--font); font-size: 0.88rem; font-weight: 600; border-radius: var(--r-md); cursor: pointer;
+}
+.btn-check:hover { background: var(--accent); }
+.btn-check:disabled { opacity: 0.4; cursor: default; }
+.btn-ghost, .btn-hint {
+  display: inline-flex; align-items: center; gap: 4px; padding: 10px 14px; min-height: 44px; background: none;
+  border: 1px dashed var(--border-strong); color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.85rem; border-radius: var(--r-md); cursor: pointer;
+}
+.btn-ghost { border-style: solid; }
+.btn-hint:hover { border-color: var(--warn); color: var(--warn); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent-bright); }
+.hint-box { display: none; margin-top: 12px; padding: 12px 16px; background: var(--warn-bg); border: 1px solid rgba(251,191,36,0.2); border-radius: var(--r-md); font-size: 0.88rem; color: #fde68a; }
+.hint-box.open { display: block; }
+.fb-block { margin-top: 12px; padding: 10px 14px; border-radius: var(--r-md); font-size: 0.9rem; display: none; }
+.fb-block.correct { display: block; background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+.fb-block.incorrect { display: block; background: var(--err-bg); color: #fecaca; border: 1px solid var(--err-border); }
+
+.opt-pills { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.opt-pill {
+  text-align: left; padding: 12px 16px; min-height: 44px; background: var(--bg-card);
+  border: 2px solid var(--border); border-radius: var(--r-md);
+  font-family: var(--font); font-size: 0.92rem; color: var(--ink); cursor: pointer; line-height: 1.45;
+}
+.opt-pill:hover { border-color: var(--accent); }
+.opt-pill.selected { border-color: var(--accent-bright); background: var(--accent-deep); color: #fff; }
+
+/* ══════════════════════════════════════════
+   PFEIL-GITTER (arrow board)
+   ══════════════════════════════════════════ */
+.board { margin: 4px 0 0; }
+.board-status {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: 0.88rem; color: var(--ink-muted); margin-bottom: 8px; min-height: 1.6em;
+}
+.board-status .step-pill { font-family: var(--mono); font-size: 0.7rem; padding: 2px 8px; border-radius: var(--r-full); background: var(--accent-subtle); color: var(--accent-bright); border: 1px solid var(--border); }
+.board svg.grid-svg {
+  display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto;
+  background: #0f1026; border: 1px solid var(--border); border-radius: var(--r-md);
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+}
+.board.static svg.grid-svg { cursor: default; }
+.board-scale { text-align: center; font-family: var(--mono); font-size: 0.78rem; color: var(--ink-dim); margin-top: 6px; }
+.board-measure { text-align: center; font-family: var(--mono); font-size: 0.85rem; color: var(--vres); margin-top: 4px; min-height: 1.3em; }
+.svg-grid { stroke: rgba(168,168,200,0.16); stroke-width: 0.03; }
+.svg-dot { fill: rgba(168,168,200,0.35); }
+.svg-body { fill: rgba(232,232,240,0.10); stroke: rgba(232,232,240,0.45); stroke-width: 0.05; }
+.svg-anchor { fill: #fff; }
+.svg-start { fill: none; stroke: #fff; stroke-width: 0.07; }
+.svg-label { font-family: 'Outfit', system-ui, sans-serif; font-style: italic; font-weight: 700; }
+
+.howto { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.howto ol { margin-left: 20px; }
+
+.result-box { display: none; margin-top: 24px; padding: 16px 20px; border-radius: var(--r-md); text-align: center; font-weight: 600; }
+.result-box.show { display: block; }
+.result-box.done { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+.result-box.partial { background: var(--accent-subtle); color: var(--accent-bright); border: 1px solid var(--border); }
+.btn-result {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 360px;
+  margin: 32px auto 0; padding: 16px 28px; min-height: 48px;
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent)); border: none; border-radius: var(--r-lg);
+  color: #fff; font-family: var(--font); font-size: 1.05rem; font-weight: 700; cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 36px 0 22px; }
+  .glass { padding: 16px; }
+  .ex-body { padding: 16px; }
+  .nav-progress-track { display: none; }
+}
+@media (hover: none) and (pointer: coarse) {
+  .mod-card:hover, .btn-check:hover, .btn-ghost:hover, .btn-hint:hover, .opt-pill:hover, .btn-back:hover {
+    transform: none; box-shadow: none;
+  }
+  .opt-pill:hover { border-color: var(--border); }
+  .opt-pill.selected:hover { border-color: var(--accent-bright); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen.active, .mod-card, .landing-header, .overall-progress { animation: none; }
+}
+</style>
+</head>
+<body>
+
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<!-- ══════════════════════════════════════════
+     LANDING
+     ══════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">Track F1</div>
+      <h1 class="landing-title">Pfeile &amp;<br>Kräfte</h1>
+      <p class="landing-sub">Kräfte als Pfeile zeichnen und zur resultierenden Kraft zusammensetzen</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">4</span> Module</span>
+        <span class="l-meta"><span class="val">Level 1</span> Grundlagen</span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track"><div class="op-fill" id="opFill"></div></div>
+        <span class="op-label" id="opLabel">0 / 4 Module</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card soon" id="card-0">
+        <div class="mc-num">F1.1</div>
+        <div class="mc-title">Was ein Kraftpfeil sagt</div>
+        <div class="mc-desc">Betrag, Richtung, Angriffspunkt und Kraftmaßstab</div>
+        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-0">in Arbeit</span></div>
+      </div>
+      <div class="mod-card soon" id="card-1">
+        <div class="mc-num">F1.2</div>
+        <div class="mc-title">Kräfte auf einer Linie</div>
+        <div class="mc-desc">Gleiche und entgegengesetzte Richtung, resultierende Kraft</div>
+        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-1">in Arbeit</span></div>
+      </div>
+      <div class="mod-card" onclick="openModule(2)" id="card-2">
+        <div class="mc-num">F1.3</div>
+        <div class="mc-title">Kräfte im Winkel</div>
+        <div class="mc-desc">Zwei Kräfte zeichnerisch zusammensetzen: Spitze an Fuß und Parallelogramm</div>
+        <div class="mc-footer"><span class="mc-time">30 min</span><span class="mc-status" id="status-2">Starten</span></div>
+      </div>
+      <div class="mod-card soon" id="card-3">
+        <div class="mc-num">F1.4</div>
+        <div class="mc-title">Dieselben Regeln für Δv</div>
+        <div class="mc-desc">Anfangs-, Zusatz- und Endgeschwindigkeit als Pfeile</div>
+        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-3">in Arbeit</span></div>
+      </div>
+    </div>
+
+    <div class="landing-footer">Track F1 &middot; Pilot</div>
+  </div>
+</div>
+
+<!-- ══════════════════════════════════════════
+     MODULE F1.3 · Kräfte im Winkel
+     ══════════════════════════════════════════ -->
+<div class="screen" id="screen-mod-2">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">F1.3 · Kräfte im Winkel</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-2"></div></div>
+          <span class="nav-progress-text" id="prog-text-2">0 / 8</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">F1.3</div>
+        <h1>Kräfte im Winkel</h1>
+        <p class="hero-sub">Zwei Kräfte ziehen in verschiedene Richtungen. Was bewirken sie zusammen?</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 1</span> Grundlagen</div>
+          <div class="meta-chip"><span class="val">30 min</span> Dauer</div>
+        </div>
+        <div class="kompetenzen">
+          <h3>Kompetenzen</h3>
+          <ul>
+            <li>Du kannst zwei Kräfte, die im Winkel zueinander stehen, zeichnerisch zur resultierenden Kraft zusammensetzen.</li>
+            <li>Du kannst den Betrag der resultierenden Kraft mit dem Kraftmaßstab bestimmen.</li>
+            <li>Du kannst begründen, warum die resultierende Kraft meist kleiner ist als die Summe der Beträge.</li>
+          </ul>
+        </div>
+      </section>
+
+      <!-- Chapter 1: explanation -->
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Die Methode: Spitze an Fuß</h2></div>
+        <div class="glass">
+          <p>Greifen an einem Körper zwei Kräfte $\vec{F}_1$ und $\vec{F}_2$ an, wirken sie zusammen wie eine einzige Kraft: die <strong>resultierende Kraft</strong> $\vec{F}_{res}$. Zeigen beide in dieselbe Richtung, addierst du einfach die Beträge. Stehen sie im Winkel zueinander, musst du die <strong>Pfeile</strong> addieren, nicht die Zahlen.</p>
+        </div>
+
+        <div class="wt-container">
+          <div class="wt-slide">
+            <div class="wt-slide-tag" id="wt-tag">Schritt 1 von 4</div>
+            <div class="board static" id="board-demo"></div>
+            <p class="wt-text" id="wt-text" style="margin-top:12px;"></p>
+          </div>
+          <div class="wt-nav-bar">
+            <button class="wt-arrow" id="wt-prev" onclick="demoStep(-1)">&larr; Zurück</button>
+            <span class="wt-counter" id="wt-counter">1 / 4</span>
+            <button class="wt-arrow primary" id="wt-next" onclick="demoStep(1)">Weiter &rarr;</button>
+          </div>
+        </div>
+
+        <div class="callout-v2 warning">
+          <span class="icon">&#9888;&#65039;</span>
+          <div class="body">
+            <div class="title">Nur ein Zeichentrick</div>
+            Das Verschieben von $\vec{F}_2$ ist ein Hilfsmittel beim Zeichnen. In Wirklichkeit greifen alle Kräfte am Körper an, und auch $\vec{F}_{res}$ zeichnest du am Körper.
+          </div>
+        </div>
+
+        <div class="glass">
+          <h3 style="color:#fff; font-weight:700; margin-bottom:8px;">Probier aus: Was macht der Winkel?</h3>
+          <p>$\vec{F}_1 = 40\,\text{N}$ und $\vec{F}_2 = 30\,\text{N}$ bleiben gleich groß. Nur der Winkel zwischen ihnen ändert sich.</p>
+          <div class="board static" id="board-angle" style="margin-top:12px;"></div>
+          <div class="slider-row">
+            <label for="angle-slider" class="readout">Winkel: <span id="angle-val">60</span>°</label>
+            <input type="range" id="angle-slider" min="0" max="180" step="5" value="60" oninput="drawAngleDemo()">
+          </div>
+          <p class="readout" style="margin-top:6px;">$F_{res}$ = <b id="angle-res">61</b> N &nbsp;·&nbsp; Summe der Beträge: 70 N</p>
+        </div>
+
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Merke</div>
+            Zeigen beide Kräfte in dieselbe Richtung (0°), ist $F_{res}$ die Summe der Beträge. Zeigen sie genau gegeneinander (180°), ist es die Differenz. Bei jedem anderen Winkel liegt $F_{res}$ dazwischen. Bei genau 90° hilft Pythagoras: $F_{res} = \sqrt{F_1^2 + F_2^2}$.
+          </div>
+        </div>
+      </section>
+
+      <!-- Chapter 2: exercises -->
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+
+        <div class="glass howto">
+          <div>
+            <strong>So zeichnest du einen Pfeil:</strong>
+            <ol>
+              <li>Tippe auf den Gitterpunkt, an dem der Pfeil anfängt (Fuß).</li>
+              <li>Tippe auf den Gitterpunkt, an dem die Spitze sein soll.</li>
+              <li>Tippe auf „Prüfen“. Falsch gesetzt? Tippe einfach neu.</li>
+            </ol>
+          </div>
+        </div>
+
+        <!-- Ex 1 -->
+        <div class="exercise-card" id="m2-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Kiste an zwei Seilen</span><span class="ex-tag">Grundlagen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">An einer Kiste ziehen zwei Seile: $\vec{F}_1$ nach rechts, $\vec{F}_2$ nach oben. Konstruiere $\vec{F}_{res}$ in zwei Schritten.</p>
+            <div class="board" id="board-b1"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b1')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b1')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h1">Der verschobene Pfeil $\vec{F}_2$ beginnt genau an der Spitze von $\vec{F}_1$ und ist genauso lang wie $\vec{F}_2$: drei Kästchen nach oben.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb1"></div>
+          </div>
+        </div>
+
+        <!-- Ex 2 -->
+        <div class="exercise-card" id="m2-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Betrag mit dem Maßstab</span><span class="ex-tag">Maßstab</span></div>
+          <div class="ex-body">
+            <p class="ex-question">In Aufgabe 1 gilt: 1 Kästchen ≙ 10 N. Der Pfeil $\vec{F}_{res}$ ist 5 Kästchen lang. Wie groß ist die resultierende Kraft?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{res}$ =</span>
+              <input class="answer-input" id="m2-a2" inputmode="decimal" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkInput(2,2,'m2-a2','m2-fb2','50|50n')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h2">Länge in Kästchen mal Maßstab: 5 Kästchen mal 10 N pro Kästchen.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb2"></div>
+          </div>
+        </div>
+
+        <!-- Ex 3 -->
+        <div class="exercise-card" id="m2-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Schlitten mit zwei Zugseilen</span><span class="ex-tag">Anwendung</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Zwei Kinder ziehen einen Schlitten nach rechts (Blick von oben): eins schräg nach oben, eins schräg nach unten. Zeichne $\vec{F}_{res}$ direkt am Schlitten. Den verschobenen Hilfspfeil kannst du dir hier denken.</p>
+            <div class="board" id="board-b3"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b3')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b3')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h3">Setz $\vec{F}_2$ gedanklich an die Spitze von $\vec{F}_1$: fünf nach rechts, zwei nach unten. Wo landest du? Dorthin zeigt $\vec{F}_{res}$.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb3"></div>
+          </div>
+        </div>
+
+        <!-- Ex 4 -->
+        <div class="exercise-card" id="m2-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Wo sind die 16 N geblieben?</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">In Aufgabe 3 zieht jedes Kind mit rund 108 N. Die resultierende Kraft beträgt aber nur 200 N, nicht 216 N. Warum?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','reib')">Ein Teil der Kraft geht durch Reibung am Schnee verloren.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','quer')">Jedes Seil zieht auch etwas zur Seite. Diese Anteile zeigen gegeneinander und heben sich auf.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','rund')">Das ist ein Rundungsfehler.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','nie')">Kräfte kann man grundsätzlich nicht addieren.</button>
+            </div>
+            <input type="hidden" id="m2-a4" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(2,4,'m2-a4','m2-fb4','quer')">Prüfen</button>
+            </div>
+            <div class="fb-block" aria-live="polite" id="m2-fb4"></div>
+          </div>
+        </div>
+
+        <!-- Ex 5 -->
+        <div class="exercise-card" id="m2-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Stumpfer Winkel</span><span class="ex-tag">Standard</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Hier stehen die Kräfte mehr als 90° auseinander. Konstruiere wieder in zwei Schritten: erst $\vec{F}_2$ verschieben, dann $\vec{F}_{res}$.</p>
+            <div class="board" id="board-b5"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b5')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b5')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h5">$\vec{F}_2$ geht zwei Kästchen nach links und drei nach oben. Genau so muss der verschobene Pfeil auch aussehen, nur mit dem Fuß an der Spitze von $\vec{F}_1$.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb5"></div>
+          </div>
+        </div>
+
+        <!-- Ex 6 -->
+        <div class="exercise-card" id="m2-ex6">
+          <div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Zwei Hunde, ein Spielzeug</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Zwei Hunde zerren an einem Spielzeug: einer mit 60 N nach Osten, der andere mit 80 N nach Norden. Wie groß ist die resultierende Kraft?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{res}$ =</span>
+              <input class="answer-input" id="m2-a6" inputmode="decimal" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkInput(2,6,'m2-a6','m2-fb6','100|100n')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h6')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h6">Osten und Norden stehen senkrecht aufeinander. Die beiden Kräfte und $\vec{F}_{res}$ bilden ein rechtwinkliges Dreieck: $F_{res} = \sqrt{F_1^2 + F_2^2}$.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb6"></div>
+          </div>
+        </div>
+
+        <!-- Ex 7 -->
+        <div class="exercise-card" id="m2-ex7">
+          <div class="ex-header"><span class="ex-num">7</span><span class="ex-title">Linas Konstruktion</span><span class="ex-tag">Fehleranalyse</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Lina hat die resultierende Kraft so konstruiert (gestrichelt). Was hat sie falsch gemacht?</p>
+            <div class="board static" id="board-b7"></div>
+            <div class="opt-pills" style="margin-top:14px;">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a7','massstab')">Sie hat den Maßstab falsch umgerechnet.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a7','laenger')">Ihr Pfeil zeigt richtig, er müsste nur länger sein.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a7','spitzen')">Sie hat die beiden Spitzen verbunden, obwohl beide Kräfte noch am Körper ansetzen.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a7','richtig')">Nichts, die Konstruktion stimmt.</button>
+            </div>
+            <input type="hidden" id="m2-a7" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(2,7,'m2-a7','m2-fb7','spitzen')">Prüfen</button>
+            </div>
+            <div class="fb-block" aria-live="polite" id="m2-fb7"></div>
+          </div>
+        </div>
+
+        <!-- Ex 8 -->
+        <div class="exercise-card" id="m2-ex8">
+          <div class="ex-header"><span class="ex-num">8</span><span class="ex-title">Rückwärts denken</span><span class="ex-tag">Knobeln</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Boot wird an zwei Seilen gezogen. $\vec{F}_1$ ist bekannt, und die resultierende Kraft $\vec{F}_{res}$ soll genau nach rechts zeigen. Zeichne die fehlende Kraft $\vec{F}_2$ am Boot.</p>
+            <div class="board" id="board-b8"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b8')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b8')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h8')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h8">Es muss gelten: $\vec{F}_1$ und dann $\vec{F}_2$ (Spitze an Fuß) landen an der Spitze von $\vec{F}_{res}$. Welcher Pfeil führt von der Spitze von $\vec{F}_1$ zur Spitze von $\vec{F}_{res}$? Diesen Pfeil zeichnest du dann am Boot.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb8"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(2)">Ergebnis anzeigen</button>
+        <div class="result-box" id="result-2" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</div>
+
+<script>
+/* ────────────────────────────────────────────
+   STATE
+   ──────────────────────────────────────────── */
+const MODULE_NAMES = ['F1.1', 'F1.2', 'F1.3', 'F1.4'];
+const MODULE_EX_COUNTS = [0, 0, 8, 0]; // 0 = module not built yet
+let moduleStates = [false, false, false, false];
+let exerciseStates = {};
+
+/* ────────────────────────────────────────────
+   SCORM 1.2 API
+   State lives in suspend_data (4096 chars) as a compact JSON string,
+   not in lesson_location (255 chars).
+   ──────────────────────────────────────────── */
+const SCORM = (() => {
+  let api = null, initialized = false;
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) win = win.parent;
+      else if (win.opener) win = win.opener;
+      else break;
+    }
+    return win ? win.API : null;
+  }
+  function init() {
+    try {
+      api = findAPI(window);
+      if (!api) return;
+      api.LMSInitialize('');
+      initialized = true;
+      const raw = api.LMSGetValue('cmi.suspend_data');
+      if (raw) {
+        try {
+          const saved = JSON.parse(raw);
+          if (Array.isArray(saved.m)) moduleStates = saved.m.map(Boolean);
+          if (Array.isArray(saved.e)) saved.e.forEach(k => { exerciseStates[k] = true; });
+        } catch (e) {}
+      }
+      if (api.LMSGetValue('cmi.core.lesson_status') === 'not attempted') {
+        api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+        api.LMSCommit('');
+      }
+    } catch (e) { console.log('SCORM init:', e); }
+  }
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      const solvedKeys = Object.keys(exerciseStates).filter(k => exerciseStates[k]);
+      api.LMSSetValue('cmi.suspend_data', JSON.stringify({ m: moduleStates.map(Number), e: solvedKeys }));
+      const total = MODULE_EX_COUNTS.reduce((a, b) => a + b, 0);
+      const score = total > 0 ? Math.round((solvedKeys.length / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+      if (moduleStates.every(s => s)) api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      api.LMSCommit('');
+    } catch (e) { console.log('SCORM save:', e); }
+  }
+  function finish() {
+    if (!api || !initialized) return;
+    try { save(); api.LMSFinish(''); initialized = false; } catch (e) {}
+  }
+  return { init, save, finish };
+})();
+
+/* ────────────────────────────────────────────
+   NAVIGATION
+   ──────────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  const onLanding = id === 'screen-landing';
+  document.getElementById('bg-canvas').classList.toggle('hidden', !onLanding);
+  BG.run(onLanding);
+}
+function openModule(idx) {
+  if (!MODULE_EX_COUNTS[idx]) return;
+  showScreen('screen-mod-' + idx);
+  restoreModuleState(idx);
+  typeset();
+}
+function goLanding() {
+  showScreen('screen-landing');
+  updateLanding();
+  SCORM.save();
+}
+function typeset(els) {
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {});
+}
+
+/* ────────────────────────────────────────────
+   VECTOR HELPERS (grid units, y axis points up)
+   ──────────────────────────────────────────── */
+const V = {
+  add: (a, b) => [a[0] + b[0], a[1] + b[1]],
+  sub: (a, b) => [a[0] - b[0], a[1] - b[1]],
+  neg: a => [-a[0], -a[1]],
+  eq: (a, b) => a[0] === b[0] && a[1] === b[1],
+  len: a => Math.hypot(a[0], a[1]),
+  sameDir: (a, b) => a[0] * b[1] - a[1] * b[0] === 0 && a[0] * b[0] + a[1] * b[1] > 0
+};
+function fmt(x) { return (Math.round(x * 10) / 10).toString().replace('.', ','); }
+
+/* ────────────────────────────────────────────
+   SVG DRAWING
+   ──────────────────────────────────────────── */
+const SVGNS = 'http://www.w3.org/2000/svg';
+const COLORS = { v1: '#60a5fa', v2: '#fbbf24', vres: '#c084fc', pen: '#e8e8f0', err: '#f87171' };
+
+function el(tag, attrs, parent) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+// Board coordinates (x right, y up) to SVG coordinates (y down).
+function sx(b, x) { return x; }
+function sy(b, y) { return b.h - y; }
+
+function makeSvg(b, label) {
+  const svg = el('svg', { class: 'grid-svg', viewBox: `-0.6 -0.6 ${b.w + 1.2} ${b.h + 1.2}`, role: 'img', 'aria-label': label || 'Pfeil-Gitter' });
+  const grid = el('g', { class: 'svg-grid' }, svg);
+  for (let x = 0; x <= b.w; x++) el('line', { x1: x, y1: 0, x2: x, y2: b.h }, grid);
+  for (let y = 0; y <= b.h; y++) el('line', { x1: 0, y1: y, x2: b.w, y2: y }, grid);
+  const dots = el('g', { class: 'svg-dot' }, svg);
+  for (let x = 0; x <= b.w; x++) for (let y = 0; y <= b.h; y++) el('circle', { cx: x, cy: y, r: 0.045 }, dots);
+  if (b.body) {
+    const [px, py] = b.body;
+    el('rect', { class: 'svg-body', x: px - 0.7, y: sy(b, py) - 0.7, width: 1.4, height: 1.4, rx: 0.18 }, svg);
+    if (b.bodyName) {
+      const t = el('text', { x: px, y: sy(b, py) + 1.15, 'text-anchor': 'middle', 'font-size': 0.36, fill: 'rgba(232,232,240,0.6)', 'font-family': 'Outfit, system-ui, sans-serif' }, svg);
+      t.textContent = b.bodyName;
+    }
+  }
+  svg._layer = el('g', {}, svg);
+  if (b.body) el('circle', { class: 'svg-anchor', cx: b.body[0], cy: sy(b, b.body[1]), r: 0.1 }, svg);
+  return svg;
+}
+
+// Draws an arrow from s to e (board coords, may be fractional).
+function drawArrow(b, layer, s, e, color, opts) {
+  opts = opts || {};
+  const x1 = s[0], y1 = sy(b, s[1]), x2 = e[0], y2 = sy(b, e[1]);
+  const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
+  if (L < 0.01) return;
+  const ux = dx / L, uy = dy / L, hl = Math.min(0.42, L * 0.45), hw = hl * 0.62;
+  const g = el('g', {}, layer);
+  el('line', {
+    x1, y1, x2: x2 - ux * hl * 0.8, y2: y2 - uy * hl * 0.8,
+    stroke: color, 'stroke-width': opts.width || 0.11, 'stroke-linecap': 'round',
+    'stroke-dasharray': opts.dashed ? '0.28 0.18' : 'none', opacity: opts.faint ? 0.55 : 1
+  }, g);
+  el('polygon', {
+    points: `${x2},${y2} ${x2 - ux * hl + uy * hw},${y2 - uy * hl - ux * hw} ${x2 - ux * hl - uy * hw},${y2 - uy * hl + ux * hw}`,
+    fill: color, opacity: opts.faint ? 0.55 : 1
+  }, g);
+  if (opts.label) drawLabel(layer, (x1 + x2) / 2, (y1 + y2) / 2, -uy, ux, opts.label, color, opts.labelSide || 1);
+}
+
+// Vector label "F_sub" with an arrow over the letter, placed beside the arrow.
+function drawLabel(layer, mx, my, nx, ny, label, color, side) {
+  const off = 0.48 * side;
+  const x = mx + nx * off, y = my + ny * off;
+  const g = el('g', { class: 'svg-label' }, layer);
+  const t = el('text', { x: x - 0.2, y: y + 0.2, 'font-size': 0.58, fill: color }, g);
+  t.appendChild(document.createTextNode(label.main || 'F'));
+  if (label.sub) {
+    const s = el('tspan', { 'font-size': 0.36, dy: 0.13 }, t);
+    s.textContent = label.sub;
+  }
+  el('path', { d: `M ${x - 0.2} ${y - 0.33} h 0.34 m -0.1 -0.07 l 0.1 0.07 l -0.1 0.07`, stroke: color, 'stroke-width': 0.045, fill: 'none', 'stroke-linecap': 'round' }, g);
+  if (label.note) {
+    const n = el('text', { x: x - 0.2, y: y + 0.62, 'font-size': 0.3, fill: color, 'font-style': 'normal', 'font-weight': 500 }, g);
+    n.textContent = label.note;
+  }
+}
+
+/* ────────────────────────────────────────────
+   PFEIL-GITTER: interactive boards
+   A board has given arrows and a list of target arrows that the student
+   draws one after the other (tap foot, tap tip, check). Each target has a
+   kind ('shift', 'sum', 'missing') that drives the error diagnosis.
+   ──────────────────────────────────────────── */
+const L1 = { sub: '1' }, L2 = { sub: '2' }, LR = { sub: 'res' };
+const TEX = { A: '$\\vec{F}_1$', B: '$\\vec{F}_2$', R: '$\\vec{F}_{res}$' };
+
+const BOARD_DEFS = {
+  b1: {
+    ex: '2-1', w: 10, h: 6, body: [2, 1], bodyName: 'Kiste', scale: 10,
+    given: [{ s: [2, 1], d: [4, 0], c: 'v1', label: L1 }, { s: [2, 1], d: [0, 3], c: 'v2', label: L2 }],
+    targets: [
+      { kind: 'shift', s: [6, 1], d: [0, 3], c: 'v2', label: L2, dashed: true, prompt: 'Schritt 1: Zeichne ' + TEX.B + ' verschoben, mit dem Fuß an der Spitze von ' + TEX.A + '.' },
+      { kind: 'sum', s: [2, 1], d: [4, 3], c: 'vres', label: LR, prompt: 'Schritt 2: Zeichne ' + TEX.R + ' vom Angriffspunkt bis zur Spitze des verschobenen Pfeils.' }
+    ],
+    A: [4, 0], B: [0, 3], ok: 'Richtig: $\\vec{F}_{res}$ geht vom Angriffspunkt zur Spitze des verschobenen $\\vec{F}_2$. Er ist 5 Kästchen lang, das sind 50 N. Die Summe der Beträge wäre 70 N.'
+  },
+  b3: {
+    ex: '2-3', w: 13, h: 6, body: [1, 3], bodyName: 'Schlitten', scale: 20,
+    given: [{ s: [1, 3], d: [5, 2], c: 'v1', label: L1, side: -1 }, { s: [1, 3], d: [5, -2], c: 'v2', label: L2 }],
+    targets: [{ kind: 'sum', s: [1, 3], d: [10, 0], c: 'vres', label: LR, prompt: 'Zeichne ' + TEX.R + ' am Schlitten.' }],
+    A: [5, 2], B: [5, -2], ok: 'Richtig: Die Anteile nach oben und nach unten heben sich auf. Übrig bleibt $\\vec{F}_{res}$ mit 10 Kästchen genau nach vorn, also $10 \\cdot 20\\,\\text{N} = 200\\,\\text{N}$.'
+  },
+  b5: {
+    ex: '2-5', w: 11, h: 6, body: [4, 1], scale: 10,
+    given: [{ s: [4, 1], d: [5, 1], c: 'v1', label: L1, side: -1 }, { s: [4, 1], d: [-2, 3], c: 'v2', label: L2 }],
+    targets: [
+      { kind: 'shift', s: [9, 2], d: [-2, 3], c: 'v2', label: L2, dashed: true, side: -1, prompt: 'Schritt 1: Zeichne ' + TEX.B + ' verschoben an die Spitze von ' + TEX.A + '.' },
+      { kind: 'sum', s: [4, 1], d: [3, 4], c: 'vres', label: LR, prompt: 'Schritt 2: Zeichne ' + TEX.R + ' am Körper.' }
+    ],
+    A: [5, 1], B: [-2, 3], ok: 'Richtig: $\\vec{F}_{res}$ ist 5 Kästchen lang, also 50 N. Das ist sogar weniger als $F_1 \\approx 51\\,\\text{N}$: Bei stumpfem Winkel arbeitet $\\vec{F}_2$ teilweise gegen $\\vec{F}_1$.'
+  },
+  b8: {
+    ex: '2-8', w: 9, h: 6, body: [1, 3], bodyName: 'Boot', scale: 10,
+    given: [{ s: [1, 3], d: [4, 2], c: 'v1', label: L1, side: -1 }, { s: [1, 3], d: [6, 0], c: 'vres', label: LR }],
+    targets: [{ kind: 'missing', s: [1, 3], d: [2, -2], c: 'v2', label: L2, side: -1, prompt: 'Zeichne ' + TEX.B + ' am Boot.' }],
+    A: [4, 2], R: [6, 0], ok: 'Richtig: $\\vec{F}_2$ zieht schräg nach rechts unten. Zusammen mit $\\vec{F}_1$ bleibt genau eine Kraft nach rechts übrig. Diesen Rückwärts-Trick brauchst du später beim Kräftegleichgewicht wieder.'
+  }
+};
+
+// Diagnosis for a wrong arrow. Returns an HTML message (MathJax allowed).
+function diagnose(def, t, s, d) {
+  const P = def.body, startOk = V.eq(s, t.s), vecOk = V.eq(d, t.d);
+  if (t.kind === 'shift') {
+    const tipA = V.add(P, def.A);
+    if (vecOk && V.eq(s, P)) return TEX.B + ' sitzt noch an der alten Stelle. Verschieb den Pfeil so, dass sein Fuß an der Spitze von ' + TEX.A + ' liegt.';
+    if (vecOk) return 'Länge und Richtung passen. Der Fuß gehört aber genau an die Spitze von ' + TEX.A + '.';
+    if (!startOk && V.eq(s, P)) return 'Du hast am Körper angefangen. In Schritt 1 beginnt der Pfeil an der Spitze von ' + TEX.A + '.';
+    if (!startOk) return 'Starte an der Spitze von ' + TEX.A + '. Dort setzt der verschobene Pfeil an.';
+    if (V.eq(d, V.neg(t.d))) return 'Der Pfeil zeigt genau verkehrt herum. Beim Verschieben bleibt die Richtung gleich.';
+    if (V.sameDir(d, t.d)) return 'Richtung stimmt, aber die Länge nicht. Beim Verschieben bleibt der Pfeil genauso lang wie ' + TEX.B + '.';
+    if (V.eq(V.add(s, d), V.add(tipA, V.sub(P, tipA)))) return 'Der Pfeil führt zurück zum Körper. Gesucht ist eine Kopie von ' + TEX.B + '.';
+    return 'Beim Verschieben bleiben Länge und Richtung gleich. Zähle bei ' + TEX.B + ' nach: wie viele Kästchen nach rechts oder links, wie viele nach oben oder unten?';
+  }
+  if (t.kind === 'sum') {
+    const A = def.A, B = def.B, tipA = V.add(P, A);
+    if (vecOk && V.eq(s, tipA)) return 'Das ist der verschobene Pfeil ' + TEX.B + ', nur Hilfslinie. ' + TEX.R + ' beginnt am Angriffspunkt.';
+    if (vecOk) return 'Länge und Richtung stimmen. ' + TEX.R + ' greift aber am Körper an: Setz den Fuß auf den Angriffspunkt.';
+    const tipB = V.add(P, B);
+    if ((V.eq(s, tipA) && V.eq(d, V.sub(B, A))) || (V.eq(s, tipB) && V.eq(d, V.sub(A, B)))) return 'Du hast die Spitzen von ' + TEX.A + ' und ' + TEX.B + ' verbunden. Dieser Pfeil gehört zum Unterschied der Kräfte, nicht zur Summe. Verschieb ' + TEX.B + ' erst an die Spitze von ' + TEX.A + ', dann zeichnest du ' + TEX.R + ' vom Körper aus.';
+    if (V.eq(d, B) && V.eq(s, tipA)) return 'Das ist der verschobene Pfeil ' + TEX.B + ', nur Hilfslinie. ' + TEX.R + ' beginnt am Angriffspunkt und endet an seiner Spitze.';
+    if (!startOk) return 'Setz den Fuß von ' + TEX.R + ' auf den Angriffspunkt in der Mitte des Körpers.';
+    if (V.eq(d, A) || V.eq(d, B)) return 'Das ist eine der beiden Einzelkräfte. ' + TEX.R + ' fasst beide zusammen.';
+    if (V.eq(d, V.sub(B, A)) || V.eq(d, V.sub(A, B))) return 'Dieser Pfeil gehört zum Unterschied der Kräfte, nicht zur Summe. Erst ' + TEX.B + ' mit dem Fuß an die Spitze von ' + TEX.A + ' setzen, dann vom Körper bis zur neuen Spitze.';
+    if (V.eq(d, V.neg(t.d))) return 'Genau verkehrt herum. ' + TEX.R + ' zeigt in die Richtung, in die die Kräfte zusammen ziehen.';
+    if (V.sameDir(d, t.d)) return 'Richtung stimmt, Länge nicht. ' + TEX.R + ' endet genau an der Spitze des verschobenen ' + TEX.B + '.';
+    if (Math.abs(V.len(d) - V.len(A) - V.len(B)) < 0.6) return 'Dein Pfeil ist etwa so lang wie beide Kräfte zusammen. Das gilt nur, wenn beide in dieselbe Richtung zeigen. Konstruiere mit Spitze an Fuß.';
+    return 'Noch nicht. Setz ' + TEX.B + ' gedanklich an die Spitze von ' + TEX.A + '. ' + TEX.R + ' führt vom Körper bis zur Spitze dieses verschobenen Pfeils.';
+  }
+  if (t.kind === 'missing') {
+    const A = def.A, R = def.R;
+    if (vecOk && V.eq(s, V.add(P, A))) return 'Richtung und Länge stimmen, das ist der Weg von der Spitze von ' + TEX.A + ' zur Spitze von ' + TEX.R + '. Als Kraft greift ' + TEX.B + ' aber am Boot an: Zeichne ihn vom Angriffspunkt aus.';
+    if (vecOk) return 'Länge und Richtung stimmen. Setz den Fuß aber auf den Angriffspunkt am Boot.';
+    if (!startOk) return 'Zeichne ' + TEX.B + ' vom Angriffspunkt am Boot aus.';
+    if (V.eq(d, V.sub(A, R))) return 'Genau verkehrt herum. Gesucht ist der Pfeil, der von der Spitze von ' + TEX.A + ' zur Spitze von ' + TEX.R + ' führt, nicht umgekehrt.';
+    if (V.eq(d, V.add(A, R))) return 'Du hast ' + TEX.A + ' und ' + TEX.R + ' addiert. Gesucht ist die Kraft, die zu ' + TEX.A + ' noch dazukommen muss, damit ' + TEX.R + ' herauskommt.';
+    if (V.eq(d, R) || V.eq(d, A)) return 'Dieser Pfeil ist schon gegeben. Gesucht ist die zweite Seilkraft.';
+    if (V.sameDir(d, t.d)) return 'Richtung stimmt, Länge nicht. Zähle die Kästchen von der Spitze von ' + TEX.A + ' bis zur Spitze von ' + TEX.R + '.';
+    return 'Überleg rückwärts: Welcher Pfeil führt von der Spitze von ' + TEX.A + ' zur Spitze von ' + TEX.R + '? Diesen Pfeil zeichnest du dann am Boot.';
+  }
+  return 'Noch nicht ganz.';
+}
+
+const Boards = (() => {
+  const state = {};
+
+  function mount(id) {
+    const def = BOARD_DEFS[id];
+    const host = document.getElementById('board-' + id);
+    host.innerHTML = '';
+    const status = document.createElement('div');
+    status.className = 'board-status';
+    host.appendChild(status);
+    const svg = makeSvg(def, 'Pfeil-Gitter, Maßstab 1 Kästchen entspricht ' + def.scale + ' N');
+    host.appendChild(svg);
+    const scale = document.createElement('div');
+    scale.className = 'board-scale';
+    scale.textContent = 'Maßstab: 1 Kästchen ≙ ' + def.scale + ' N';
+    host.appendChild(scale);
+    const measure = document.createElement('div');
+    measure.className = 'board-measure';
+    host.appendChild(measure);
+    const st = state[id] = { def, svg, status, measure, step: 0, start: null, end: null, wrong: false, preview: null };
+    svg.addEventListener('click', ev => onTap(id, ev));
+    svg.addEventListener('pointermove', ev => onMove(id, ev));
+    if (exerciseStates[def.ex]) st.step = def.targets.length;
+    render(id);
+  }
+
+  function toGrid(svg, def, ev) {
+    const pt = svg.createSVGPoint();
+    pt.x = ev.clientX; pt.y = ev.clientY;
+    const m = svg.getScreenCTM();
+    if (!m) return null;
+    const p = pt.matrixTransform(m.inverse());
+    const gx = Math.round(p.x), gy = Math.round(def.h - p.y);
+    if (gx < 0 || gx > def.w || gy < 0 || gy > def.h) return null;
+    return [gx, gy];
+  }
+
+  function onTap(id, ev) {
+    const st = state[id];
+    if (st.step >= st.def.targets.length) return;
+    const g = toGrid(st.svg, st.def, ev);
+    if (!g) return;
+    if (st.wrong || st.end) { st.start = null; st.end = null; st.wrong = false; clearFb(st.def); }
+    if (!st.start) st.start = g;
+    else if (V.eq(st.start, g)) st.start = null;
+    else st.end = g;
+    st.preview = null;
+    render(id);
+  }
+
+  function onMove(id, ev) {
+    const st = state[id];
+    if (ev.pointerType !== 'mouse' || !st.start || st.end) return;
+    const pt = st.svg.createSVGPoint();
+    pt.x = ev.clientX; pt.y = ev.clientY;
+    const m = st.svg.getScreenCTM();
+    if (!m) return;
+    const p = pt.matrixTransform(m.inverse());
+    st.preview = [p.x, st.def.h - p.y];
+    render(id);
+  }
+
+  function render(id) {
+    const st = state[id], def = st.def, layer = st.svg._layer;
+    while (layer.firstChild) layer.removeChild(layer.firstChild);
+    def.given.forEach(a => drawArrow(def, layer, a.s, V.add(a.s, a.d), COLORS[a.c], { label: a.label, labelSide: a.side || 1 }));
+    for (let i = 0; i < st.step; i++) {
+      const t = def.targets[i];
+      drawArrow(def, layer, t.s, V.add(t.s, t.d), COLORS[t.c], { label: t.label, dashed: t.dashed, labelSide: t.side || 1, width: 0.12 });
+    }
+    if (st.start && st.end) drawArrow(def, layer, st.start, st.end, st.wrong ? COLORS.err : COLORS.pen, { width: 0.12 });
+    else if (st.start && st.preview) drawArrow(def, layer, st.start, st.preview, COLORS.pen, { faint: true });
+    if (st.start) el('circle', { class: 'svg-start', cx: st.start[0], cy: def.h - st.start[1], r: 0.22 }, layer);
+
+    const done = st.step >= def.targets.length;
+    if (done) {
+      st.status.innerHTML = '<span class="step-pill">fertig</span> Alle Pfeile richtig.';
+      const last = def.targets[def.targets.length - 1];
+      const n = V.len(last.d);
+      st.measure.textContent = 'Länge des letzten Pfeils: ' + fmt(n) + ' Kästchen ≙ ' + fmt(n * def.scale) + ' N';
+    } else {
+      const t = def.targets[st.step];
+      const pill = def.targets.length > 1 ? '<span class="step-pill">' + (st.step + 1) + ' / ' + def.targets.length + '</span> ' : '';
+      const hint = !st.start ? ' <span style="color:var(--ink-dim)">Tippe den Fuß.</span>'
+        : !st.end ? ' <span style="color:var(--ink-dim)">Tippe die Spitze.</span>' : '';
+      st.status.innerHTML = pill + t.prompt + hint;
+      st.measure.textContent = '';
+      typeset([st.status]);
+    }
+  }
+
+  function clearFb(def) {
+    const n = def.ex.split('-')[1];
+    const fb = document.getElementById('m2-fb' + n);
+    fb.className = 'fb-block';
+    fb.innerHTML = '';
+    document.getElementById('m2-ex' + n).classList.remove('wrong-state');
+  }
+
+  function check(id) {
+    const st = state[id], def = st.def;
+    if (st.step >= def.targets.length) return;
+    const n = def.ex.split('-')[1];
+    const fb = document.getElementById('m2-fb' + n);
+    const card = document.getElementById('m2-ex' + n);
+    if (!st.start || !st.end) {
+      fb.className = 'fb-block incorrect';
+      fb.innerHTML = 'Zeichne zuerst einen Pfeil: Fuß antippen, dann Spitze antippen.';
+      return;
+    }
+    const t = def.targets[st.step];
+    const d = V.sub(st.end, st.start);
+    if (V.eq(st.start, t.s) && V.eq(d, t.d)) {
+      st.step++;
+      st.start = st.end = null;
+      st.wrong = false;
+      if (st.step >= def.targets.length) {
+        fb.className = 'fb-block correct';
+        fb.innerHTML = '&#10003; ' + def.ok;
+        card.classList.remove('wrong-state');
+        card.classList.add('solved');
+        exerciseStates[def.ex] = true;
+        updateModuleProgress(2);
+        SCORM.save();
+      } else {
+        fb.className = 'fb-block correct';
+        fb.innerHTML = '&#10003; Schritt ' + st.step + ' stimmt. Weiter mit dem nächsten Pfeil.';
+        card.classList.remove('wrong-state');
+      }
+    } else {
+      st.wrong = true;
+      fb.className = 'fb-block incorrect';
+      fb.innerHTML = '&#10007; ' + diagnose(def, t, st.start, d) + ' <span style="opacity:.75">Tippe neu, um es nochmal zu versuchen.</span>';
+      card.classList.add('wrong-state');
+    }
+    render(id);
+    typeset([fb]);
+  }
+
+  function undo(id) {
+    const st = state[id];
+    st.start = st.end = st.preview = null;
+    st.wrong = false;
+    clearFb(st.def);
+    render(id);
+  }
+
+  return { mount, check, undo };
+})();
+
+/* ────────────────────────────────────────────
+   STATIC FIGURES: walkthrough, angle demo, Lina
+   ──────────────────────────────────────────── */
+const DEMO = { w: 9, h: 6, body: [1, 1], bodyName: 'Kiste', A: [5, 1], B: [1, 3] };
+const DEMO_TEXT = [
+  'Zwei Seile ziehen an einer Kiste: ' + '<span class="c1">$\\vec{F}_1$</span> fast waagerecht, <span class="c2">$\\vec{F}_2$</span> steil nach oben. Beide greifen am selben Punkt an.',
+  'Verschiebe <span class="c2">$\\vec{F}_2$</span> parallel, bis sein Fuß an der Spitze von <span class="c1">$\\vec{F}_1$</span> sitzt. Länge und Richtung bleiben dabei genau gleich.',
+  'Die resultierende Kraft <span class="cr">$\\vec{F}_{res}$</span> führt vom Angriffspunkt bis zur Spitze des verschobenen Pfeils. Das ist die Methode <strong>Spitze an Fuß</strong>.',
+  'Andersherum geht es genauso: <span class="c1">$\\vec{F}_1$</span> an die Spitze von <span class="c2">$\\vec{F}_2$</span>. Beide Wege bilden ein <strong>Kräfteparallelogramm</strong>, und <span class="cr">$\\vec{F}_{res}$</span> ist seine Diagonale.'
+];
+let demoIdx = 0;
+function renderDemo() {
+  const b = DEMO, host = document.getElementById('board-demo');
+  host.innerHTML = '';
+  const svg = makeSvg(b, 'Konstruktion der resultierenden Kraft, Schritt ' + (demoIdx + 1));
+  host.appendChild(svg);
+  const L = svg._layer, P = b.body, tA = V.add(P, b.A), tB = V.add(P, b.B), tR = V.add(tA, b.B);
+  drawArrow(b, L, P, tA, COLORS.v1, { label: L1 });
+  drawArrow(b, L, P, tB, COLORS.v2, { label: L2 });
+  if (demoIdx >= 1) drawArrow(b, L, tA, tR, COLORS.v2, { dashed: true, label: L2, labelSide: -1 });
+  if (demoIdx >= 3) drawArrow(b, L, tB, tR, COLORS.v1, { dashed: true, label: L1 });
+  if (demoIdx >= 2) drawArrow(b, L, P, tR, COLORS.vres, { label: LR, width: 0.13 });
+  document.getElementById('wt-text').innerHTML = DEMO_TEXT[demoIdx];
+  document.getElementById('wt-tag').textContent = 'Schritt ' + (demoIdx + 1) + ' von 4';
+  document.getElementById('wt-counter').textContent = (demoIdx + 1) + ' / 4';
+  document.getElementById('wt-prev').disabled = demoIdx === 0;
+  document.getElementById('wt-next').disabled = demoIdx === 3;
+  typeset([document.getElementById('wt-text')]);
+}
+function demoStep(dir) {
+  demoIdx = Math.max(0, Math.min(3, demoIdx + dir));
+  renderDemo();
+}
+
+const ANGLE = { w: 11, h: 4, body: [3.5, 0.5] };
+function drawAngleDemo() {
+  const deg = +document.getElementById('angle-slider').value;
+  const host = document.getElementById('board-angle');
+  host.innerHTML = '';
+  const b = ANGLE, svg = makeSvg(b, 'Zwei Kräfte mit ' + deg + ' Grad Winkel');
+  svg.style.maxWidth = '520px';
+  host.appendChild(svg);
+  const L = svg._layer, P = b.body, rad = deg * Math.PI / 180;
+  const A = [4, 0], B = [3 * Math.cos(rad), 3 * Math.sin(rad)];
+  const tA = V.add(P, A), tB = V.add(P, B), tR = V.add(tA, B);
+  // resultant first and wider, so it stays visible under F1/F2 at 0 and 180 degrees
+  drawArrow(b, L, P, tR, COLORS.vres, { width: 0.22 });
+  drawArrow(b, L, tA, tR, COLORS.v2, { dashed: true, faint: true });
+  drawArrow(b, L, P, tA, COLORS.v1, { label: L1 });
+  drawArrow(b, L, P, tB, COLORS.v2, { label: deg > 20 && deg < 160 ? L2 : null, labelSide: -1 });
+  document.getElementById('angle-val').textContent = deg;
+  document.getElementById('angle-res').textContent = Math.round(V.len(V.add(A, B)) * 10);
+}
+
+function renderLina() {
+  const b = { w: 9, h: 5, body: [2, 1] };
+  const host = document.getElementById('board-b7');
+  const svg = makeSvg(b, 'Linas Konstruktion');
+  host.appendChild(svg);
+  const L = svg._layer, P = b.body, tA = V.add(P, [5, 0]), tB = V.add(P, [1, 3]);
+  drawArrow(b, L, P, tA, COLORS.v1, { label: L1 });
+  drawArrow(b, L, P, tB, COLORS.v2, { label: L2 });
+  drawArrow(b, L, tA, tB, COLORS.vres, { dashed: true, label: { sub: 'res', note: 'Lina' } });
+}
+
+/* ────────────────────────────────────────────
+   MC AND INPUT EXERCISES
+   ──────────────────────────────────────────── */
+const EX_FEEDBACK = {
+  '2-2': {
+    ok: 'Richtig: $5 \\cdot 10\\,\\text{N} = 50\\,\\text{N}$. Weniger als $40\\,\\text{N} + 30\\,\\text{N} = 70\\,\\text{N}$, weil die Kräfte nicht in dieselbe Richtung ziehen.',
+    wrong: {
+      '70': 'Du hast 40 N und 30 N addiert. Das gilt nur, wenn beide Kräfte in dieselbe Richtung zeigen. Lies stattdessen die Länge von $\\vec{F}_{res}$ ab.',
+      '70n': 'Du hast 40 N und 30 N addiert. Das gilt nur, wenn beide Kräfte in dieselbe Richtung zeigen. Lies stattdessen die Länge von $\\vec{F}_{res}$ ab.',
+      '5': '5 ist die Länge in Kästchen. Rechne mit dem Maßstab in Newton um: 1 Kästchen ≙ 10 N.'
+    },
+    fallback: 'Länge in Kästchen mal Maßstab: Wie viele Newton sind 5 Kästchen, wenn ein Kästchen für 10 N steht?'
+  },
+  '2-4': {
+    ok: 'Richtig: Jedes Seil zieht nach vorn und ein Stück zur Seite. Die Seitenanteile sind gleich groß und entgegengesetzt, sie heben sich auf. Nur die Anteile nach vorn addieren sich: $2 \\cdot 100\\,\\text{N} = 200\\,\\text{N}$.',
+    wrong: {
+      'reib': 'Reibung ist eine eigene Kraft, die in dieser Aufgabe nicht vorkommt. Schau dir die beiden Seilpfeile an: Wohin zeigen sie außer nach vorn?',
+      'rund': '108 N ist gerundet, aber 16 N Unterschied sind kein Rundungsfehler. Zerlege gedanklich jeden Seilpfeil in einen Anteil nach vorn und einen zur Seite.',
+      'nie': 'Doch, Kräfte kann man addieren, aber als Pfeile, nicht als Zahlen. Nur bei gleicher Richtung darfst du die Beträge einfach zusammenzählen.'
+    }
+  },
+  '2-6': {
+    ok: 'Richtig: $F_{res} = \\sqrt{(60\\,\\text{N})^2 + (80\\,\\text{N})^2} = \\sqrt{10\\,000}\\,\\text{N} = 100\\,\\text{N}$.',
+    wrong: {
+      '140': 'Du hast 60 N und 80 N addiert. Das geht nur bei gleicher Richtung. Osten und Norden stehen senkrecht aufeinander, also Pythagoras.',
+      '140n': 'Du hast 60 N und 80 N addiert. Das geht nur bei gleicher Richtung. Osten und Norden stehen senkrecht aufeinander, also Pythagoras.',
+      '20': 'Du hast subtrahiert. Das passt nur, wenn die Kräfte genau gegeneinander ziehen. Hier stehen sie senkrecht: Pythagoras.',
+      '10000': 'Fast: Das ist $F_{res}^2$. Zieh noch die Wurzel.'
+    },
+    fallback: 'Bei 90° bilden die beiden Kräfte und $\\vec{F}_{res}$ ein rechtwinkliges Dreieck. Rechne $\\sqrt{60^2 + 80^2}$.'
+  },
+  '2-7': {
+    ok: 'Richtig: Lina hat die Spitzen verbunden, während beide Kräfte noch am Körper ansetzen. So ein Pfeil gehört zum Unterschied $\\vec{F}_2 - \\vec{F}_1$. Für die Summe muss $\\vec{F}_2$ erst mit dem Fuß an die Spitze von $\\vec{F}_1$.',
+    wrong: {
+      'massstab': 'Am Maßstab liegt es nicht: Die Zeichnung ist falsch, bevor irgendetwas umgerechnet wird. Wo beginnt und wo endet Linas Pfeil?',
+      'laenger': 'Auch die Richtung stimmt nicht. Linas Pfeil zeigt nach links oben, beide Kräfte ziehen aber nach rechts beziehungsweise oben. Wo müsste der Fuß von $\\vec{F}_{res}$ sitzen?',
+      'richtig': 'Schau genau: Linas Pfeil beginnt an der Spitze von $\\vec{F}_1$. $\\vec{F}_{res}$ muss aber am Körper ansetzen, und vorher wird $\\vec{F}_2$ verschoben.'
+    }
+  }
+};
+
+// Tolerant matching: exact or numeric equality ("50" == "50.0" == "50,0").
+function matchesPattern(val, p) {
+  if (val === p) return true;
+  if (/^[-+]?[0-9.]+$/.test(val) && /^[-+]?[0-9.]+$/.test(p)) return parseFloat(val) === parseFloat(p);
+  return false;
+}
+function normalize(v) {
+  return v.trim().replace(/\s+/g, '').toLowerCase().replace(/,/g, '.');
+}
+function selOpt(btn, hiddenId, val) {
+  btn.closest('.opt-pills').querySelectorAll('.opt-pill').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById(hiddenId).value = val;
+}
+function markResult(mod, ex, ok, html) {
+  const key = mod + '-' + ex;
+  const fb = document.getElementById('m' + mod + '-fb' + ex);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+  fb.className = 'fb-block ' + (ok ? 'correct' : 'incorrect');
+  fb.innerHTML = (ok ? '&#10003; ' : '&#10007; ') + html;
+  card.classList.toggle('solved', ok);
+  card.classList.toggle('wrong-state', !ok);
+  if (ok) exerciseStates[key] = true;
+  updateModuleProgress(mod);
+  typeset([fb]);
+  SCORM.save();
+}
+function checkMC(mod, ex, inputId, fbId, correctVal) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = document.getElementById(inputId).value;
+  if (!val) return;
+  const f = EX_FEEDBACK[key] || {};
+  markResult(mod, ex, val === correctVal, val === correctVal ? f.ok : ((f.wrong || {})[val] || 'Nicht ganz.'));
+}
+function checkInput(mod, ex, inputId, fbId, patterns) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const inp = document.getElementById(inputId);
+  const val = normalize(inp.value);
+  if (!val) return;
+  const ok = patterns.split('|').map(normalize).some(p => matchesPattern(val, p));
+  const f = EX_FEEDBACK[key] || {};
+  inp.className = 'answer-input ' + (ok ? 'correct' : 'incorrect');
+  markResult(mod, ex, ok, ok ? f.ok : ((f.wrong || {})[val] || f.fallback || 'Noch nicht ganz.'));
+}
+function toggleHint(id) {
+  const h = document.getElementById(id);
+  h.classList.toggle('open');
+  if (h.classList.contains('open')) typeset([h]);
+}
+
+/* ────────────────────────────────────────────
+   PROGRESS
+   ──────────────────────────────────────────── */
+function solvedCount(mod) {
+  let n = 0;
+  for (let i = 1; i <= MODULE_EX_COUNTS[mod]; i++) if (exerciseStates[mod + '-' + i]) n++;
+  return n;
+}
+function updateModuleProgress(mod) {
+  const total = MODULE_EX_COUNTS[mod], solved = solvedCount(mod);
+  document.getElementById('prog-fill-' + mod).style.width = (solved / total * 100) + '%';
+  document.getElementById('prog-text-' + mod).textContent = solved + ' / ' + total;
+  if (solved === total) moduleStates[mod] = true;
+}
+function updateLanding() {
+  const done = moduleStates.filter(Boolean).length;
+  document.getElementById('opFill').style.width = (done / 4 * 100) + '%';
+  document.getElementById('opLabel').textContent = done + ' / 4 Module';
+  for (let i = 0; i < 4; i++) {
+    if (!MODULE_EX_COUNTS[i]) continue;
+    const card = document.getElementById('card-' + i), status = document.getElementById('status-' + i);
+    card.classList.toggle('completed', moduleStates[i]);
+    status.classList.toggle('done', moduleStates[i]);
+    status.textContent = moduleStates[i] ? 'Erledigt' : (solvedCount(i) ? 'Angefangen' : 'Starten');
+  }
+}
+function restoreModuleState(mod) {
+  for (let i = 1; i <= MODULE_EX_COUNTS[mod]; i++) {
+    if (!exerciseStates[mod + '-' + i]) continue;
+    document.getElementById('m' + mod + '-ex' + i).classList.add('solved');
+    const fb = document.getElementById('m' + mod + '-fb' + i);
+    if (!fb.innerHTML) { fb.className = 'fb-block correct'; fb.innerHTML = '&#10003; Bereits gelöst.'; }
+  }
+  updateModuleProgress(mod);
+}
+function showResult(mod) {
+  const total = MODULE_EX_COUNTS[mod], solved = solvedCount(mod);
+  const box = document.getElementById('result-' + mod);
+  if (solved === total) {
+    moduleStates[mod] = true;
+    box.className = 'result-box show done';
+    box.textContent = 'Modul ' + MODULE_NAMES[mod] + ' abgeschlossen: alle ' + total + ' Aufgaben richtig.';
+  } else {
+    const open = [];
+    for (let i = 1; i <= total; i++) if (!exerciseStates[mod + '-' + i]) open.push(i);
+    box.className = 'result-box show partial';
+    box.textContent = solved + ' von ' + total + ' Aufgaben richtig. Noch offen: Aufgabe ' + open.join(', ') + '.';
+  }
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   BACKGROUND: slowly drifting force arrows (landing only)
+   ──────────────────────────────────────────── */
+const BG = (() => {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W, H, arrows = [], raf = null;
+  const cols = ['rgba(96,165,250,', 'rgba(251,191,36,', 'rgba(192,132,252,', 'rgba(251,113,133,'];
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    arrows = [];
+    const n = Math.round(Math.min(26, W * H / 45000));
+    for (let i = 0; i < n; i++) arrows.push({
+      x: Math.random() * W, y: Math.random() * H, a: Math.random() * Math.PI * 2,
+      l: 40 + Math.random() * 70, va: (Math.random() - 0.5) * 0.004, vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25,
+      c: cols[i % cols.length], o: 0.12 + Math.random() * 0.18
+    });
+  }
+  function frame() {
+    ctx.fillStyle = '#0c0c1d';
+    ctx.fillRect(0, 0, W, H);
+    for (const r of arrows) {
+      if (!reduce) { r.a += r.va; r.x += r.vx; r.y += r.vy; }
+      if (r.x < -100) r.x = W + 100; if (r.x > W + 100) r.x = -100;
+      if (r.y < -100) r.y = H + 100; if (r.y > H + 100) r.y = -100;
+      const ex = r.x + Math.cos(r.a) * r.l, ey = r.y + Math.sin(r.a) * r.l;
+      ctx.strokeStyle = ctx.fillStyle = r.c + r.o + ')';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(ex - Math.cos(r.a) * 9, ey - Math.sin(r.a) * 9); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ex, ey);
+      ctx.lineTo(ex - Math.cos(r.a - 0.45) * 13, ey - Math.sin(r.a - 0.45) * 13);
+      ctx.lineTo(ex - Math.cos(r.a + 0.45) * 13, ey - Math.sin(r.a + 0.45) * 13);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#0c0c1d';
+    raf = reduce ? null : requestAnimationFrame(frame);
+  }
+  function run(on) {
+    if (on && !raf) frame();
+    if (!on && raf) { cancelAnimationFrame(raf); raf = null; }
+  }
+  window.addEventListener('resize', () => { resize(); if (reduce) frame(); });
+  resize();
+  return { run };
+})();
+
+/* ────────────────────────────────────────────
+   INIT
+   ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  SCORM.init();
+  ['b1', 'b3', 'b5', 'b8'].forEach(Boards.mount);
+  renderDemo();
+  drawAngleDemo();
+  renderLina();
+  updateLanding();
+  BG.run(true);
+});
+window.addEventListener('beforeunload', () => SCORM.finish());
+window.addEventListener('pagehide', () => SCORM.finish());
+</script>
+</body>
+</html>
