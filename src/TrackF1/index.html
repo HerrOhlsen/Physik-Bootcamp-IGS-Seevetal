@@ -62,6 +62,7 @@ button, [onclick], .opt-pill, .mod-card, svg.grid-svg { touch-action: manipulati
   --v1: #60a5fa;
   --v2: #fbbf24;
   --vres: #c084fc;
+  --v3: #2dd4bf;
 
   --font: 'Outfit', system-ui, sans-serif;
   --mono: 'IBM Plex Mono', monospace;
@@ -222,6 +223,7 @@ body {
 .c1 { color: var(--v1); font-weight: 700; }
 .c2 { color: var(--v2); font-weight: 700; }
 .cr { color: var(--vres); font-weight: 700; }
+.c3 { color: var(--v3); font-weight: 700; }
 
 .callout-v2 { display: flex; gap: 12px; align-items: flex-start; padding: 16px 20px; border-radius: var(--r-md); margin: 16px 0; }
 .callout-v2 .icon { font-size: 1.2rem; flex-shrink: 0; }
@@ -380,6 +382,7 @@ body {
       <p class="landing-sub">Kräfte als Pfeile zeichnen und zur resultierenden Kraft zusammensetzen</p>
       <div class="landing-meta">
         <span class="l-meta"><span class="val">4</span> Module</span>
+        <span class="l-meta"><span class="val">27</span> Aufgaben</span>
         <span class="l-meta"><span class="val">Level 1</span> Grundlagen</span>
       </div>
     </div>
@@ -392,17 +395,17 @@ body {
     </div>
 
     <div class="module-grid">
-      <div class="mod-card soon" id="card-0">
+      <div class="mod-card" onclick="openModule(0)" id="card-0">
         <div class="mc-num">F1.1</div>
         <div class="mc-title">Was ein Kraftpfeil sagt</div>
         <div class="mc-desc">Betrag, Richtung, Angriffspunkt und Kraftmaßstab</div>
-        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-0">in Arbeit</span></div>
+        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-0">Starten</span></div>
       </div>
-      <div class="mod-card soon" id="card-1">
+      <div class="mod-card" onclick="openModule(1)" id="card-1">
         <div class="mc-num">F1.2</div>
         <div class="mc-title">Kräfte auf einer Linie</div>
         <div class="mc-desc">Gleiche und entgegengesetzte Richtung, resultierende Kraft</div>
-        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-1">in Arbeit</span></div>
+        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-1">Starten</span></div>
       </div>
       <div class="mod-card" onclick="openModule(2)" id="card-2">
         <div class="mc-num">F1.3</div>
@@ -410,15 +413,15 @@ body {
         <div class="mc-desc">Zwei Kräfte zeichnerisch zusammensetzen: Spitze an Fuß und Parallelogramm</div>
         <div class="mc-footer"><span class="mc-time">30 min</span><span class="mc-status" id="status-2">Starten</span></div>
       </div>
-      <div class="mod-card soon" id="card-3">
+      <div class="mod-card" onclick="openModule(3)" id="card-3">
         <div class="mc-num">F1.4</div>
         <div class="mc-title">Dieselben Regeln für Δv</div>
         <div class="mc-desc">Anfangs-, Zusatz- und Endgeschwindigkeit als Pfeile</div>
-        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-3">in Arbeit</span></div>
+        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-3">Starten</span></div>
       </div>
     </div>
 
-    <div class="landing-footer">Track F1 &middot; Pilot</div>
+    <div class="landing-footer">Track F1 &middot; v1</div>
   </div>
 </div>
 
@@ -667,12 +670,542 @@ body {
   </div>
 </div>
 
+<div class="screen" id="screen-mod-0">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">F1.1 · Was ein Kraftpfeil sagt</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div>
+          <span class="nav-progress-text" id="prog-text-0">0 / 6</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">F1.1</div>
+        <h1>Was ein Kraftpfeil sagt</h1>
+        <p class="hero-sub">Eine Kraft hat einen Betrag, eine Richtung und einen Angriffspunkt. Ein Pfeil zeigt alle drei.</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 1</span> Grundlagen</div>
+          <div class="meta-chip"><span class="val">20 min</span> Dauer</div>
+        </div>
+        <div class="kompetenzen">
+          <h3>Kompetenzen</h3>
+          <ul>
+            <li>Du kennst die drei Angaben, die ein Kraftpfeil macht: Betrag, Richtung und Angriffspunkt.</li>
+            <li>Du kannst den Betrag einer Kraft mit dem Kraftmaßstab ablesen.</li>
+            <li>Du kannst eine Kraft maßstabsgerecht am Angriffspunkt zeichnen.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Kräfte sind Pfeile</h2></div>
+        <div class="glass">
+          <p>Um eine Kraft vollständig zu beschreiben, brauchst du drei Angaben: <strong>wie stark</strong> sie ist (Betrag), <strong>wohin</strong> sie zeigt (Richtung) und <strong>wo</strong> sie am Körper wirkt (Angriffspunkt). Ein Pfeil zeigt alles auf einmal: Die Länge steht für den Betrag, die Pfeilspitze für die Richtung, der Fuß sitzt am Angriffspunkt.</p>
+          <div class="board static" id="board-fig11" style="margin-top:14px;"></div>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Mit Pfeil oder ohne?</div>
+            $\vec{F}$ mit Pfeil meint die ganze Kraft, also Betrag und Richtung. $F$ ohne Pfeil meint nur den Betrag, zum Beispiel $F = 40\,\text{N}$.
+          </div>
+        </div>
+        <div class="glass">
+          <h3 style="color:#fff; font-weight:700; margin-bottom:8px;">Der Kraftmaßstab</h3>
+          <p>Auf dem Papier ist kein Pfeil 40 N lang. Deshalb legt jede Zeichnung einen Maßstab fest, zum Beispiel 1 Kästchen ≙ 10 N. Dann gilt:</p>
+          <p>$\text{Betrag} = \text{Länge in Kästchen} \cdot \text{Maßstab}$ &nbsp; und &nbsp; $\text{Länge} = \text{Betrag} : \text{Maßstab}$</p>
+          <p>Bei 1 Kästchen ≙ 10 N wird eine Kraft von 40 N also 4 Kästchen lang.</p>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+        <div class="glass howto">
+          <div>
+            <strong>So zeichnest du einen Pfeil:</strong>
+            <ol>
+              <li>Tippe auf den Gitterpunkt, an dem der Pfeil anfängt (Fuß).</li>
+              <li>Tippe auf den Gitterpunkt, an dem die Spitze sein soll.</li>
+              <li>Tippe auf „Prüfen“. Falsch gesetzt? Tippe einfach neu.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="exercise-card" id="m0-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Pfeil ablesen</span><span class="ex-tag">Maßstab</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Wie groß ist die Kraft $F$ auf die Kiste?</p>
+            <div class="board static" id="board-s11a" style="margin-bottom:14px;"></div>
+            <div class="answer-row">
+              <span class="answer-prefix">$F$ =</span>
+              <input class="answer-input" id="m0-a1" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkInput(0,1,'m0-a1','m0-fb1','20|20n')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h1">Zähl die Kästchen vom Fuß bis zur Spitze und multipliziere mit 5 N.</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb1"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Gewichtskraft einer Lampe</span><span class="ex-tag">Maßstab</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Der Pfeil zeigt die Gewichtskraft $\vec{F}_G$ einer Lampe. Wie groß ist $F_G$?</p>
+            <div class="board static" id="board-s11b" style="margin-bottom:14px;"></div>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_G$ =</span>
+              <input class="answer-input" id="m0-a2" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkInput(0,2,'m0-a2','m0-fb2','12|12n')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h2">Länge in Kästchen mal 3 N pro Kästchen.</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb2"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">30 N nach rechts</span><span class="ex-tag">Zeichnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Auf den Körper wirkt eine Kraft von 30 N nach rechts. Zeichne sie maßstabsgerecht.</p>
+            <div class="board" id="board-b13"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b13')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b13')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h3">30 N : 10 N pro Kästchen = 3 Kästchen. Der Fuß sitzt am weißen Punkt.</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb3"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Gewichtskraft zeichnen</span><span class="ex-tag">Zeichnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Die Lampe hat eine Gewichtskraft von 40 N. Zeichne $\vec{F}_G$.</p>
+            <div class="board" id="board-b14"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b14')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b14')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h4">Die Gewichtskraft zeigt senkrecht nach unten. 40 N : 20 N pro Kästchen = ?</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb4"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Welcher Pfeil ist stärker?</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Pfeil A ist 4 Kästchen lang, Maßstab 1 Kästchen ≙ 10 N. Pfeil B ist 2 Kästchen lang, Maßstab 1 Kästchen ≙ 20 N. Welche Kraft ist größer?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','a')">Kraft A, weil Pfeil A länger ist.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','b')">Kraft B, weil ihr Maßstab größer ist.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','gleich')">Beide Kräfte sind gleich groß.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','unbekannt')">Das kann man nicht vergleichen.</button>
+            </div>
+            <input type="hidden" id="m0-a5" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(0,5,'m0-a5','m0-fb5','gleich')">Prüfen</button>
+            </div>
+            <div class="fb-block" aria-live="polite" id="m0-fb5"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex6">
+          <div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Wo sitzt der Pfeil?</span><span class="ex-tag">Angriffspunkt</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Lea schiebt eine Kiste mit der Hand nach rechts. Wo setzt der Pfeil für die Kraft an, die auf die Kiste wirkt?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a6','lea')">Bei Lea, weil sie die Kraft ausübt.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a6','mitte')">In der Luft zwischen Lea und der Kiste.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a6','kiste')">An der Kiste, dort wo Leas Hand drückt.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a6','boden')">Am Boden unter der Kiste.</button>
+            </div>
+            <input type="hidden" id="m0-a6" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(0,6,'m0-a6','m0-fb6','kiste')">Prüfen</button>
+            </div>
+            <div class="fb-block" aria-live="polite" id="m0-fb6"></div>
+          </div>
+        </div>
+        <button class="btn-result" onclick="showResult(0)">Ergebnis anzeigen</button>
+        <div class="result-box" id="result-0" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="screen" id="screen-mod-1">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">F1.2 · Kräfte auf einer Linie</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div>
+          <span class="nav-progress-text" id="prog-text-1">0 / 7</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">F1.2</div>
+        <h1>Kräfte auf einer Linie</h1>
+        <p class="hero-sub">Wenn alle Kräfte in dieselbe oder in die Gegenrichtung zeigen, wird Addieren zur Rechnung mit Vorzeichen.</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 1</span> Grundlagen</div>
+          <div class="meta-chip"><span class="val">20 min</span> Dauer</div>
+        </div>
+        <div class="kompetenzen">
+          <h3>Kompetenzen</h3>
+          <ul>
+            <li>Du kannst Kräfte, die in dieselbe oder in die entgegengesetzte Richtung zeigen, zur resultierenden Kraft zusammenfassen.</li>
+            <li>Du kannst mit Vorzeichen rechnen, wenn du eine Richtung als positiv festlegst.</li>
+            <li>Du kannst erkennen, wann sich Kräfte gegenseitig aufheben.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Addieren und abziehen</h2></div>
+        <div class="glass">
+          <p>Liegen alle Kräfte auf einer Linie, ist die Regel einfach: Zeigen sie in <strong>dieselbe Richtung</strong>, addierst du die Beträge. Zeigen sie <strong>gegeneinander</strong>, ziehst du ab. $\vec{F}_{res}$ zeigt dann in die Richtung der stärkeren Seite.</p>
+          <p>Mit Pfeilen ist das wieder <strong>Spitze an Fuß</strong>: $\vec{F}_2$ an die Spitze von $\vec{F}_1$ setzen, $\vec{F}_{res}$ geht vom Anfang bis zur letzten Spitze.</p>
+          <div class="board static" id="board-fig12" style="margin-top:14px;"></div>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Rechnen mit Vorzeichen</div>
+            Leg eine Richtung als positiv fest, zum Beispiel nach rechts. Kräfte in die Gegenrichtung bekommen ein Minus. Dann addierst du einfach alles: $F_{res} = F_1 + F_2 + \dots$ Das Vorzeichen des Ergebnisses verrät die Richtung.
+          </div>
+        </div>
+        <div class="callout-v2 warning">
+          <span class="icon">&#9888;&#65039;</span>
+          <div class="body">
+            <div class="title">Wenn sich alles aufhebt</div>
+            Sind die Kräfte gleich groß und entgegengesetzt, ist $F_{res} = 0$. Das heißt nicht, dass der Körper stillsteht. Er kann sich auch mit konstanter Geschwindigkeit bewegen.
+          </div>
+        </div>
+        <div class="glass">
+          <p>In den Aufgaben stehen die Pfeile untereinander, damit sie sich nicht überdecken. Alle greifen trotzdem am selben Körper an. $\vec{F}_{res}$ zeichnest du ab dem weißen Punkt.</p>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+        <div class="glass howto">
+          <div>
+            <strong>So zeichnest du einen Pfeil:</strong>
+            <ol>
+              <li>Tippe auf den Gitterpunkt, an dem der Pfeil anfängt (Fuß).</li>
+              <li>Tippe auf den Gitterpunkt, an dem die Spitze sein soll.</li>
+              <li>Tippe auf „Prüfen“. Falsch gesetzt? Tippe einfach neu.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="exercise-card" id="m1-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Auto anschieben</span><span class="ex-tag">Grundlagen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Zwei Personen schieben ein liegengebliebenes Auto nach rechts: $\vec{F}_1$ mit 300 N, $\vec{F}_2$ mit 200 N. Zeichne $\vec{F}_{res}$ ab dem weißen Punkt.</p>
+            <div class="board" id="board-b21"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b21')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b21')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h1">Spitze an Fuß: erst 3 Kästchen, dann noch 2 Kästchen in dieselbe Richtung.</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb1"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Tauziehen</span><span class="ex-tag">Grundlagen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Beim Tauziehen zieht $\vec{F}_1$ mit 400 N nach rechts und $\vec{F}_2$ mit 300 N nach links. Zeichne $\vec{F}_{res}$ ab dem weißen Punkt.</p>
+            <div class="board" id="board-b22"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b22')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b22')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h2">4 Kästchen nach rechts, dann 3 Kästchen zurück. Wo landest du?</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb2"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Wer gewinnt?</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Team Rot zieht mit 1200 N nach links, Team Blau mit 1350 N nach rechts. Wie groß ist die resultierende Kraft?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{res}$ =</span>
+              <input class="answer-input" id="m1-a3" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkInput(1,3,'m1-a3','m1-fb3','150|150n')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h3">Die Kräfte zeigen gegeneinander: Zieh die kleinere von der größeren ab.</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb3"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Fallschirmspringer</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Fallschirmspringer sinkt mit offenem Schirm. Die Gewichtskraft beträgt 800 N nach unten, der Luftwiderstand 800 N nach oben. Was gilt für die resultierende Kraft?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a4','u1600')">1600 N nach unten.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a4','u800')">800 N nach unten, weil er ja fällt.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a4','null')">$F_{res} = 0\,\text{N}$.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a4','o')">800 N nach oben.</button>
+            </div>
+            <input type="hidden" id="m1-a4" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(1,4,'m1-a4','m1-fb4','null')">Prüfen</button>
+            </div>
+            <div class="fb-block" aria-live="polite" id="m1-fb4"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Aufzug fährt an</span><span class="ex-tag">Anwendung</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Aufzug fährt nach oben an. Das Seil zieht mit $F_S = 12\,000\,\text{N}$ nach oben, die Gewichtskraft beträgt $F_G = 8000\,\text{N}$. Zeichne $\vec{F}_{res}$ ab dem weißen Punkt.</p>
+            <div class="board" id="board-b25"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b25')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b25')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h5">Maßstab 1 Kästchen ≙ 4000 N: Das Seil ist 3 Kästchen nach oben, die Gewichtskraft 2 Kästchen nach unten.</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb5"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex6">
+          <div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Drei Kräfte am Schlitten</span><span class="ex-tag">Standard</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Auf einen Schlitten wirken drei Kräfte: Zugkraft $\vec{F}_1$ mit 100 N nach rechts, Reibung $\vec{F}_2$ mit 20 N nach links, Gegenwind $\vec{F}_3$ mit 40 N nach links. Zeichne $\vec{F}_{res}$.</p>
+            <div class="board" id="board-b26"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b26')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b26')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h6')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h6">Kästchen nach rechts zählen, Kästchen nach links abziehen.</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb6"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex7">
+          <div class="ex-header"><span class="ex-num">7</span><span class="ex-title">Mit Vorzeichen</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Lege rechts als positive Richtung fest. Auf einen Wagen wirken $F_1 = +250\,\text{N}$ und $F_2 = -400\,\text{N}$. Gib $F_{res}$ mit Vorzeichen an.</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{res}$ =</span>
+              <input class="answer-input" id="m1-a7" inputmode="text" autocomplete="off" placeholder="mit Vorzeichen">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkInput(1,7,'m1-a7','m1-fb7','-150|-150n')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h7')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h7">Einfach addieren: $+250 + (-400)$. Das Vorzeichen zeigt die Richtung.</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb7"></div>
+          </div>
+        </div>
+        <button class="btn-result" onclick="showResult(1)">Ergebnis anzeigen</button>
+        <div class="result-box" id="result-1" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="screen" id="screen-mod-3">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">F1.4 · Dieselben Regeln für Δv</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-3"></div></div>
+          <span class="nav-progress-text" id="prog-text-3">0 / 6</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">F1.4</div>
+        <h1>Dieselben Regeln für Δv</h1>
+        <p class="hero-sub">Geschwindigkeiten sind auch Pfeile. Spitze an Fuß gilt für sie genauso wie für Kräfte.</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 1</span> Grundlagen</div>
+          <div class="meta-chip"><span class="val">20 min</span> Dauer</div>
+        </div>
+        <div class="kompetenzen">
+          <h3>Kompetenzen</h3>
+          <ul>
+            <li>Du kannst aus $\vec{v}_A$ und $\Delta\vec{v}$ den Pfeil $\vec{v}_E$ konstruieren.</li>
+            <li>Du kannst aus $\vec{v}_A$ und $\vec{v}_E$ den Pfeil $\Delta\vec{v}$ konstruieren.</li>
+            <li>Du kannst begründen, warum $\Delta\vec{v}$ in Richtung der resultierenden Kraft zeigt.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Geschwindigkeit als Pfeil</h2></div>
+        <div class="glass">
+          <p>Auch eine Geschwindigkeit hat Betrag und Richtung: Die Länge des Pfeils ist das Tempo, die Spitze zeigt die Bewegungsrichtung. Ändert sich die Geschwindigkeit, kommt eine <strong>Zusatzgeschwindigkeit</strong> $\Delta\vec{v}$ dazu:</p>
+          <p style="text-align:center;">$\vec{v}_A + \Delta\vec{v} = \vec{v}_E$</p>
+          <p>Gezeichnet wird mit Spitze an Fuß, genau wie bei Kräften: <span class="c2">$\Delta\vec{v}$</span> an die Spitze von <span class="c1">$\vec{v}_A$</span>, <span class="cr">$\vec{v}_E$</span> vom Anfang bis zur Spitze von $\Delta\vec{v}$.</p>
+          <div class="board static" id="board-fig14" style="margin-top:14px;"></div>
+        </div>
+        <div class="glass">
+          <h3 style="color:#fff; font-weight:700; margin-bottom:8px;">Rückwärts: $\Delta\vec{v}$ finden</h3>
+          <p>Kennst du $\vec{v}_A$ und $\vec{v}_E$, zeichnest du beide vom selben Punkt aus. $\Delta\vec{v}$ führt dann von der Spitze von $\vec{v}_A$ zur Spitze von $\vec{v}_E$.</p>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Merke</div>
+            $\Delta\vec{v}$ zeigt immer in Richtung der resultierenden Kraft. Wer wissen will, wohin die Kraft zeigt, schaut auf $\Delta\vec{v}$.
+          </div>
+        </div>
+        <div class="callout-v2 warning">
+          <span class="icon">&#9888;&#65039;</span>
+          <div class="body">
+            <div class="title">Gleiches Tempo ist nicht gleiche Geschwindigkeit</div>
+            In einer Kurve bleibt das Tempo vielleicht gleich, aber der Pfeil dreht sich. Dann ist $\Delta\vec{v} \neq 0$.
+          </div>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+        <div class="glass howto">
+          <div>
+            <strong>So zeichnest du einen Pfeil:</strong>
+            <ol>
+              <li>Tippe auf den Gitterpunkt, an dem der Pfeil anfängt (Fuß).</li>
+              <li>Tippe auf den Gitterpunkt, an dem die Spitze sein soll.</li>
+              <li>Tippe auf „Prüfen“. Falsch gesetzt? Tippe einfach neu.</li>
+            </ol>
+          </div>
+        </div>
+        <div class="exercise-card" id="m3-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Puck bekommt einen Schlag</span><span class="ex-tag">Grundlagen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Puck gleitet mit $\vec{v}_A$ nach rechts. Ein Schläger gibt ihm die Zusatzgeschwindigkeit $\Delta\vec{v}$ nach oben. Zeichne $\vec{v}_E$.</p>
+            <div class="board" id="board-b41"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b41')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b41')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h1">$\Delta\vec{v}$ sitzt schon an der Spitze von $\vec{v}_A$. $\vec{v}_E$ geht vom Puck bis zur Spitze von $\Delta\vec{v}$.</div>
+            <div class="fb-block" aria-live="polite" id="m3-fb1"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Kurve mit gleichem Tempo</span><span class="ex-tag">Standard</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Auto fährt mit 20 m/s nach rechts und nach der Kurve mit 20 m/s nach oben. Zeichne $\Delta\vec{v}$ an die Spitze von $\vec{v}_A$.</p>
+            <div class="board" id="board-b42"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b42')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b42')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h2">Verbinde die Spitze von $\vec{v}_A$ mit der Spitze von $\vec{v}_E$. Die Pfeilspitze zeigt zu $\vec{v}_E$.</div>
+            <div class="fb-block" aria-live="polite" id="m3-fb2"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Ist Δv null?</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Auto fährt mit gleichbleibend 50 km/h durch eine Kurve. Ist $\Delta\vec{v} = 0$?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m3-a3','ja')">Ja, das Tempo ändert sich nicht.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a3','tacho')">Das hängt davon ab, was der Tacho anzeigt.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a3','kurz')">Nur am Anfang der Kurve ist Δv nicht null.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a3','nein')">Nein, die Richtung der Geschwindigkeit ändert sich.</button>
+            </div>
+            <input type="hidden" id="m3-a3" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(3,3,'m3-a3','m3-fb3','nein')">Prüfen</button>
+            </div>
+            <div class="fb-block" aria-live="polite" id="m3-fb3"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Kugel an der Bande</span><span class="ex-tag">Anwendung</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Billardkugel rollt schräg auf die untere Bande zu und prallt ab. Gegeben sind $\vec{v}_A$ und $\vec{v}_E$. Zeichne $\Delta\vec{v}$.</p>
+            <div class="board" id="board-b44"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('b44')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('b44')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h4">$\Delta\vec{v}$ beginnt an der Spitze von $\vec{v}_A$ und endet an der Spitze von $\vec{v}_E$.</div>
+            <div class="fb-block" aria-live="polite" id="m3-fb4"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Ball gegen die Wand</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Ball fliegt mit 5 m/s gegen eine Wand und prallt mit 5 m/s genau zurück. Wie groß ist der Betrag von $\Delta\vec{v}$?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$\Delta v$ =</span>
+              <input class="answer-input" id="m3-a5" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">m/s</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkInput(3,5,'m3-a5','m3-fb5','10|10m/s')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h5">Zeichne beide Pfeile vom selben Punkt aus. Wie lang ist der Pfeil von der einen Spitze zur anderen?</div>
+            <div class="fb-block" aria-live="polite" id="m3-fb5"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex6">
+          <div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Bremsen</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Auto bremst auf gerader Straße. Wohin zeigt $\Delta\vec{v}$ und damit die resultierende Kraft?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m3-a6','vor')">In Fahrtrichtung.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a6','zurueck')">Entgegen der Fahrtrichtung.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a6','null')">Nirgendwohin, Δv ist null, weil das Auto geradeaus fährt.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a6','unten')">Nach unten zur Straße.</button>
+            </div>
+            <input type="hidden" id="m3-a6" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(3,6,'m3-a6','m3-fb6','zurueck')">Prüfen</button>
+            </div>
+            <div class="fb-block" aria-live="polite" id="m3-fb6"></div>
+          </div>
+        </div>
+        <button class="btn-result" onclick="showResult(3)">Ergebnis anzeigen</button>
+        <div class="result-box" id="result-3" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</div>
 <script>
 /* ────────────────────────────────────────────
    STATE
    ──────────────────────────────────────────── */
 const MODULE_NAMES = ['F1.1', 'F1.2', 'F1.3', 'F1.4'];
-const MODULE_EX_COUNTS = [0, 0, 8, 0]; // 0 = module not built yet
+const MODULE_EX_COUNTS = [6, 7, 8, 6]; // 0 = module not built yet
 let moduleStates = [false, false, false, false];
 let exerciseStates = {};
 
@@ -777,7 +1310,8 @@ function fmt(x) { return (Math.round(x * 10) / 10).toString().replace('.', ',');
    SVG DRAWING
    ──────────────────────────────────────────── */
 const SVGNS = 'http://www.w3.org/2000/svg';
-const COLORS = { v1: '#60a5fa', v2: '#fbbf24', vres: '#c084fc', pen: '#e8e8f0', err: '#f87171' };
+const COLORS = { v1: '#60a5fa', v2: '#fbbf24', v3: '#2dd4bf', vres: '#c084fc', pen: '#e8e8f0', err: '#f87171' };
+function scaleText(b) { return 'Maßstab: 1 Kästchen ≙ ' + b.scale + ' ' + (b.unit || 'N'); }
 
 function el(tag, attrs, parent) {
   const n = document.createElementNS(SVGNS, tag);
@@ -800,12 +1334,17 @@ function makeSvg(b, label) {
     const [px, py] = b.body;
     el('rect', { class: 'svg-body', x: px - 0.7, y: sy(b, py) - 0.7, width: 1.4, height: 1.4, rx: 0.18 }, svg);
     if (b.bodyName) {
-      const t = el('text', { x: px, y: sy(b, py) + 1.15, 'text-anchor': 'middle', 'font-size': 0.36, fill: 'rgba(232,232,240,0.6)', 'font-family': 'Outfit, system-ui, sans-serif' }, svg);
+      const t = el('text', { x: px, y: sy(b, py) + (b.bodyNameAbove ? -0.9 : 1.15), 'text-anchor': 'middle', 'font-size': 0.36, fill: 'rgba(232,232,240,0.6)', 'font-family': 'Outfit, system-ui, sans-serif' }, svg);
       t.textContent = b.bodyName;
     }
   }
+  (b.notes || []).forEach(n => {
+    const t = el('text', { x: n.x, y: sy(b, n.y), 'font-size': n.size || 0.34, fill: n.color || 'rgba(232,232,240,0.75)', 'text-anchor': n.anchor || 'start', 'font-family': 'Outfit, system-ui, sans-serif' }, svg);
+    t.textContent = n.text;
+  });
   svg._layer = el('g', {}, svg);
   if (b.body) el('circle', { class: 'svg-anchor', cx: b.body[0], cy: sy(b, b.body[1]), r: 0.1 }, svg);
+  if (b.anchor) el('circle', { class: 'svg-anchor', cx: b.anchor[0], cy: sy(b, b.anchor[1]), r: 0.13 }, svg);
   return svg;
 }
 
@@ -840,7 +1379,8 @@ function drawLabel(layer, mx, my, nx, ny, label, color, side) {
     const s = el('tspan', { 'font-size': 0.36, dy: 0.13 }, t);
     s.textContent = label.sub;
   }
-  el('path', { d: `M ${x - 0.2} ${y - 0.33} h 0.34 m -0.1 -0.07 l 0.1 0.07 l -0.1 0.07`, stroke: color, 'stroke-width': 0.045, fill: 'none', 'stroke-linecap': 'round' }, g);
+  const ax = x - 0.2 + (label.arrowX || 0);
+  el('path', { d: `M ${ax} ${y - 0.33} h ${label.arrowW || 0.34} m -0.1 -0.07 l 0.1 0.07 l -0.1 0.07`, stroke: color, 'stroke-width': 0.045, fill: 'none', 'stroke-linecap': 'round' }, g);
   if (label.note) {
     const n = el('text', { x: x - 0.2, y: y + 0.62, 'font-size': 0.3, fill: color, 'font-style': 'normal', 'font-weight': 500 }, g);
     n.textContent = label.note;
@@ -853,10 +1393,69 @@ function drawLabel(layer, mx, my, nx, ny, label, color, side) {
    draws one after the other (tap foot, tap tip, check). Each target has a
    kind ('shift', 'sum', 'missing') that drives the error diagnosis.
    ──────────────────────────────────────────── */
-const L1 = { sub: '1' }, L2 = { sub: '2' }, LR = { sub: 'res' };
+const L1 = { sub: '1' }, L2 = { sub: '2' }, L3 = { sub: '3' }, LR = { sub: 'res' };
+const LF = {}, LG = { sub: 'G' }, LS = { sub: 'S' };
+const LvA = { main: 'v', sub: 'A' }, LvE = { main: 'v', sub: 'E' }, LdV = { main: 'Δv', arrowX: 0.33, arrowW: 0.3 };
 const TEX = { A: '$\\vec{F}_1$', B: '$\\vec{F}_2$', R: '$\\vec{F}_{res}$' };
+const TV = { A: '$\\vec{v}_A$', D: '$\\Delta\\vec{v}$', E: '$\\vec{v}_E$' };
 
 const BOARD_DEFS = {
+  // ── F1.1
+  b13: {
+    ex: '0-3', w: 8, h: 3, body: [2, 1], bodyName: 'Körper', scale: 10, given: [],
+    targets: [{ kind: 'draw', s: [2, 1], d: [3, 0], c: 'v1', label: LF, side: -1, prompt: 'Zeichne die Kraft $F = 30\\,\\text{N}$ nach rechts.' }],
+    ok: 'Richtig: 30 N bei 10 N pro Kästchen sind 3 Kästchen, angesetzt am Körper.'
+  },
+  b14: {
+    ex: '0-4', w: 5, h: 5, body: [2, 4], bodyName: 'Lampe', bodyNameAbove: true, scale: 20, given: [],
+    targets: [{ kind: 'draw', s: [2, 4], d: [0, -2], c: 'v1', label: LG, side: -1, prompt: 'Zeichne die Gewichtskraft $\\vec{F}_G$ der Lampe.' }],
+    ok: 'Richtig: $40\\,\\text{N} : 20\\,\\text{N} = 2$ Kästchen, senkrecht nach unten. Die Gewichtskraft zeigt immer senkrecht nach unten.'
+  },
+  // ── F1.2
+  b21: {
+    ex: '1-1', w: 9, h: 4, anchor: [1, 1], scale: 100,
+    given: [{ s: [1, 3], d: [3, 0], c: 'v1', label: L1, side: -1 }, { s: [1, 2], d: [2, 0], c: 'v2', label: L2, side: -1 }],
+    targets: [{ kind: 'line', s: [1, 1], d: [5, 0], c: 'vres', label: LR, side: -1, prompt: 'Zeichne ' + TEX.R + ' ab dem weißen Punkt.' }],
+    ok: 'Richtig: Beide Kräfte zeigen in dieselbe Richtung, also addieren sich die Beträge: $300\\,\\text{N} + 200\\,\\text{N} = 500\\,\\text{N}$.'
+  },
+  b22: {
+    ex: '1-2', w: 9, h: 4, anchor: [4, 1], scale: 100,
+    given: [{ s: [4, 3], d: [4, 0], c: 'v1', label: L1, side: -1 }, { s: [4, 2], d: [-3, 0], c: 'v2', label: L2 }],
+    targets: [{ kind: 'line', s: [4, 1], d: [1, 0], c: 'vres', label: LR, side: -1, prompt: 'Zeichne ' + TEX.R + ' ab dem weißen Punkt.' }],
+    ok: 'Richtig: $400\\,\\text{N} - 300\\,\\text{N} = 100\\,\\text{N}$ nach rechts. Die stärkere Seite gewinnt, aber nur mit dem Unterschied.'
+  },
+  b25: {
+    ex: '1-5', w: 6, h: 6, anchor: [4, 3], scale: 4000,
+    given: [{ s: [1, 3], d: [0, 3], c: 'v1', label: LS }, { s: [2, 3], d: [0, -2], c: 'v2', label: LG }],
+    targets: [{ kind: 'line', s: [4, 3], d: [0, 1], c: 'vres', label: LR, prompt: 'Zeichne ' + TEX.R + ' ab dem weißen Punkt.' }],
+    ok: 'Richtig: $12\\,000\\,\\text{N} - 8000\\,\\text{N} = 4000\\,\\text{N}$ nach oben. Deshalb wird der Aufzug schneller.'
+  },
+  b26: {
+    ex: '1-6', w: 9, h: 5, anchor: [3, 1], scale: 20,
+    given: [{ s: [3, 4], d: [5, 0], c: 'v1', label: L1, side: -1 }, { s: [3, 3], d: [-1, 0], c: 'v2', label: L2 }, { s: [3, 2], d: [-2, 0], c: 'v3', label: L3, side: -1 }],
+    targets: [{ kind: 'line', s: [3, 1], d: [2, 0], c: 'vres', label: LR, side: -1, prompt: 'Zeichne ' + TEX.R + ' ab dem weißen Punkt.' }],
+    ok: 'Richtig: $100\\,\\text{N} - 20\\,\\text{N} - 40\\,\\text{N} = 40\\,\\text{N}$ nach rechts.'
+  },
+  // ── F1.4
+  b41: {
+    ex: '3-1', w: 7, h: 5, body: [1, 1], bodyName: 'Puck', scale: 1, unit: 'm/s', A: [4, 0], B: [0, 3],
+    given: [{ s: [1, 1], d: [4, 0], c: 'v1', label: LvA }, { s: [5, 1], d: [0, 3], c: 'v2', label: LdV }],
+    targets: [{ kind: 'vsum', s: [1, 1], d: [4, 3], c: 'vres', label: LvE, side: -1, prompt: 'Zeichne ' + TV.E + ' am Puck.' }],
+    ok: 'Richtig: $\\vec{v}_A + \\Delta\\vec{v} = \\vec{v}_E$. Der Puck ist danach 5 m/s schnell, obwohl 4 m/s und 3 m/s zusammen 7 ergeben würden.'
+  },
+  b42: {
+    ex: '3-2', w: 6, h: 6, body: [1, 1], bodyName: 'Auto', scale: 5, unit: 'm/s', A: [4, 0], E: [0, 4],
+    given: [{ s: [1, 1], d: [4, 0], c: 'v1', label: LvA }, { s: [1, 1], d: [0, 4], c: 'vres', label: LvE, side: -1 }],
+    targets: [{ kind: 'vdiff', s: [5, 1], d: [-4, 4], c: 'v2', label: LdV, prompt: 'Zeichne ' + TV.D + ' an die Spitze von ' + TV.A + '.' }],
+    ok: 'Richtig: $\\Delta\\vec{v}$ zeigt schräg nach links oben, zur Innenseite der Kurve. Das Tempo bleibt gleich, trotzdem ist $\\Delta\\vec{v} \\neq 0$, weil sich die Richtung ändert.'
+  },
+  b44: {
+    ex: '3-4', w: 6, h: 7, body: [1, 4], bodyName: 'Kugel', scale: 1, unit: 'm/s', A: [3, -2], E: [3, 2],
+    given: [{ s: [1, 4], d: [3, -2], c: 'v1', label: LvA }, { s: [1, 4], d: [3, 2], c: 'vres', label: LvE, side: -1 }],
+    targets: [{ kind: 'vdiff', s: [4, 2], d: [0, 4], c: 'v2', label: LdV, prompt: 'Zeichne ' + TV.D + ' an die Spitze von ' + TV.A + '.' }],
+    ok: 'Richtig: $\\Delta\\vec{v}$ zeigt senkrecht von der Bande weg, nach oben. Genau in diese Richtung hat die Bande auf die Kugel gedrückt.'
+  },
+  // ── F1.3
   b1: {
     ex: '2-1', w: 10, h: 6, body: [2, 1], bodyName: 'Kiste', scale: 10,
     given: [{ s: [2, 1], d: [4, 0], c: 'v1', label: L1 }, { s: [2, 1], d: [0, 3], c: 'v2', label: L2 }],
@@ -929,6 +1528,48 @@ function diagnose(def, t, s, d) {
     if (V.sameDir(d, t.d)) return 'Richtung stimmt, Länge nicht. Zähle die Kästchen von der Spitze von ' + TEX.A + ' bis zur Spitze von ' + TEX.R + '.';
     return 'Überleg rückwärts: Welcher Pfeil führt von der Spitze von ' + TEX.A + ' zur Spitze von ' + TEX.R + '? Diesen Pfeil zeichnest du dann am Boot.';
   }
+  if (t.kind === 'draw') {
+    const unit = def.unit || 'N', n = V.len(d), want = V.len(t.d);
+    if (vecOk) return 'Länge und Richtung stimmen. Ein Kraftpfeil beginnt aber am Angriffspunkt, dem weißen Punkt am Körper.';
+    if (!startOk) return 'Setz den Fuß des Pfeils auf den Angriffspunkt, den weißen Punkt am Körper.';
+    if (V.eq(d, V.neg(t.d))) return 'Die Länge stimmt, aber der Pfeil zeigt in die Gegenrichtung.';
+    if (V.sameDir(d, t.d)) return 'Richtung stimmt. Dein Pfeil ist ' + fmt(n) + ' Kästchen lang, das wären ' + fmt(n * def.scale) + ' ' + unit + '. Gesucht sind ' + fmt(want * def.scale) + ' ' + unit + ': Teile durch ' + def.scale + ' ' + unit + ' pro Kästchen.';
+    if (Math.abs(n - want) < 0.01) return 'Die Länge stimmt, die Richtung nicht. Lies noch einmal, wohin die Kraft zeigen soll.';
+    return 'Noch nicht. Rechne zuerst die Länge aus (' + fmt(want * def.scale) + ' ' + unit + ' geteilt durch ' + def.scale + ' ' + unit + ' pro Kästchen) und achte auf die Richtung.';
+  }
+  if (t.kind === 'line') {
+    const G = def.given.map(g => g.d), sumMag = G.reduce((a, g) => a + V.len(g), 0);
+    const opposite = G.some(g => g[0] * t.d[0] + g[1] * t.d[1] < 0);
+    if (vecOk) return 'Länge und Richtung stimmen. Setz den Fuß aber auf den weißen Punkt.';
+    if (!startOk) return 'Starte am weißen Punkt. Dort beginnt ' + TEX.R + '.';
+    if (d[0] * t.d[1] - d[1] * t.d[0] !== 0) return 'Alle Kräfte liegen auf einer Linie, also liegt auch ' + TEX.R + ' auf dieser Linie.';
+    if (G.some(g => V.eq(g, d))) return 'Das ist eine einzelne Kraft. ' + TEX.R + ' fasst alle Kräfte zusammen.';
+    if (opposite && Math.abs(V.len(d) - sumMag) < 0.01) return 'Du hast alle Beträge addiert. Kräfte in Gegenrichtung werden aber abgezogen.';
+    if (V.sameDir(d, t.d)) return 'Die Richtung stimmt, die Länge nicht. Zähl die Kästchen in Richtung von ' + TEX.R + ' zusammen und zieh die Kästchen in Gegenrichtung ab.';
+    return 'Die Richtung stimmt nicht. ' + TEX.R + ' zeigt dorthin, wo die stärkere Seite zieht.';
+  }
+  if (t.kind === 'vsum') {
+    const A = def.A, B = def.B, tipA = V.add(P, A), am = 'am ' + def.bodyName;
+    if (vecOk) return 'Richtung und Länge stimmen. ' + TV.E + ' beginnt aber dort, wo auch ' + TV.A + ' beginnt: ' + am + '.';
+    if (V.eq(s, tipA) && V.eq(d, B)) return 'Das ist ' + TV.D + ' selbst. ' + TV.E + ' beginnt ' + am + ' und endet an der Spitze von ' + TV.D + '.';
+    if (!startOk) return TV.E + ' beginnt ' + am + ', genau wie ' + TV.A + '.';
+    if (V.eq(d, A)) return 'Das ist ' + TV.A + ', die Geschwindigkeit vorher.';
+    if (V.eq(d, B)) return 'Das ist ' + TV.D + '. Gesucht ist die Geschwindigkeit danach.';
+    if (V.eq(d, V.neg(t.d))) return 'Genau verkehrt herum.';
+    if (V.sameDir(d, t.d)) return 'Richtung stimmt, Länge nicht. ' + TV.E + ' endet genau an der Spitze von ' + TV.D + '.';
+    return 'Noch nicht. ' + TV.E + ' führt vom Fuß von ' + TV.A + ' bis zur Spitze von ' + TV.D + '.';
+  }
+  if (t.kind === 'vdiff') {
+    const A = def.A, E = def.E, tipE = V.add(P, E);
+    if (vecOk) return 'Länge und Richtung stimmen. Setz ' + TV.D + ' aber an die Spitze von ' + TV.A + ', dann siehst du direkt: ' + TV.A + ' und ' + TV.D + ' ergeben zusammen ' + TV.E + '.';
+    if (V.eq(s, tipE) && V.eq(d, V.neg(t.d))) return 'Verkehrt herum: ' + TV.D + ' zeigt von der Spitze von ' + TV.A + ' zur Spitze von ' + TV.E + ', nicht umgekehrt.';
+    if (!startOk) return TV.D + ' beginnt an der Spitze von ' + TV.A + '.';
+    if (V.eq(d, V.neg(t.d))) return 'Verkehrt herum: Die Spitze von ' + TV.D + ' muss auf der Spitze von ' + TV.E + ' landen.';
+    if (V.eq(d, E)) return 'Das ist ' + TV.E + ' noch einmal. Gesucht ist, was zu ' + TV.A + ' dazukommen muss, damit ' + TV.E + ' herauskommt.';
+    if (V.eq(d, V.add(A, E))) return 'Du hast die beiden Geschwindigkeiten addiert. ' + TV.D + ' ist der Unterschied: von der Spitze von ' + TV.A + ' zur Spitze von ' + TV.E + '.';
+    if (V.sameDir(d, t.d)) return 'Richtung stimmt, Länge nicht. Die Spitze von ' + TV.D + ' liegt genau auf der Spitze von ' + TV.E + '.';
+    return 'Verbinde die Spitze von ' + TV.A + ' mit der Spitze von ' + TV.E + '. Die Pfeilspitze von ' + TV.D + ' zeigt zu ' + TV.E + '.';
+  }
   return 'Noch nicht ganz.';
 }
 
@@ -942,11 +1583,11 @@ const Boards = (() => {
     const status = document.createElement('div');
     status.className = 'board-status';
     host.appendChild(status);
-    const svg = makeSvg(def, 'Pfeil-Gitter, Maßstab 1 Kästchen entspricht ' + def.scale + ' N');
+    const svg = makeSvg(def, 'Pfeil-Gitter, ' + scaleText(def).replace('≙', 'entspricht'));
     host.appendChild(svg);
     const scale = document.createElement('div');
     scale.className = 'board-scale';
-    scale.textContent = 'Maßstab: 1 Kästchen ≙ ' + def.scale + ' N';
+    scale.textContent = scaleText(def);
     host.appendChild(scale);
     const measure = document.createElement('div');
     measure.className = 'board-measure';
@@ -997,7 +1638,7 @@ const Boards = (() => {
   function render(id) {
     const st = state[id], def = st.def, layer = st.svg._layer;
     while (layer.firstChild) layer.removeChild(layer.firstChild);
-    def.given.forEach(a => drawArrow(def, layer, a.s, V.add(a.s, a.d), COLORS[a.c], { label: a.label, labelSide: a.side || 1 }));
+    def.given.forEach(a => drawArrow(def, layer, a.s, V.add(a.s, a.d), COLORS[a.c], { label: a.label, labelSide: a.side || 1, dashed: a.dashed }));
     for (let i = 0; i < st.step; i++) {
       const t = def.targets[i];
       drawArrow(def, layer, t.s, V.add(t.s, t.d), COLORS[t.c], { label: t.label, dashed: t.dashed, labelSide: t.side || 1, width: 0.12 });
@@ -1011,7 +1652,7 @@ const Boards = (() => {
       st.status.innerHTML = '<span class="step-pill">fertig</span> Alle Pfeile richtig.';
       const last = def.targets[def.targets.length - 1];
       const n = V.len(last.d);
-      st.measure.textContent = 'Länge des letzten Pfeils: ' + fmt(n) + ' Kästchen ≙ ' + fmt(n * def.scale) + ' N';
+      st.measure.textContent = 'Länge des letzten Pfeils: ' + fmt(n) + ' Kästchen ≙ ' + fmt(n * def.scale) + ' ' + (def.unit || 'N');
     } else {
       const t = def.targets[st.step];
       const pill = def.targets.length > 1 ? '<span class="step-pill">' + (st.step + 1) + ' / ' + def.targets.length + '</span> ' : '';
@@ -1023,20 +1664,22 @@ const Boards = (() => {
     }
   }
 
+  function cardEls(def) {
+    const [mod, n] = def.ex.split('-');
+    return { mod: +mod, fb: document.getElementById('m' + mod + '-fb' + n), card: document.getElementById('m' + mod + '-ex' + n) };
+  }
+
   function clearFb(def) {
-    const n = def.ex.split('-')[1];
-    const fb = document.getElementById('m2-fb' + n);
+    const { fb, card } = cardEls(def);
     fb.className = 'fb-block';
     fb.innerHTML = '';
-    document.getElementById('m2-ex' + n).classList.remove('wrong-state');
+    card.classList.remove('wrong-state');
   }
 
   function check(id) {
     const st = state[id], def = st.def;
     if (st.step >= def.targets.length) return;
-    const n = def.ex.split('-')[1];
-    const fb = document.getElementById('m2-fb' + n);
-    const card = document.getElementById('m2-ex' + n);
+    const { mod, fb, card } = cardEls(def);
     if (!st.start || !st.end) {
       fb.className = 'fb-block incorrect';
       fb.innerHTML = 'Zeichne zuerst einen Pfeil: Fuß antippen, dann Spitze antippen.';
@@ -1054,7 +1697,7 @@ const Boards = (() => {
         card.classList.remove('wrong-state');
         card.classList.add('solved');
         exerciseStates[def.ex] = true;
-        updateModuleProgress(2);
+        updateModuleProgress(mod);
         SCORM.save();
       } else {
         fb.className = 'fb-block correct';
@@ -1081,6 +1724,39 @@ const Boards = (() => {
 
   return { mount, check, undo };
 })();
+
+/* ────────────────────────────────────────────
+   STATIC FIGURES: explanation figures and read-off boards
+   ──────────────────────────────────────────── */
+const STATIC_DEFS = {
+  fig11: {
+    w: 8, h: 4, body: [1, 2], bodyName: 'Kiste', scale: 10,
+    given: [{ s: [1, 2], d: [4, 0], c: 'v1', label: LF, side: -1 }],
+    notes: [{ x: 0.2, y: 3.35, text: 'Angriffspunkt' }, { x: 5.35, y: 1.88, text: 'Richtung' }, { x: 2.1, y: 0.55, text: 'Länge: 4 Kästchen ≙ 40 N' }]
+  },
+  s11a: { w: 7, h: 3, body: [1, 1], bodyName: 'Kiste', scale: 5, given: [{ s: [1, 1], d: [4, 0], c: 'v1', label: LF, side: -1 }] },
+  s11b: { w: 4, h: 6, body: [2, 5], bodyName: 'Lampe', bodyNameAbove: true, scale: 3, given: [{ s: [2, 5], d: [0, -4], c: 'v1', label: LG }] },
+  fig12: {
+    w: 8, h: 4, scale: 10,
+    given: [{ s: [1, 3], d: [4, 0], c: 'v1', label: L1, side: -1 }, { s: [5, 2.3], d: [-3, 0], c: 'v2', label: L2, side: -1, dashed: true }, { s: [1, 1.1], d: [1, 0], c: 'vres', label: LR, side: -1 }],
+    notes: [{ x: 2.5, y: 0.98, text: '40 N − 30 N = 10 N nach rechts' }]
+  },
+  fig14: {
+    w: 7, h: 4, body: [1, 1], bodyName: 'Puck', scale: 1, unit: 'm/s',
+    given: [{ s: [1, 1], d: [4, 0], c: 'v1', label: LvA }, { s: [5, 1], d: [0, 3], c: 'v2', label: LdV }, { s: [1, 1], d: [4, 3], c: 'vres', label: LvE, side: -1 }]
+  }
+};
+function renderStatic(id) {
+  const def = STATIC_DEFS[id], host = document.getElementById('board-' + id);
+  host.innerHTML = '';
+  const svg = makeSvg(def, 'Abbildung, ' + scaleText(def).replace('≙', 'entspricht'));
+  host.appendChild(svg);
+  def.given.forEach(a => drawArrow(def, svg._layer, a.s, V.add(a.s, a.d), COLORS[a.c], { label: a.label, labelSide: a.side || 1, dashed: a.dashed }));
+  const sc = document.createElement('div');
+  sc.className = 'board-scale';
+  sc.textContent = scaleText(def);
+  host.appendChild(sc);
+}
 
 /* ────────────────────────────────────────────
    STATIC FIGURES: walkthrough, angle demo, Lina
@@ -1151,6 +1827,89 @@ function renderLina() {
    MC AND INPUT EXERCISES
    ──────────────────────────────────────────── */
 const EX_FEEDBACK = {
+  // F1.1
+  '0-1': {
+    ok: 'Richtig: 4 Kästchen mal 5 N pro Kästchen sind 20 N.',
+    wrong: { '4': '4 ist die Länge in Kästchen. Rechne mit dem Maßstab um: 1 Kästchen ≙ 5 N.', '40': 'Schau auf den Maßstab: Hier steht ein Kästchen für 5 N, nicht für 10 N.' },
+    fallback: 'Zähl die Kästchen vom Fuß bis zur Spitze und multipliziere mit 5 N.'
+  },
+  '0-2': {
+    ok: 'Richtig: 4 Kästchen mal 3 N sind 12 N.',
+    wrong: { '4': '4 ist die Länge in Kästchen. Rechne mit dem Maßstab um: 1 Kästchen ≙ 3 N.', '-12': 'Der Betrag einer Kraft ist immer positiv. Die Richtung nach unten zeigt der Pfeil.', '-12n': 'Der Betrag einer Kraft ist immer positiv. Die Richtung nach unten zeigt der Pfeil.' },
+    fallback: 'Zähl die Kästchen und multipliziere mit 3 N pro Kästchen.'
+  },
+  '0-5': {
+    ok: 'Richtig: A ist $4 \\cdot 10\\,\\text{N} = 40\\,\\text{N}$, B ist $2 \\cdot 20\\,\\text{N} = 40\\,\\text{N}$. Die Länge allein sagt nichts, erst mit dem Maßstab wird daraus eine Kraft.',
+    wrong: {
+      'a': 'A ist zwar länger gezeichnet, aber mit einem anderen Maßstab. Rechne beide in Newton um.',
+      'b': 'B hat den größeren Maßstab, ist aber nur halb so lang. Rechne beide in Newton um.',
+      'unbekannt': 'Doch, das geht: Länge mal Maßstab ergibt den Betrag. Rechne beide aus.'
+    }
+  },
+  '0-6': {
+    ok: 'Richtig: Die Kraft wirkt auf die Kiste, also beginnt der Pfeil an der Kiste, dort wo die Hand drückt. Ein Kraftpfeil sitzt immer an dem Körper, auf den die Kraft wirkt.',
+    wrong: {
+      'lea': 'Lea übt die Kraft aus, aber sie wirkt auf die Kiste. Der Pfeil sitzt an dem Körper, auf den die Kraft wirkt.',
+      'mitte': 'Kräfte wirken an Körpern, nicht in der Luft dazwischen. Auf welchen Körper wirkt die Kraft?',
+      'boden': 'Der Boden hat mit dieser Kraft nichts zu tun. Die Hand drückt gegen die Kiste: Dort setzt der Pfeil an.'
+    }
+  },
+  // F1.2
+  '1-3': {
+    ok: 'Richtig: $1350\\,\\text{N} - 1200\\,\\text{N} = 150\\,\\text{N}$, und zwar nach rechts, zur stärkeren Seite. Team Blau gewinnt.',
+    wrong: {
+      '2550': 'Du hast die Beträge addiert. Die Teams ziehen aber gegeneinander, also wird abgezogen.',
+      '2550n': 'Du hast die Beträge addiert. Die Teams ziehen aber gegeneinander, also wird abgezogen.',
+      '-150': 'Gefragt ist der Betrag, der ist immer positiv. Die Richtung sagst du in Worten: nach rechts.',
+      '-150n': 'Gefragt ist der Betrag, der ist immer positiv. Die Richtung sagst du in Worten: nach rechts.'
+    },
+    fallback: 'Die Kräfte zeigen gegeneinander: Zieh die kleinere von der größeren ab.'
+  },
+  '1-4': {
+    ok: 'Richtig: Gleich große, entgegengesetzte Kräfte heben sich auf, $F_{res} = 0$. Der Springer fällt trotzdem weiter, aber mit konstanter Geschwindigkeit. Das ist ein Kräftegleichgewicht, mehr dazu in Track F2.',
+    wrong: {
+      'u1600': 'Du hast die Beträge addiert. Die beiden Kräfte zeigen aber gegeneinander.',
+      'u800': 'Dass er sich nach unten bewegt, heißt nicht, dass eine resultierende Kraft nach unten wirkt. Rechne: 800 N nach unten und 800 N nach oben.',
+      'o': 'Beide Kräfte sind gleich groß. Keine Seite ist stärker.'
+    }
+  },
+  '1-7': {
+    ok: 'Richtig: $+250\\,\\text{N} + (-400\\,\\text{N}) = -150\\,\\text{N}$. Das Minus sagt: $\\vec{F}_{res}$ zeigt nach links.',
+    wrong: {
+      '150': 'Der Betrag stimmt, aber das Vorzeichen fehlt. Welche Kraft ist stärker, und in welche Richtung zeigt sie?',
+      '150n': 'Der Betrag stimmt, aber das Vorzeichen fehlt. Welche Kraft ist stärker, und in welche Richtung zeigt sie?',
+      '650': 'Du hast die Beträge addiert. Mit Vorzeichen rechnest du einfach: $+250 + (-400)$.',
+      '-650': 'Du hast beide Kräfte negativ gerechnet. $F_1$ zeigt aber nach rechts und bleibt positiv.'
+    },
+    fallback: 'Einfach addieren: $+250 + (-400)$. Das Vorzeichen des Ergebnisses zeigt die Richtung.'
+  },
+  // F1.4
+  '3-3': {
+    ok: 'Richtig: Geschwindigkeit ist ein Pfeil mit Betrag und Richtung. In der Kurve dreht sich der Pfeil, also ist $\\Delta\\vec{v} \\neq 0$, und dafür braucht es eine Kraft zur Innenseite der Kurve.',
+    wrong: {
+      'ja': 'Das Tempo bleibt gleich, das stimmt. Aber Geschwindigkeit ist ein Pfeil: Wenn er sich dreht, ändert sich die Geschwindigkeit.',
+      'tacho': 'Der Tacho zeigt nur den Betrag, also das Tempo. Die Richtung zeigt er nicht an.',
+      'kurz': 'Die Richtung ändert sich während der ganzen Kurve, nicht nur am Anfang.'
+    }
+  },
+  '3-5': {
+    ok: 'Richtig: Der Pfeil muss erst von 5 m/s auf null schrumpfen und dann noch einmal 5 m/s in die Gegenrichtung wachsen. Zusammen ist $\\Delta v = 10\\,\\text{m/s}$.',
+    wrong: {
+      '0': 'Das Tempo ist vorher und nachher gleich, aber die Richtung kehrt sich um. Zeichne beide Pfeile vom selben Punkt aus und verbinde die Spitzen.',
+      '5': 'Das würde nur reichen, um den Ball zu stoppen. Er fliegt aber noch mit 5 m/s zurück.',
+      '-10': 'Gefragt ist der Betrag, der ist immer positiv.'
+    },
+    fallback: 'Zeichne beide Pfeile vom selben Punkt aus. Wie lang ist der Pfeil von der einen Spitze zur anderen?'
+  },
+  '3-6': {
+    ok: 'Richtig: Der Geschwindigkeitspfeil wird kürzer, also zeigt $\\Delta\\vec{v}$ nach hinten. Genau dorthin zeigt auch die resultierende Kraft, hier die Bremskraft.',
+    wrong: {
+      'vor': 'Das Auto fährt zwar nach vorn, aber es wird langsamer. Zeichne $\\vec{v}_A$ lang und $\\vec{v}_E$ kurz: Wohin zeigt der Pfeil dazwischen?',
+      'null': 'Geradeaus heißt nur: Die Richtung bleibt gleich. Das Tempo ändert sich aber, also ist $\\Delta\\vec{v}$ nicht null.',
+      'unten': 'Nach unten wirken Gewichtskraft und Normalkraft, die heben sich auf. Für das Langsamerwerden zählt die Kraft entlang der Straße.'
+    }
+  },
+  // F1.3
   '2-2': {
     ok: 'Richtig: $5 \\cdot 10\\,\\text{N} = 50\\,\\text{N}$. Weniger als $40\\,\\text{N} + 30\\,\\text{N} = 70\\,\\text{N}$, weil die Kräfte nicht in dieselbe Richtung ziehen.',
     wrong: {
@@ -1195,7 +1954,7 @@ function matchesPattern(val, p) {
   return false;
 }
 function normalize(v) {
-  return v.trim().replace(/\s+/g, '').toLowerCase().replace(/,/g, '.');
+  return v.trim().replace(/\s+/g, '').toLowerCase().replace(/,/g, '.').replace(/\u2212/g, '-');
 }
 function selOpt(btn, hiddenId, val) {
   btn.closest('.opt-pills').querySelectorAll('.opt-pill').forEach(b => b.classList.remove('selected'));
@@ -1344,7 +2103,8 @@ const BG = (() => {
    ──────────────────────────────────────────── */
 window.addEventListener('load', () => {
   SCORM.init();
-  ['b1', 'b3', 'b5', 'b8'].forEach(Boards.mount);
+  ['b13', 'b14', 'b21', 'b22', 'b25', 'b26', 'b41', 'b42', 'b44', 'b1', 'b3', 'b5', 'b8'].forEach(Boards.mount);
+  Object.keys(STATIC_DEFS).forEach(renderStatic);
   renderDemo();
   drawAngleDemo();
   renderLina();
