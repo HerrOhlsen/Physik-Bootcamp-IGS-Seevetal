@@ -9,9 +9,9 @@ SCORM-1.2-Lernpakete für das Physik Bootcamp (Jg. 11-13): Mastery-basiertes Sel
 | C | Diagramme | TrackC1 | TrackC2 | TrackC3 |
 | D | Fachsprache | TrackD1 | TrackD2 | TrackD3 |
 | E | Synthese | TrackE1 | TrackE2 | TrackE3 |
-| F | Pfeile & Kräfte (F2, F3 im Aufbau) | TrackF1 | | |
+| F | Pfeile & Kräfte (F3 im Aufbau) | TrackF1 | TrackF2 | |
 
-Dazu: **Gate-Tests** zwischen den Leveln (GateA1A2, GateA2A3, ...) und ein **Einstufungstest**.
+Dazu: **Gate-Tests** zwischen den Leveln (GateA1A2, GateA2A3, ..., GateF1F2) und ein **Einstufungstest**.
 
 ## Repo-Struktur
 
