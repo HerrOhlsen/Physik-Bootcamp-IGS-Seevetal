@@ -39,11 +39,16 @@ function scormFinish() {
   }
 }
 
-function scormComplete(resultsObj) {
+function scormComplete(resultsObj, compactStr) {
   if (scormAPI) {
     scormAPI.LMSSetValue('cmi.core.lesson_status', 'completed');
+    // lesson_location is limited to 255 chars in Moodle: store only a compact string there
     try {
-      scormAPI.LMSSetValue('cmi.core.lesson_location', JSON.stringify(resultsObj));
+      scormAPI.LMSSetValue('cmi.core.lesson_location', compactStr);
+    } catch(e) {}
+    // full result object goes to suspend_data (4096 chars)
+    try {
+      scormAPI.LMSSetValue('cmi.suspend_data', JSON.stringify(resultsObj));
     } catch(e) {}
     scormAPI.LMSCommit('');
   }
@@ -334,7 +339,7 @@ button:disabled { opacity: .45; cursor: default; }
   <div class="landing-content">
     <div class="landing-badge">PHYSIK BOOTCAMP</div>
     <h1 class="landing-title">Wo steigst du <span>ein?</span></h1>
-    <p class="landing-sub">Finde in 5 Minuten heraus, welches Level zu dir passt. Ehrlich antworten – der Test hilft dir, nicht uns.</p>
+    <p class="landing-sub">Finde in 6 Minuten heraus, welches Level zu dir passt. Ehrlich antworten – der Test hilft dir, nicht uns.</p>
     <button class="landing-cta" onclick="leaveLanding()">Einstufungstest starten</button>
     <div class="landing-tracks">
       <div class="landing-track-pill"><div class="landing-track-dot" style="background:#6366f1"></div>Formeln</div>
@@ -342,6 +347,7 @@ button:disabled { opacity: .45; cursor: default; }
       <div class="landing-track-pill"><div class="landing-track-dot" style="background:#ea580c"></div>Diagramme</div>
       <div class="landing-track-pill"><div class="landing-track-dot" style="background:#9333ea"></div>Fachsprache</div>
       <div class="landing-track-pill"><div class="landing-track-dot" style="background:#0d9488"></div>Synthese</div>
+      <div class="landing-track-pill"><div class="landing-track-dot" style="background:#e11d48"></div>Pfeile &amp; Kräfte</div>
     </div>
   </div>
   <div class="landing-footer">Einstufungstest · v1.0</div>
@@ -354,6 +360,7 @@ button:disabled { opacity: .45; cursor: default; }
   <div class="track-dot" id="dot-C">C</div>
   <div class="track-dot" id="dot-D">D</div>
   <div class="track-dot" id="dot-E">E</div>
+  <div class="track-dot" id="dot-F">F</div>
 </div>
 
 <!-- ══════════════════════════════════════
@@ -366,7 +373,7 @@ button:disabled { opacity: .45; cursor: default; }
   </div>
   <div class="intro-card">
     <h2>So funktioniert's</h2>
-    <p>Du siehst zu jedem Track 2–3 Fragen. Bei jeder Frage kannst du wählen:</p>
+    <p>Du siehst zu jedem Track 2–4 Fragen. Bei jeder Frage kannst du wählen:</p>
     <div class="legend">
       <div class="legend-item">
         <div class="leg-badge" style="background:#dcfce7;color:#15803d">✓</div>
@@ -394,6 +401,7 @@ button:disabled { opacity: .45; cursor: default; }
 <div class="screen" id="screen-C"></div>
 <div class="screen" id="screen-D"></div>
 <div class="screen" id="screen-E"></div>
+<div class="screen" id="screen-F"></div>
 
 <!-- ══════════════════════════════════════
      RESULT SCREEN
@@ -409,7 +417,8 @@ const META = {
   B: { name:'Rechnen & Einheiten', color:'#15803d', bg:'#dcfce7', dark:'#14532d' },
   C: { name:'Diagramme lesen',  color:'#c2410c', bg:'#ffedd5', dark:'#7c2d12' },
   D: { name:'Fachsprache',      color:'#9333ea', bg:'#faf5ff', dark:'#581c87' },
-  E: { name:'Synthese',          color:'#0d9488', bg:'#f0fdfa', dark:'#134e4a' }
+  E: { name:'Synthese',          color:'#0d9488', bg:'#f0fdfa', dark:'#134e4a' },
+  F: { name:'Pfeile & Kräfte',   color:'#e11d48', bg:'#fff1f2', dark:'#9f1239' }
 };
 
 const CARDS = {
@@ -581,15 +590,54 @@ const CARDS = {
       opts: ['40 m', '13 m', '5 m', '64 m'],
       correct: 0
     }
+  ],
+  F: [
+    {
+      level: 'Level 1',
+      question: 'Ich kann zwei Kräfte in verschiedene Richtungen zu einer Gesamtkraft zusammensetzen (Spitze an Fuß, Parallelogramm).',
+      taskType: 'mc',
+      taskText: 'Zwei Kräfte greifen im selben Punkt an: $3\\,\\text{N}$ nach rechts und $4\\,\\text{N}$ nach oben (rechtwinklig zueinander). Wie groß ist die resultierende Kraft?',
+      opts: ['$7\\,\\text{N}$', '$1\\,\\text{N}$', '$5\\,\\text{N}$', '$12\\,\\text{N}$'],
+      correct: 2
+    },
+    {
+      level: 'Level 1',
+      question: 'Ich kann die Geschwindigkeitsänderung $\\Delta\\vec{v}$ bestimmen und weiß, dass $\\vec{v}_A + \\Delta\\vec{v} = \\vec{v}_E$ gilt.',
+      taskType: 'mc',
+      taskText: 'Ein Ball trifft mit $v_A = 6\\,\\text{m/s}$ nach rechts auf eine Wand und springt mit $v_E = 4\\,\\text{m/s}$ nach links zurück. Wie groß ist $\\Delta\\vec{v}$?',
+      opts: ['$2\\,\\text{m/s}$ nach links', '$10\\,\\text{m/s}$ nach links', '$2\\,\\text{m/s}$ nach rechts', '$10\\,\\text{m/s}$ nach rechts'],
+      correct: 1
+    },
+    {
+      level: 'Level 2',
+      question: 'Ich kann einen Körper freistellen und entscheiden, ob ein Kräftegleichgewicht vorliegt und was eine Wechselwirkung ist.',
+      taskType: 'mc',
+      taskText: 'Ein Buch liegt ruhig auf einem Tisch. Welche Aussage stimmt?',
+      opts: [
+        'Gewichtskraft und Tischkraft auf das Buch sind ein Wechselwirkungspaar, weil sie gleich groß und entgegengesetzt sind.',
+        'Auf das Buch wirkt nur die Gewichtskraft, der Tisch hält es lediglich fest.',
+        'Beide wirken auf das Buch und heben sich auf: ein Kräftegleichgewicht, kein Wechselwirkungspaar.',
+        'Weil das Buch ruht, wirkt keine Kraft auf das Buch.'
+      ],
+      correct: 2
+    },
+    {
+      level: 'Level 3',
+      question: 'Ich kann eine Kraft in Komponenten zerlegen und damit z.B. eine schiefe Ebene berechnen.',
+      taskType: 'mc',
+      taskText: 'Eine Kiste (Gewichtskraft $100\\,\\text{N}$) steht auf einer reibungsfreien schiefen Ebene mit Neigungswinkel $30°$. Wie groß ist die Komponente der Gewichtskraft <strong>entlang</strong> der Ebene (Hangabtriebskraft)?',
+      opts: ['$87\\,\\text{N}$', '$100\\,\\text{N}$', '$30\\,\\text{N}$', '$50\\,\\text{N}$'],
+      correct: 3
+    }
   ]
 };
 
-const ORDER = ['A','B','C','D','E'];
+const ORDER = ['A','B','C','D','E','F'];
 
 /* ─────────────────────────────────────────
    STATE
 ───────────────────────────────────────── */
-const results = { A:[null,null,null], B:[null,null,null], C:[null,null,null], D:[null,null,null], E:[null,null] };
+const results = { A:[null,null,null], B:[null,null,null], C:[null,null,null], D:[null,null,null], E:[null,null], F:[null,null,null,null] };
 let currentScreen = 'intro';
 
 /* ─────────────────────────────────────────
@@ -856,6 +904,12 @@ function goNext(t) {
 ───────────────────────────────────────── */
 function getRec(t) {
   const r = results[t].slice(0, CARDS[t].length);
+  if (t === 'F') {
+    // Track F: cards 0+1 test F1 (force parallelogram, delta v), card 2 tests F2, card 3 tests F3
+    if (!pass(r[0]) || !pass(r[1])) return { level: 1, label: 'Level 1', note: 'Starte von Anfang an.' };
+    if (!pass(r[2])) return { level: 2, label: 'Level 2', note: 'Überspringe Level 1.' };
+    return { level: 3, label: 'Level 3', note: 'Direkt zu Level 3 – Gate Test erforderlich!' };
+  }
   if (!pass(r[0])) return { level: 1, label: 'Level 1', note: 'Starte von Anfang an.' };
   if (r.length < 2 || !pass(r[1])) return { level: 2, label: 'Level 2', note: 'Überspringe Level 1.' };
   return { level: 3, label: 'Level 3', note: 'Direkt zu Level 3 – Gate Test erforderlich!' };
@@ -867,7 +921,8 @@ function getFirstModule(t, level) {
     B: { 1:'B1.1 – SI-Einheiten', 2:'B2.1 – Mehrstufige Rechnung', 3:'B3.1 – Überschlag' },
     C: { 1:'C1.1 – Achsen lesen', 2:'C2.1 – Graphen vergleichen', 3:'C3.1 – Realexperiment' },
     D: { 1:'D1.1 – Grundbegriffe', 2:'D2.1 – Erweiterte Begriffe', 3:'D3.1 – Hypothesen' },
-    E: { 1:'E1.1 – Formel + Einheit', 2:'E2.1 – Realproblem', 3:'E3.1 – Freier Fall' }
+    E: { 1:'E1.1 – Formel + Einheit', 2:'E2.1 – Realproblem', 3:'E3.1 – Freier Fall' },
+    F: { 1:'F1.1 – Was ein Kraftpfeil sagt', 2:'F2.1 – Körper freistellen', 3:'F3.1 – Kräfte zerlegen' }
   };
   return map[t][level];
 }
@@ -878,12 +933,15 @@ function showResult() {
 
   // SCORM: save completion and results
   const scormResults = {};
+  const compact = [];
   ORDER.forEach(t => {
     const rec = getRec(t);
     scormResults[t] = { track: META[t].name, recommendedLevel: rec.level, label: rec.label };
+    compact.push(t + rec.level);
   });
   scormResults.weakest = weakest;
-  scormComplete(scormResults);
+  // compact string (e.g. "A2,B1,C3,D1,E2,F2,w:F") stays far below the 255 char limit of lesson_location
+  scormComplete(scormResults, compact.join(',') + ',w:' + weakest);
 
   let html = `<div class="result-header">
     <h1>🎯 Dein Einstieg</h1>

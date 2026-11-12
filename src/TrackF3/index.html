@@ -1,0 +1,2297 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>Physik Bootcamp · Track F3: Zerlegen &amp; rechnen</title>
+
+<script>
+MathJax = {
+  tex: { inlineMath: [['$','$']], displayMath: [['$$','$$']] },
+  svg: { fontCache: 'global' }
+};
+</script>
+<script async src="https://cdn.jsdelivr.net/npm/mathjax@3.2.2/es5/tex-svg.js"></script>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;500;600;700;800;900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+
+<style>
+/* ── iOS-Kompatibilität ─────────────────────────────────────── */
+input, textarea, select { font-size: 16px; }
+html { height: 100%; }
+body { min-height: 100vh; min-height: 100dvh; overflow-y: auto; }
+button, [onclick], .opt-pill, .mod-card, svg.grid-svg { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+/* ── Ende iOS-Kompatibilität ────────────────────────────────── */
+
+/* ══════════════════════════════════════════
+   TOKENS & RESET
+   ══════════════════════════════════════════ */
+:root {
+  --bg-deep: #0c0c1d;
+  --bg-surface: #13132b;
+  --bg-card: #1a1a3e;
+  --bg-elevated: #222255;
+  --bg-glass: rgba(26, 26, 62, 0.72);
+  --bg-glass-heavy: rgba(12, 12, 29, 0.92);
+
+  --ink: #e8e8f0;
+  --ink-muted: #a8a8c8;
+  --ink-dim: #8587b8;
+
+  --accent: #e11d48;
+  --accent-bright: #fb7185;
+  --accent-glow: rgba(225, 29, 72, 0.35);
+  --accent-deep: #9f1239;
+  --accent-subtle: rgba(225, 29, 72, 0.10);
+
+  --ok: #34d399;
+  --ok-bg: rgba(52, 211, 153, 0.12);
+  --ok-border: rgba(52, 211, 153, 0.3);
+  --err: #f87171;
+  --err-bg: rgba(248, 113, 113, 0.12);
+  --err-border: rgba(248, 113, 113, 0.3);
+  --warn: #fbbf24;
+  --warn-bg: rgba(251, 191, 36, 0.10);
+
+  --border: rgba(251, 113, 133, 0.16);
+  --border-strong: rgba(251, 113, 133, 0.32);
+
+  /* vector colours, shared by SVG boards and text */
+  --v1: #60a5fa;
+  --v2: #fbbf24;
+  --vres: #c084fc;
+  --v3: #2dd4bf;
+
+  --font: 'Outfit', system-ui, sans-serif;
+  --mono: 'IBM Plex Mono', monospace;
+  --r-sm: 8px; --r-md: 14px; --r-lg: 20px; --r-full: 100px;
+  --shadow: 0 4px 24px rgba(0,0,0,0.3), 0 1px 4px rgba(0,0,0,0.2);
+  --shadow-lg: 0 8px 40px rgba(0,0,0,0.4), 0 2px 8px rgba(0,0,0,0.3);
+  --glow: 0 0 30px var(--accent-glow);
+}
+
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+body {
+  font-family: var(--font);
+  font-size: 1rem;
+  line-height: 1.7;
+  color: var(--ink);
+  background: var(--bg-deep);
+  overflow-x: hidden;
+}
+
+#bg-canvas { position: fixed; inset: 0; width: 100%; height: 100%; z-index: 0; transition: opacity 0.8s ease; }
+#bg-canvas.hidden { opacity: 0; pointer-events: none; }
+
+/* ══════════════════════════════════════════
+   SCREENS
+   ══════════════════════════════════════════ */
+.screen { display: none; position: relative; z-index: 1; min-height: 100vh; min-height: 100dvh; }
+.screen.active { display: block; animation: screenIn 0.5s cubic-bezier(0.22, 1, 0.36, 1); }
+@keyframes screenIn { from { opacity: 0; transform: translateY(24px); } to { opacity: 1; transform: none; } }
+@keyframes fadeUp { from { opacity: 0; transform: translateY(30px); } to { opacity: 1; transform: none; } }
+
+/* ══════════════════════════════════════════
+   LANDING
+   ══════════════════════════════════════════ */
+.landing {
+  display: flex; flex-direction: column; align-items: center; justify-content: center;
+  min-height: 100vh; min-height: 100dvh; padding: 40px 20px;
+}
+.landing-header { text-align: center; margin-bottom: 44px; animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.2s both; }
+.track-badge {
+  display: inline-flex; align-items: center; gap: 8px;
+  background: rgba(159, 18, 57, 0.35);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--accent); color: var(--accent-bright);
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.14em; text-transform: uppercase;
+  padding: 8px 20px; border-radius: var(--r-full); margin-bottom: 24px;
+}
+.landing-title {
+  font-size: clamp(2.4rem, 6vw, 4rem); font-weight: 900; line-height: 1.05; letter-spacing: -0.04em;
+  background: linear-gradient(135deg, #ffffff 0%, var(--accent-bright) 55%, #fecdd3 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+  margin-bottom: 16px;
+}
+.landing-sub { color: var(--ink-muted); font-size: 1.1rem; max-width: 500px; margin: 0 auto 20px; line-height: 1.6; }
+.landing-meta { display: flex; justify-content: center; gap: 28px; flex-wrap: wrap; }
+.l-meta { font-size: 0.8rem; color: var(--ink-dim); font-weight: 500; }
+.l-meta .val { color: var(--accent-bright); font-weight: 700; font-family: var(--mono); }
+
+.overall-progress { width: 100%; max-width: 640px; margin-bottom: 36px; animation: fadeUp 0.8s cubic-bezier(0.22,1,0.36,1) 0.4s both; }
+.op-bar-wrap { display: flex; align-items: center; gap: 14px; }
+.op-track { flex: 1; height: 6px; background: rgba(255,255,255,0.06); border-radius: var(--r-full); overflow: hidden; }
+.op-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright)); border-radius: var(--r-full); transition: width 0.8s; }
+.op-label { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-muted); white-space: nowrap; }
+
+.module-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; width: 100%; max-width: 920px; }
+.mod-card {
+  background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border: 1px solid var(--border); border-radius: var(--r-lg);
+  padding: 28px; cursor: pointer; position: relative;
+  transition: transform 0.35s cubic-bezier(0.22,1,0.36,1), border-color 0.35s, box-shadow 0.35s;
+  animation: fadeUp 0.6s cubic-bezier(0.22,1,0.36,1) 0.5s both;
+}
+.mod-card:hover { transform: translateY(-4px); border-color: var(--border-strong); box-shadow: var(--shadow-lg), var(--glow); }
+.mod-card.soon { cursor: default; opacity: 0.55; }
+.mod-card.soon:hover { transform: none; box-shadow: none; border-color: var(--border); }
+.mod-card.completed { border-color: var(--ok-border); }
+.mod-card.completed::after {
+  content: '\2713'; position: absolute; top: 16px; right: 16px; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--ok); color: #0c0c1d; display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 0.85rem;
+}
+.mc-num { font-family: var(--mono); font-size: 0.65rem; font-weight: 700; color: var(--accent-bright); letter-spacing: 0.15em; text-transform: uppercase; margin-bottom: 8px; }
+.mc-title { font-size: 1.15rem; font-weight: 700; color: #fff; margin-bottom: 6px; }
+.mc-desc { font-size: 0.82rem; color: var(--ink-muted); margin-bottom: 14px; line-height: 1.5; }
+.mc-footer { display: flex; align-items: center; justify-content: space-between; }
+.mc-time { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-dim); }
+.mc-status { font-size: 0.7rem; font-weight: 600; padding: 3px 10px; border-radius: var(--r-full); background: var(--accent-subtle); color: var(--accent-bright); border: 1px solid var(--border); }
+.mc-status.done { background: var(--ok-bg); color: var(--ok); border-color: var(--ok-border); }
+.landing-footer { margin-top: 44px; font-size: 0.72rem; color: var(--ink-dim); font-family: var(--mono); }
+
+/* ══════════════════════════════════════════
+   MODULE PAGE
+   ══════════════════════════════════════════ */
+.module-page { background: var(--bg-deep); position: relative; min-height: 100vh; min-height: 100dvh; }
+.module-page::before {
+  content: ''; position: fixed; inset: 0; pointer-events: none; z-index: 0;
+  background-image: radial-gradient(circle at 1px 1px, rgba(225,29,72,0.06) 1px, transparent 0);
+  background-size: 32px 32px;
+}
+.top-nav {
+  position: sticky; top: 0; z-index: 100;
+  background: var(--bg-glass-heavy);
+  -webkit-backdrop-filter: blur(16px); backdrop-filter: blur(16px);
+  border-bottom: 1px solid var(--border); padding: 0 16px;
+}
+.top-nav-inner { max-width: 820px; margin: 0 auto; display: flex; align-items: center; gap: 16px; height: 56px; }
+.btn-back {
+  display: inline-flex; align-items: center; gap: 6px; background: none;
+  border: 1px solid var(--border); color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.8rem; font-weight: 600;
+  padding: 8px 14px; min-height: 44px; border-radius: var(--r-md); cursor: pointer; flex-shrink: 0;
+}
+.btn-back:hover { border-color: var(--accent); color: var(--accent-bright); }
+.nav-title { font-size: 0.85rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.nav-progress { margin-left: auto; display: flex; align-items: center; gap: 10px; flex-shrink: 0; }
+.nav-progress-track { width: 80px; height: 4px; background: var(--bg-elevated); border-radius: var(--r-full); overflow: hidden; }
+.nav-progress-fill { height: 100%; width: 0%; background: linear-gradient(90deg, var(--accent-deep), var(--accent-bright)); transition: width 0.6s; }
+.nav-progress-text { font-family: var(--mono); font-size: 0.7rem; color: var(--ink-dim); white-space: nowrap; }
+
+.mod-content { position: relative; z-index: 1; max-width: 780px; margin: 0 auto; padding: 0 16px 100px; }
+.hero { padding: 48px 0 28px; text-align: center; }
+.hero-badge {
+  display: inline-flex; background: var(--accent-deep); color: #ffe4e6;
+  font-size: 0.72rem; font-weight: 700; letter-spacing: 0.12em; text-transform: uppercase;
+  padding: 6px 16px; border-radius: var(--r-full); margin-bottom: 18px; border: 1px solid var(--accent);
+}
+.hero h1 {
+  font-size: clamp(1.8rem, 4.5vw, 2.6rem); font-weight: 900; line-height: 1.1; letter-spacing: -0.03em;
+  background: linear-gradient(135deg, #fff 0%, var(--accent-bright) 100%);
+  -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; margin-bottom: 10px;
+}
+.hero-sub { color: var(--ink-muted); max-width: 500px; margin: 0 auto 18px; }
+.hero-meta { display: flex; justify-content: center; gap: 20px; flex-wrap: wrap; }
+.meta-chip { font-size: 0.78rem; color: var(--ink-muted); font-weight: 500; }
+.meta-chip .val { color: var(--accent-bright); font-weight: 700; font-family: var(--mono); }
+
+.kompetenzen {
+  text-align: left; max-width: 560px; margin: 24px auto 0;
+  background: var(--bg-glass); border: 1px solid var(--border); border-radius: var(--r-md); padding: 14px 20px;
+}
+.kompetenzen h3 { font-size: 0.72rem; font-family: var(--mono); letter-spacing: 0.12em; text-transform: uppercase; color: var(--accent-bright); margin-bottom: 6px; }
+.kompetenzen li { font-size: 0.9rem; color: var(--ink); margin-left: 18px; }
+
+.glass {
+  background: var(--bg-glass);
+  -webkit-backdrop-filter: blur(12px); backdrop-filter: blur(12px);
+  border: 1px solid var(--border); border-radius: var(--r-lg); padding: 22px; margin-bottom: 18px;
+}
+.glass p + p { margin-top: 10px; }
+.chapter { margin-top: 40px; }
+.chapter-label { display: flex; align-items: center; gap: 14px; margin-bottom: 18px; }
+.chapter-num {
+  display: flex; align-items: center; justify-content: center; width: 36px; height: 36px; border-radius: 50%;
+  background: var(--accent-deep); border: 2px solid var(--accent); color: #ffe4e6;
+  font-family: var(--mono); font-size: 0.8rem; font-weight: 700; flex-shrink: 0;
+}
+.chapter-title { font-size: 1.3rem; font-weight: 800; color: #fff; }
+
+.c1 { color: var(--v1); font-weight: 700; }
+.c2 { color: var(--v2); font-weight: 700; }
+.cr { color: var(--vres); font-weight: 700; }
+.c3 { color: var(--v3); font-weight: 700; }
+
+.callout-v2 { display: flex; gap: 12px; align-items: flex-start; padding: 16px 20px; border-radius: var(--r-md); margin: 16px 0; }
+.callout-v2 .icon { font-size: 1.2rem; flex-shrink: 0; }
+.callout-v2 .title { font-weight: 700; margin-bottom: 4px; }
+.callout-v2.info { background: rgba(56,189,248,0.08); border: 1px solid rgba(56,189,248,0.2); }
+.callout-v2.info .body { color: #bae6fd; } .callout-v2.info .title { color: #38bdf8; }
+.callout-v2.warning { background: var(--warn-bg); border: 1px solid rgba(251,191,36,0.2); }
+.callout-v2.warning .body { color: #fde68a; } .callout-v2.warning .title { color: #fcd34d; }
+
+/* Walkthrough */
+.wt-container { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg); overflow: hidden; margin: 16px 0; }
+.wt-slide { padding: 20px 22px 6px; }
+.wt-slide-tag { font-family: var(--mono); font-size: 0.65rem; color: var(--accent-bright); text-transform: uppercase; letter-spacing: 0.12em; margin-bottom: 6px; }
+.wt-text { min-height: 4.5em; }
+.wt-nav-bar { display: flex; align-items: center; justify-content: space-between; padding: 10px 16px; border-top: 1px solid var(--border); }
+.wt-arrow {
+  background: none; border: 1px solid var(--border); color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.85rem; font-weight: 600;
+  padding: 10px 16px; min-height: 44px; border-radius: var(--r-md); cursor: pointer;
+}
+.wt-arrow:disabled { opacity: 0.3; cursor: default; }
+.wt-arrow.primary { border-color: var(--accent); color: var(--accent-bright); }
+.wt-counter { font-family: var(--mono); font-size: 0.75rem; color: var(--ink-dim); }
+
+/* Angle slider demo */
+.slider-row { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin-top: 10px; }
+.slider-row input[type=range] { flex: 1; min-width: 200px; accent-color: var(--accent); height: 32px; }
+.readout { font-family: var(--mono); font-size: 0.95rem; }
+.readout b { color: var(--vres); }
+
+/* Exercise cards */
+.exercise-card { background: var(--bg-surface); border: 1px solid var(--border); border-radius: var(--r-lg); margin-bottom: 16px; transition: border-color 0.3s; }
+.exercise-card.solved { border-color: var(--ok-border); }
+.exercise-card.wrong-state { border-color: var(--err-border); }
+.ex-header { display: flex; align-items: center; gap: 10px; padding: 14px 20px; background: var(--bg-card); border-bottom: 1px solid var(--border); border-radius: var(--r-lg) var(--r-lg) 0 0; }
+.ex-num {
+  display: flex; align-items: center; justify-content: center; width: 28px; height: 28px; border-radius: 50%;
+  background: var(--accent-deep); color: #ffe4e6; font-family: var(--mono); font-size: 0.75rem; font-weight: 700; flex-shrink: 0;
+}
+.ex-title { font-weight: 600; font-size: 0.92rem; }
+.ex-tag { margin-left: auto; font-family: var(--mono); font-size: 0.6rem; font-weight: 600; color: var(--accent-bright); background: var(--accent-subtle); padding: 2px 8px; border-radius: var(--r-full); letter-spacing: 0.05em; text-transform: uppercase; white-space: nowrap; }
+.ex-body { padding: 20px; }
+.ex-question { margin-bottom: 14px; line-height: 1.6; }
+
+.answer-row { display: flex; gap: 8px; align-items: center; flex-wrap: wrap; }
+.answer-prefix { font-weight: 600; font-size: 1.05rem; color: var(--vres); }
+.answer-input {
+  flex: 1; min-width: 140px; max-width: 220px; padding: 10px 14px; min-height: 44px;
+  background: var(--bg-deep); border: 2px solid var(--border-strong); border-radius: var(--r-md);
+  color: var(--ink); font-family: var(--mono); font-size: 16px; outline: none;
+}
+.answer-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-glow); }
+.answer-input.correct { border-color: var(--ok); background: var(--ok-bg); color: var(--ok); }
+.answer-input.incorrect { border-color: var(--err); background: var(--err-bg); color: var(--err); }
+.answer-unit { color: var(--ink-muted); }
+
+.btn-row { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 12px; }
+.btn-check {
+  display: inline-flex; align-items: center; gap: 6px; padding: 10px 18px; min-height: 44px;
+  background: var(--accent-deep); border: 1px solid var(--accent); color: #fff;
+  font-family: var(--font); font-size: 0.88rem; font-weight: 600; border-radius: var(--r-md); cursor: pointer;
+}
+.btn-check:hover { background: var(--accent); }
+.btn-check:disabled { opacity: 0.4; cursor: default; }
+.btn-ghost, .btn-hint {
+  display: inline-flex; align-items: center; gap: 4px; padding: 10px 14px; min-height: 44px; background: none;
+  border: 1px dashed var(--border-strong); color: var(--ink-muted);
+  font-family: var(--font); font-size: 0.85rem; border-radius: var(--r-md); cursor: pointer;
+}
+.btn-ghost { border-style: solid; }
+.btn-hint:hover { border-color: var(--warn); color: var(--warn); }
+.btn-ghost:hover { border-color: var(--accent); color: var(--accent-bright); }
+.hint-box { display: none; margin-top: 12px; padding: 12px 16px; background: var(--warn-bg); border: 1px solid rgba(251,191,36,0.2); border-radius: var(--r-md); font-size: 0.88rem; color: #fde68a; }
+.hint-box.open { display: block; }
+.fb-block { margin-top: 12px; padding: 10px 14px; border-radius: var(--r-md); font-size: 0.9rem; display: none; }
+.fb-block.correct { display: block; background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+.fb-block.incorrect { display: block; background: var(--err-bg); color: #fecaca; border: 1px solid var(--err-border); }
+
+.opt-pills { display: flex; flex-direction: column; gap: 8px; margin-bottom: 4px; }
+.opt-pill {
+  text-align: left; padding: 12px 16px; min-height: 44px; background: var(--bg-card);
+  border: 2px solid var(--border); border-radius: var(--r-md);
+  font-family: var(--font); font-size: 0.92rem; color: var(--ink); cursor: pointer; line-height: 1.45;
+}
+.opt-pill:hover { border-color: var(--accent); }
+.opt-pill.selected { border-color: var(--accent-bright); background: var(--accent-deep); color: #fff; }
+
+/* ══════════════════════════════════════════
+   PFEIL-GITTER (arrow board)
+   ══════════════════════════════════════════ */
+.board { margin: 4px 0 0; }
+.board-status {
+  display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+  font-size: 0.88rem; color: var(--ink-muted); margin-bottom: 8px; min-height: 1.6em;
+}
+.board-status .step-pill { font-family: var(--mono); font-size: 0.7rem; padding: 2px 8px; border-radius: var(--r-full); background: var(--accent-subtle); color: var(--accent-bright); border: 1px solid var(--border); }
+.board svg.grid-svg {
+  display: block; width: 100%; max-width: 640px; height: auto; margin: 0 auto;
+  background: #0f1026; border: 1px solid var(--border); border-radius: var(--r-md);
+  cursor: pointer; user-select: none; -webkit-user-select: none;
+}
+.board.static svg.grid-svg { cursor: default; }
+.board-scale { text-align: center; font-family: var(--mono); font-size: 0.78rem; color: var(--ink-dim); margin-top: 6px; }
+.board-measure { text-align: center; font-family: var(--mono); font-size: 0.85rem; color: var(--vres); margin-top: 4px; min-height: 1.3em; }
+.svg-grid { stroke: rgba(168,168,200,0.16); stroke-width: 0.03; }
+.svg-dot { fill: rgba(168,168,200,0.35); }
+.svg-body { fill: rgba(232,232,240,0.10); stroke: rgba(232,232,240,0.45); stroke-width: 0.05; }
+.svg-anchor { fill: #fff; }
+.svg-start { fill: none; stroke: #fff; stroke-width: 0.07; }
+.svg-label { font-family: 'Outfit', system-ui, sans-serif; font-style: italic; font-weight: 700; }
+
+.howto { display: flex; gap: 14px; align-items: center; flex-wrap: wrap; }
+.howto ol { margin-left: 20px; }
+
+.result-box { display: none; margin-top: 24px; padding: 16px 20px; border-radius: var(--r-md); text-align: center; font-weight: 600; }
+.result-box.show { display: block; }
+.result-box.done { background: var(--ok-bg); color: var(--ok); border: 1px solid var(--ok-border); }
+.result-box.partial { background: var(--accent-subtle); color: var(--accent-bright); border: 1px solid var(--border); }
+.btn-result {
+  display: flex; align-items: center; justify-content: center; gap: 10px; width: 100%; max-width: 360px;
+  margin: 32px auto 0; padding: 16px 28px; min-height: 48px;
+  background: linear-gradient(135deg, var(--accent-deep), var(--accent)); border: none; border-radius: var(--r-lg);
+  color: #fff; font-family: var(--font); font-size: 1.05rem; font-weight: 700; cursor: pointer;
+}
+
+@media (max-width: 640px) {
+  .hero { padding: 36px 0 22px; }
+  .glass { padding: 16px; }
+  .ex-body { padding: 16px; }
+  .nav-progress-track { display: none; }
+}
+@media (hover: none) and (pointer: coarse) {
+  .mod-card:hover, .btn-check:hover, .btn-ghost:hover, .btn-hint:hover, .opt-pill:hover, .btn-back:hover {
+    transform: none; box-shadow: none;
+  }
+  .opt-pill:hover { border-color: var(--border); }
+  .opt-pill.selected:hover { border-color: var(--accent-bright); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .screen.active, .mod-card, .landing-header, .overall-progress { animation: none; }
+}
+/* ══════════════════════════════════════════
+   FREIKÖRPERBILD-BAUKASTEN und ZUORDNUNG
+   ══════════════════════════════════════════ */
+.fbd-scene svg { display: block; width: 100%; max-width: 440px; height: auto; margin: 0 auto; background: #0f1026; border: 1px solid var(--border); border-radius: var(--r-md); }
+.fbd-cards { display: flex; flex-direction: column; gap: 8px; margin-top: 12px; }
+.fbd-card { border: 1px solid var(--border); border-radius: var(--r-md); background: var(--bg-card); padding: 4px 10px; }
+.fbd-card.on { border-color: var(--border-strong); }
+.fbd-toggle { display: flex; align-items: center; gap: 10px; width: 100%; background: none; border: none; color: var(--ink); font-family: var(--font); font-size: 0.92rem; text-align: left; min-height: 44px; cursor: pointer; }
+.fbd-box { width: 22px; height: 22px; border: 2px solid var(--border-strong); border-radius: 6px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; color: #fff; }
+.fbd-card.on .fbd-box { background: var(--accent-deep); border-color: var(--accent-bright); }
+.fbd-swatch { width: 12px; height: 12px; border-radius: 50%; flex-shrink: 0; }
+.fbd-dirs { display: none; grid-template-columns: repeat(3, 44px); gap: 6px; margin: 4px 0 8px 32px; }
+.fbd-card.on .fbd-dirs { display: grid; }
+.fbd-dir { width: 44px; height: 44px; border-radius: 10px; border: 1px solid var(--border-strong); background: var(--bg-deep); color: var(--ink); font-size: 1.15rem; cursor: pointer; }
+.fbd-dir.sel { background: var(--accent-deep); border-color: var(--accent-bright); color: #fff; }
+.fbd-dir.blank { visibility: hidden; }
+.fbd.locked .fbd-toggle, .fbd.locked .fbd-dir { cursor: default; }
+.rowsel .rs-row { padding: 10px 0; border-top: 1px solid var(--border); }
+.rowsel .rs-row:first-child { border-top: none; }
+.rowsel .rs-btns { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 6px; }
+.rowsel .rs-btn { min-height: 44px; padding: 8px 14px; border-radius: var(--r-md); border: 2px solid var(--border); background: var(--bg-card); color: var(--ink); font-family: var(--font); font-size: 0.88rem; cursor: pointer; }
+.rowsel .rs-btn.sel { border-color: var(--accent-bright); background: var(--accent-deep); color: #fff; }
+.rowsel .rs-row.ok .rs-text { color: var(--ok); }
+.rowsel .rs-row.bad .rs-text { color: #fecaca; }
+@media (hover: none) and (pointer: coarse) { .fbd-dir:hover, .rs-btn:hover { transform: none; } }
+
+/* ══════════════════════════════════════════
+   TRACK F3
+   ══════════════════════════════════════════ */
+.ctab { width: 100%; border-collapse: collapse; margin: 10px 0 4px; font-size: 0.92rem; }
+.ctab th, .ctab td { padding: 6px 8px; border-bottom: 1px solid var(--border); text-align: left; }
+.ctab th { color: var(--ink-muted); font-weight: 600; }
+.answer-row + .answer-row { margin-top: 8px; }
+.formula-line { text-align: center; margin: 10px 0; }
+</style>
+
+</head>
+<body>
+
+<canvas id="bg-canvas" aria-hidden="true"></canvas>
+
+<!-- ══════════════════════════════════════════
+     LANDING
+     ══════════════════════════════════════════ -->
+<div class="screen active" id="screen-landing">
+  <div class="landing">
+    <div class="landing-header">
+      <div class="track-badge">Track F3</div>
+      <h1 class="landing-title">Zerlegen &amp;<br>rechnen</h1>
+      <p class="landing-sub">Kräfte in Anteile zerlegen, die schiefe Ebene verstehen und Gleichgewicht ausrechnen</p>
+      <div class="landing-meta">
+        <span class="l-meta"><span class="val">4</span> Module</span>
+        <span class="l-meta"><span class="val">27</span> Aufgaben</span>
+        <span class="l-meta"><span class="val">Level 3</span> Vertiefung</span>
+      </div>
+    </div>
+
+    <div class="overall-progress">
+      <div class="op-bar-wrap">
+        <div class="op-track"><div class="op-fill" id="opFill"></div></div>
+        <span class="op-label" id="opLabel">0 / 4 Module</span>
+      </div>
+    </div>
+
+    <div class="module-grid">
+      <div class="mod-card" onclick="openModule(0)" id="card-0">
+        <div class="mc-num">F3.1</div>
+        <div class="mc-title">Kräfte zerlegen</div>
+        <div class="mc-desc">x-Anteil und y-Anteil, Pythagoras und tan, komponentenweise addieren</div>
+        <div class="mc-footer"><span class="mc-time">25 min</span><span class="mc-status" id="status-0">Starten</span></div>
+      </div>
+      <div class="mod-card" onclick="openModule(1)" id="card-1">
+        <div class="mc-num">F3.2</div>
+        <div class="mc-title">Schiefe Ebene</div>
+        <div class="mc-desc">Hangabtriebskraft und Normalkraft, sin und cos richtig zuordnen</div>
+        <div class="mc-footer"><span class="mc-time">25 min</span><span class="mc-status" id="status-1">Starten</span></div>
+      </div>
+      <div class="mod-card" onclick="openModule(2)" id="card-2">
+        <div class="mc-num">F3.3</div>
+        <div class="mc-title">Gleichgewicht rechnerisch</div>
+        <div class="mc-desc">Summe der x-Anteile und Summe der y-Anteile gleich null</div>
+        <div class="mc-footer"><span class="mc-time">25 min</span><span class="mc-status" id="status-2">Starten</span></div>
+      </div>
+      <div class="mod-card" onclick="openModule(3)" id="card-3">
+        <div class="mc-num">F3.4</div>
+        <div class="mc-title">Wohin zeigt F<sub>res</sub>?</div>
+        <div class="mc-desc">Resultierende Kraft berechnen und Richtung der Beschleunigung angeben</div>
+        <div class="mc-footer"><span class="mc-time">20 min</span><span class="mc-status" id="status-3">Starten</span></div>
+      </div>
+    </div>
+
+    <div class="landing-footer">Track F3 &middot; v1</div>
+  </div>
+</div>
+<div class="screen" id="screen-mod-0">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">F3.1 · Kräfte zerlegen</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-0"></div></div>
+          <span class="nav-progress-text" id="prog-text-0">0 / 7</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">F3.1</div>
+        <h1>Kräfte zerlegen</h1>
+        <p class="hero-sub">Jede Kraft hat einen waagerechten und einen senkrechten Anteil. Mit ihnen rechnest du Kräfte im Winkel ohne Zeichnung.</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 3</span> Vertiefung<span></span></div>
+          <div class="meta-chip"><span class="val">25 min</span> Dauer</div>
+        </div>
+        <div class="kompetenzen">
+          <h3>Kompetenzen</h3>
+          <ul>
+            <li>Du kannst eine Kraft in ihren x-Anteil und y-Anteil zerlegen, zeichnerisch und mit $\sin$ und $\cos$.</li>
+            <li>Du kannst aus den Anteilen Betrag und Richtung einer Kraft berechnen.</li>
+            <li>Du kannst Kräfte im Winkel komponentenweise addieren.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Eine Kraft in zwei Anteile zerlegen</h2></div>
+        <div class="glass">
+          <p>Jede Kraft $\vec{F}$ lässt sich in zwei Anteile zerlegen: einen waagerechten <span class="c1">$\vec{F}_x$</span> und einen senkrechten <span class="c2">$\vec{F}_y$</span>. Setzt du die beiden Spitze an Fuß aneinander, ergeben sie wieder $\vec{F}$. Kraft und Anteile bilden ein rechtwinkliges Dreieck.</p><p>Mit dem Winkel $\alpha$ gegen die Waagerechte gilt:</p><p class="formula-line">$F_x = F \cdot \cos\alpha \qquad F_y = F \cdot \sin\alpha$</p><p>Und rückwärts, aus den Anteilen zur Kraft:</p><p class="formula-line">$F = \sqrt{F_x^2 + F_y^2} \qquad \tan\alpha = \dfrac{F_y}{F_x}$</p>
+        </div>
+        <div class="glass">
+          <h3 style="color:#fff; font-weight:700; margin-bottom:8px;">Probier aus: Was macht der Winkel?</h3><p>$\vec{F}$ ist immer 50 N groß. Nur der Winkel gegen die Waagerechte ändert sich.</p><div class="board static" id="board-comp" style="margin-top:12px;"></div>
+          <div class="slider-row">
+            <label for="comp-slider" class="readout">Winkel: <span id="comp-val">35</span>°</label>
+            <input type="range" id="comp-slider" min="0" max="90" step="5" value="35" oninput="drawCompDemo()">
+          </div>
+          <p class="readout" style="margin-top:6px;"><span class="c1">$F_x$</span> = <b id="comp-x">41</b> N &nbsp;·&nbsp; <span class="c2">$F_y$</span> = <b id="comp-y">28,7</b> N</p>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Vorzeichen</div>
+            Nach rechts und nach oben sind Anteile positiv, nach links und nach unten negativ. Eine Kraft von 50 N nach links unten hat zum Beispiel $F_x = -30\,\text{N}$ und $F_y = -40\,\text{N}$.
+          </div>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Wozu das Ganze?</div>
+            Kräfte im Winkel kannst du ohne Zeichnung addieren: alle x-Anteile zusammenzählen, dann alle y-Anteile. Das Ergebnis sind die Anteile von $\vec{F}_{res}$. Für die Zeichnung auf dem Gitter heißt das: Kästchen nach rechts und links zählen, dann nach oben und unten.
+          </div>
+        </div>
+        <div class="callout-v2 warning">
+          <span class="icon">&#9888;&#65039;</span>
+          <div class="body">
+            <div class="title">Taschenrechner</div>
+            Steht oben im Display RAD, rechnet er im Bogenmaß. Dann kommt für $\cos 30^\circ$ Unsinn heraus. Stell ihn auf DEG.
+          </div>
+        </div>
+
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+
+        <div class="glass howto">
+          <div>
+            <strong>So zeichnest du einen Pfeil:</strong>
+            <ol>
+              <li>Tippe auf den Gitterpunkt, an dem der Pfeil anfängt (Fuß).</li>
+              <li>Tippe auf den Gitterpunkt, an dem die Spitze sein soll.</li>
+              <li>Tippe auf „Prüfen“. Falsch gesetzt? Tippe einfach neu.</li>
+            </ol>
+            <p style="margin-top:8px;">Bei Rechenaufgaben: Komma oder Punkt sind beide in Ordnung. Runde auf eine Nachkommastelle. Stell den Taschenrechner auf Grad (DEG).</p>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Anteile zeichnen</span><span class="ex-tag">Grundlagen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Zerlege $\vec{F}$ in den x-Anteil $\vec{F}_x$ und den y-Anteil $\vec{F}_y$. Beide greifen am Körper an.</p>
+            <div class="board" id="board-c1"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('c1')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('c1')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h1">$\vec{F}_x$ ist waagerecht und endet genau unter der Spitze von $\vec{F}$. $\vec{F}_y$ ist senkrecht und reicht so hoch wie die Spitze von $\vec{F}$.</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb1"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Anteile ablesen</span><span class="ex-tag">Grundlagen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Lies die Anteile von $\vec{F}$ ab. Achte auf die Vorzeichen.</p>
+            <div class="board static" id="board-c2"></div>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_x$ =</span>
+              <input class="answer-input" id="m0-a2x" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_y$ =</span>
+              <input class="answer-input" id="m0-a2y" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(0,2)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h2">Zähle vom Fuß zur Spitze. Nach links und nach unten bekommen ein Minus.</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb2"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Anteile berechnen</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Seil zieht mit $F = 80\,\text{N}$ unter $30^\circ$ gegen die Waagerechte nach rechts oben an einem Schlitten. Berechne beide Anteile.</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_x$ =</span>
+              <input class="answer-input" id="m0-a3x" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_y$ =</span>
+              <input class="answer-input" id="m0-a3y" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(0,3)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h3">$F_x = F \cdot \cos\alpha$, $F_y = F \cdot \sin\alpha$. Kontrolle: Bei $30^\circ$ ist der waagerechte Anteil der größere.</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb3"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Aus Anteilen zur Kraft</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Kraft hat die Anteile $F_x = 60\,\text{N}$ und $F_y = 80\,\text{N}$. Wie groß ist sie, und unter welchem Winkel $\alpha$ gegen die Waagerechte zeigt sie?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F$ =</span>
+              <input class="answer-input" id="m0-a4f" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-prefix">$\alpha$ =</span>
+              <input class="answer-input" id="m0-a4a" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">°</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(0,4)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h4">Pythagoras für den Betrag, $\tan\alpha = \dfrac{F_y}{F_x}$ für den Winkel.</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb4"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Komponentenweise addieren</span><span class="ex-tag">Anwendung</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Zwei Kräfte wirken auf einen Körper. Berechne die Anteile der resultierenden Kraft.</p>
+            <table class="ctab"><tr><th></th><th>x-Anteil</th><th>y-Anteil</th></tr>
+              <tr><td>$\vec{F}_1$</td><td>40 N</td><td>30 N</td></tr>
+              <tr><td>$\vec{F}_2$</td><td>−10 N</td><td>50 N</td></tr></table>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{res,x}$ =</span>
+              <input class="answer-input" id="m0-a5x" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{res,y}$ =</span>
+              <input class="answer-input" id="m0-a5y" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(0,5)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h5">Erst alle x-Werte addieren, dann alle y-Werte. Vorzeichen mitnehmen.</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb5"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex6">
+          <div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Aus Anteilen zeichnen</span><span class="ex-tag">Standard</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Gegeben sind die Anteile $\vec{F}_x$ und $\vec{F}_y$ einer Kraft. Zeichne $\vec{F}$.</p>
+            <div class="board" id="board-c6"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('c6')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('c6')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m0-h6')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m0-h6">Geh vom Angriffspunkt so weit wie $\vec{F}_x$ zur Seite und so weit wie $\vec{F}_y$ nach oben. Dort ist die Spitze von $\vec{F}$.</div>
+            <div class="fb-block" aria-live="polite" id="m0-fb6"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m0-ex7">
+          <div class="ex-header"><span class="ex-num">7</span><span class="ex-title">Größer als die Kraft?</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Kraft von 50 N wird in $\vec{F}_x$ und $\vec{F}_y$ zerlegt. Kann einer der Anteile größer als 50 N sein?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m0-a7','klein')">Ja, $F_x$ wird bei kleinem Winkel größer als $F$.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a7','nein')">Nein. $F_x$ und $F_y$ sind die Katheten, $F$ ist die Hypotenuse.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a7','45')">Ja, bei genau $45^\circ$ sind beide größer.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a7','summe')">Nein, denn $F_x + F_y$ muss genau 50 N ergeben.</button>
+            </div>
+            <input type="hidden" id="m0-a7" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(0,7,'m0-a7','m0-fb7','nein')">Prüfen</button>
+              
+            </div>
+            <div class="fb-block" aria-live="polite" id="m0-fb7"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(0)">Ergebnis anzeigen</button>
+        <div class="result-box" id="result-0" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="screen" id="screen-mod-1">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">F3.2 · Schiefe Ebene</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-1"></div></div>
+          <span class="nav-progress-text" id="prog-text-1">0 / 7</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">F3.2</div>
+        <h1>Schiefe Ebene</h1>
+        <p class="hero-sub">Die Gewichtskraft entlang der Ebene zerlegen: Was zieht hangabwärts, was drückt auf die Ebene?</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 3</span> Vertiefung<span></span></div>
+          <div class="meta-chip"><span class="val">25 min</span> Dauer</div>
+        </div>
+        <div class="kompetenzen">
+          <h3>Kompetenzen</h3>
+          <ul>
+            <li>Du kannst $\vec{F}_G$ auf der schiefen Ebene in Hangabtriebskraft und Normalanteil zerlegen.</li>
+            <li>Du kannst $\sin$ und $\cos$ mit dem Grenzfall-Check sicher zuordnen.</li>
+            <li>Du kannst entscheiden, ob eine Kiste auf einer Rampe liegen bleibt.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Die Gewichtskraft auf der schiefen Ebene</h2></div>
+        <div class="glass">
+          <p>Auf einer schiefen Ebene zerlegst du $\vec{F}_G$ nicht waagerecht und senkrecht, sondern <strong>entlang der Ebene</strong>:</p><ul style="margin:8px 0 0 20px;"><li><span class="cr">Hangabtriebskraft $\vec{F}_H$</span>: parallel zur Ebene, hangabwärts. Sie zieht die Kiste den Hang hinunter.</li><li><span class="c3">Anteil $\vec{F}_{\perp}$</span>: senkrecht zur Ebene, in sie hinein. Mit ihm drückt die Kiste auf die Ebene.</li></ul><p>Die Ebene drückt mit der <span class="c2">Normalkraft $\vec{F}_N$</span> zurück. Sie ist genauso groß wie $F_{\perp}$, zeigt aber aus der Ebene heraus.</p><div class="board static" id="board-fig32" style="margin-top:14px;"></div>
+          <p style="text-align:center; font-size:.85rem; color:var(--ink-muted);">$\vec{F}_H$ und $\vec{F}_{\perp}$ Spitze an Fuß ergeben wieder $\vec{F}_G$. Gestrichelt: die Normalkraft.</p>
+        </div>
+        <div class="glass">
+          <p>Im Kräftedreieck steckt der Neigungswinkel $\alpha$ zwischen $\vec{F}_G$ und $\vec{F}_{\perp}$. Deshalb gilt:</p><p class="formula-line">$F_H = F_G \cdot \sin\alpha \qquad F_N = F_{\perp} = F_G \cdot \cos\alpha$</p>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Grenzfall-Check gegen sin-cos-Verwechslung</div>
+            Flache Ebene, $\alpha = 0^\circ$: Nichts zieht hangabwärts, also $F_H = 0$, und die Ebene trägt alles, $F_N = F_G$. Das passt nur mit $\sin 0^\circ = 0$ und $\cos 0^\circ = 1$.
+          </div>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Bleibt die Kiste liegen?</div>
+            Die Haftreibung kann höchstens $F_{R,max} = \mu_H \cdot F_N$ aufbringen. Ist $F_H$ kleiner, bleibt die Kiste liegen. Ist $F_H$ größer, rutscht sie.
+          </div>
+        </div>
+        <div class="callout-v2 warning">
+          <span class="icon">&#9888;&#65039;</span>
+          <div class="body">
+            <div class="title">Andere Bezeichnung</div>
+            Manche Bücher nennen schon den Anteil $\vec{F}_{\perp}$ „Normalkraft“. Der Betrag ist derselbe. Hier ist $\vec{F}_N$ immer die Kraft der Ebene auf den Körper, wie im Freikörperbild aus F2.
+          </div>
+        </div>
+
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+
+        <div class="glass howto">
+          <div>
+            <strong>So zeichnest du einen Pfeil:</strong>
+            <ol>
+              <li>Tippe auf den Gitterpunkt, an dem der Pfeil anfängt (Fuß).</li>
+              <li>Tippe auf den Gitterpunkt, an dem die Spitze sein soll.</li>
+              <li>Tippe auf „Prüfen“. Falsch gesetzt? Tippe einfach neu.</li>
+            </ol>
+            <p style="margin-top:8px;">Bei Rechenaufgaben: Komma oder Punkt sind beide in Ordnung. Runde auf eine Nachkommastelle. Stell den Taschenrechner auf Grad (DEG).</p>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Zerlegen auf der Ebene</span><span class="ex-tag">Grundlagen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Kiste liegt auf einer schiefen Ebene. Zerlege $\vec{F}_G$ in die Hangabtriebskraft $\vec{F}_H$ und den Anteil $\vec{F}_{\perp}$ senkrecht zur Ebene.</p>
+            <div class="board" id="board-s1"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('s1')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('s1')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h1">$\vec{F}_H$ liegt parallel zur Ebene: 2 Kästchen zur Seite, 1 Kästchen in der Höhe. $\vec{F}_{\perp}$ steht senkrecht dazu. Zusammen ergeben sie $\vec{F}_G$.</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb1"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Wo steckt α?</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Zwischen welchen beiden Pfeilen findest du im Kräftedreieck den Neigungswinkel $\alpha$ der Ebene wieder?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','gh')">Zwischen $\vec{F}_G$ und $\vec{F}_H$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','gp')">Zwischen $\vec{F}_G$ und $\vec{F}_{\perp}$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','hp')">Zwischen $\vec{F}_H$ und $\vec{F}_{\perp}$</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','nirgends')">Nirgends, man rechnet mit $90^\circ - \alpha$</button>
+            </div>
+            <input type="hidden" id="m1-a2" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(1,2,'m1-a2','m1-fb2','gp')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h2">Denk dir die Ebene flach ($\alpha = 0^\circ$). Welche zwei Pfeile zeigen dann in dieselbe Richtung, also mit Winkel 0?</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb2"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Sinus oder Kosinus?</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Gehört zu $F_H$ der Sinus oder der Kosinus? Welche Begründung ist am sichersten?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','cos_an')">Kosinus, denn $F_H$ liegt am Winkel an.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','sin_voll')">Sinus, denn bei $\alpha = 0^\circ$ muss $F_H = F_G$ sein.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','sin_0')">Sinus, denn bei $\alpha = 0^\circ$ muss $F_H = 0$ sein.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a3','cos_90')">Kosinus, denn bei $\alpha = 90^\circ$ muss $F_H = 0$ sein.</button>
+            </div>
+            <input type="hidden" id="m1-a3" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(1,3,'m1-a3','m1-fb3','sin_0')">Prüfen</button>
+              
+            </div>
+            <div class="fb-block" aria-live="polite" id="m1-fb3"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Kiste auf der Rampe</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Kiste mit $F_G = 400\,\text{N}$ steht auf einer Rampe mit $\alpha = 30^\circ$. Berechne die Hangabtriebskraft und die Normalkraft.</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_H$ =</span>
+              <input class="answer-input" id="m1-a4h" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_N$ =</span>
+              <input class="answer-input" id="m1-a4n" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(1,4)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h4">$F_H = F_G \cdot \sin\alpha$, $F_N = F_G \cdot \cos\alpha$.</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb4"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Steile Ebene</span><span class="ex-tag">Standard</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Jetzt ist die Ebene viel steiler. Zerlege $\vec{F}_G$ wieder in $\vec{F}_H$ und $\vec{F}_{\perp}$.</p>
+            <div class="board" id="board-s5"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('s5')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('s5')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h5">Die Ebene steigt 2 Kästchen hoch auf 1 Kästchen zur Seite. $\vec{F}_H$ zeigt genau so, nur hangabwärts.</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb5"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex6">
+          <div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Bleibt die Kiste liegen?</span><span class="ex-tag">Anwendung</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Kiste mit $F_G = 500\,\text{N}$ steht auf einer Rampe mit $\alpha = 20^\circ$. Die Haftreibungszahl ist $\mu_H = 0{,}5$. Was passiert?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a6','liegt_fn')">Sie bleibt liegen, weil $F_N$ größer ist als $F_H$.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a6','rutscht_hang')">Sie rutscht, weil auf der schiefen Ebene immer eine Hangabtriebskraft wirkt.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a6','liegt')">Sie bleibt liegen, weil $F_H \approx 171\,\text{N}$ kleiner ist als $F_{R,max} \approx 235\,\text{N}$.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a6','rutscht_fg')">Sie rutscht, weil $F_H$ größer ist als $\mu_H \cdot F_G \cdot \sin 20^\circ$.</button>
+            </div>
+            <input type="hidden" id="m1-a6" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(1,6,'m1-a6','m1-fb6','liegt')">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m1-h6')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m1-h6">Rechne $F_H = F_G \cdot \sin 20^\circ$ und $F_{R,max} = \mu_H \cdot F_G \cdot \cos 20^\circ$ und vergleiche.</div>
+            <div class="fb-block" aria-live="polite" id="m1-fb6"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m1-ex7">
+          <div class="ex-header"><span class="ex-num">7</span><span class="ex-title">Steiler machen</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Dieselbe Kiste steht auf einer immer steileren Rampe. Was passiert mit $F_H$ und $F_N$?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m1-a7','beide')">Beide werden größer.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a7','nur_h')">$F_H$ wird größer, $F_N$ bleibt gleich.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a7','richtig')">$F_H$ wird größer, $F_N$ wird kleiner.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a7','gleich')">Beide bleiben gleich, denn $F_G$ ändert sich nicht.</button>
+            </div>
+            <input type="hidden" id="m1-a7" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(1,7,'m1-a7','m1-fb7','richtig')">Prüfen</button>
+              
+            </div>
+            <div class="fb-block" aria-live="polite" id="m1-fb7"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(1)">Ergebnis anzeigen</button>
+        <div class="result-box" id="result-1" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="screen" id="screen-mod-2">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">F3.3 · Gleichgewicht rechnerisch</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-2"></div></div>
+          <span class="nav-progress-text" id="prog-text-2">0 / 7</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">F3.3</div>
+        <h1>Gleichgewicht rechnerisch</h1>
+        <p class="hero-sub">Summe der x-Anteile gleich null, Summe der y-Anteile gleich null: zwei Gleichungen für unbekannte Kräfte.</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 3</span> Vertiefung<span></span></div>
+          <div class="meta-chip"><span class="val">25 min</span> Dauer</div>
+        </div>
+        <div class="kompetenzen">
+          <h3>Kompetenzen</h3>
+          <ul>
+            <li>Du kannst die Gleichgewichtsbedingung in x- und y-Richtung aufstellen.</li>
+            <li>Du kannst unbekannte Seil-, Normal- und Reibungskräfte aus dem Gleichgewicht berechnen.</li>
+            <li>Du kennst den Grund, warum flach gespannte Seile sehr große Kräfte aushalten müssen.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Gleichgewicht in zwei Gleichungen</h2></div>
+        <div class="glass">
+          <p>In F2 hast du ein Gleichgewicht gezeichnet: Das Krafteck ist geschlossen. Rechnerisch heißt $\vec{F}_{res} = 0$, dass zwei Summen null sind:</p><p class="formula-line">$F_{1,x} + F_{2,x} + \ldots = 0 \qquad F_{1,y} + F_{2,y} + \ldots = 0$</p><p>Zwei Gleichungen, also kannst du bis zu zwei unbekannte Größen bestimmen. Das Rezept: Freikörperbild, jede Kraft zerlegen, x-Gleichung und y-Gleichung aufstellen, auflösen.</p>
+        </div>
+        <div class="wt-container">
+          <div class="wt-slide">
+            <div class="wt-slide-tag" id="lamp-tag">Schritt 1 von 4</div>
+            <div class="board static" id="board-lamp"></div>
+            <p class="wt-text" id="lamp-text" style="margin-top:12px;"></p>
+          </div>
+          <div class="wt-nav-bar">
+            <button class="wt-arrow" id="lamp-prev" onclick="lampStep(-1)">&larr; Zurück</button>
+            <span class="wt-counter" id="lamp-counter">1 / 4</span>
+            <button class="wt-arrow primary" id="lamp-next" onclick="lampStep(1)">Weiter &rarr;</button>
+          </div>
+        </div>
+        <div class="callout-v2 warning">
+          <span class="icon">&#9888;&#65039;</span>
+          <div class="body">
+            <div class="title">Normalkraft ist nicht immer gleich der Gewichtskraft</div>
+            Zieht ein Seil schräg nach oben an einer Kiste, trägt es einen Teil der Gewichtskraft mit. Dann ist $F_N$ kleiner als $F_G$. Die y-Gleichung sagt dir, wie viel.
+          </div>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Flache Seile, große Kräfte</div>
+            Je flacher ein Seil gespannt ist, desto kleiner ist sein y-Anteil. Um dieselbe Last zu tragen, muss die Seilkraft dann viel größer werden.
+          </div>
+        </div>
+
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+
+        <div class="glass howto">
+          <div>
+            <strong>So zeichnest du einen Pfeil:</strong>
+            <ol>
+              <li>Tippe auf den Gitterpunkt, an dem der Pfeil anfängt (Fuß).</li>
+              <li>Tippe auf den Gitterpunkt, an dem die Spitze sein soll.</li>
+              <li>Tippe auf „Prüfen“. Falsch gesetzt? Tippe einfach neu.</li>
+            </ol>
+            <p style="margin-top:8px;">Bei Rechenaufgaben: Komma oder Punkt sind beide in Ordnung. Runde auf eine Nachkommastelle. Stell den Taschenrechner auf Grad (DEG).</p>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Lampe an zwei Seilen</span><span class="ex-tag">Grundlagen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Lampe mit $F_G = 80\,\text{N}$ hängt ruhig an zwei Seilen. Beide sind um $30^\circ$ gegen die Waagerechte geneigt. Wie groß ist die Kraft in jedem Seil?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_S$ =</span>
+              <input class="answer-input" id="m2-a1" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(2,1)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h1">Wie im Beispiel: $2 \cdot F_S \cdot \sin 30^\circ = F_G$.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb1"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Schräges Zugseil: Normalkraft</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Kiste ($F_G = 300\,\text{N}$) wird mit einem Seil über den Boden gezogen. Das Seil zieht mit $F_Z = 100\,\text{N}$ unter $30^\circ$ gegen die Waagerechte nach rechts oben. Die Kiste gleitet mit konstantem Tempo. Wie groß ist die Normalkraft?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_N$ =</span>
+              <input class="answer-input" id="m2-a2" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(2,2)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h2">y-Richtung: Nach oben wirken $F_N$ und der y-Anteil des Seils, nach unten $F_G$.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb2"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Schräges Zugseil: Reibung</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Dieselbe Kiste wie in Aufgabe 2. Wie groß ist die Reibungskraft?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_R$ =</span>
+              <input class="answer-input" id="m2-a3" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(2,3)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h3">x-Richtung: Der x-Anteil des Seils zieht nach rechts, die Reibung nach links. Konstantes Tempo heißt Gleichgewicht.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb3"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Gleichgewicht prüfen</span><span class="ex-tag">Standard</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Auf jeden Körper wirken drei Kräfte (Anteile in N). Herrscht Gleichgewicht?</p>
+            <div class="rowsel" id="rows-r4"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="RowSel.check('r4')">Prüfen</button>
+            </div>
+            <div class="fb-block" aria-live="polite" id="m2-fb4"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Die fehlende Kraft</span><span class="ex-tag">Anwendung</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Auf einen Körper wirken $\vec{F}_1$ und $\vec{F}_2$. Welche Anteile muss $\vec{F}_3$ haben, damit Gleichgewicht herrscht?</p>
+            <table class="ctab"><tr><th></th><th>x-Anteil</th><th>y-Anteil</th></tr>
+              <tr><td>$\vec{F}_1$</td><td>40 N</td><td>−30 N</td></tr>
+              <tr><td>$\vec{F}_2$</td><td>−10 N</td><td>60 N</td></tr></table>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{3,x}$ =</span>
+              <input class="answer-input" id="m2-a5x" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{3,y}$ =</span>
+              <input class="answer-input" id="m2-a5y" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(2,5)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h5')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h5">Summe der x-Anteile gleich null, Summe der y-Anteile gleich null.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb5"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex6">
+          <div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Ampel über der Straße</span><span class="ex-tag">Anwendung</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Ampel ($F_G = 150\,\text{N}$) hängt in der Mitte eines Seils zwischen zwei Masten. Beide Seilhälften sind nur um $10^\circ$ gegen die Waagerechte geneigt. Wie groß ist die Seilkraft?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_S$ =</span>
+              <input class="answer-input" id="m2-a6" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(2,6)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m2-h6')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m2-h6">Gleiche Rechnung wie bei der Lampe, nur mit $10^\circ$.</div>
+            <div class="fb-block" aria-live="polite" id="m2-fb6"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m2-ex7">
+          <div class="ex-header"><span class="ex-num">7</span><span class="ex-title">Ganz waagerecht?</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Kann man das Ampelseil so stramm spannen, dass es ganz waagerecht verläuft?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m2-a7','stark')">Ja, wenn das Seil stark genug ist.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a7','klein')">Ja, dann ist die Seilkraft sogar am kleinsten.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a7','nein')">Nein. Ein waagerechtes Seil hat keinen y-Anteil, der die Ampel tragen könnte.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a7','schwer')">Nein, weil die Ampel dann schwerer wird.</button>
+            </div>
+            <input type="hidden" id="m2-a7" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(2,7,'m2-a7','m2-fb7','nein')">Prüfen</button>
+              
+            </div>
+            <div class="fb-block" aria-live="polite" id="m2-fb7"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(2)">Ergebnis anzeigen</button>
+        <div class="result-box" id="result-2" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<div class="screen" id="screen-mod-3">
+  <div class="module-page">
+    <nav class="top-nav">
+      <div class="top-nav-inner">
+        <button class="btn-back" onclick="goLanding()">&larr; Zurück</button>
+        <span class="nav-title">F3.4 · Wohin zeigt F<sub>res</sub>?</span>
+        <div class="nav-progress">
+          <div class="nav-progress-track"><div class="nav-progress-fill" id="prog-fill-3"></div></div>
+          <span class="nav-progress-text" id="prog-text-3">0 / 6</span>
+        </div>
+      </div>
+    </nav>
+    <div class="mod-content">
+      <section class="hero">
+        <div class="hero-badge">F3.4</div>
+        <h1>Wohin zeigt F<sub>res</sub>?</h1>
+        <p class="hero-sub">Kein Gleichgewicht: resultierende Kraft berechnen und daraus die Beschleunigung bestimmen.</p>
+        <div class="hero-meta">
+          <div class="meta-chip"><span class="val">Level 3</span> Vertiefung<span></span></div>
+          <div class="meta-chip"><span class="val">20 min</span> Dauer</div>
+        </div>
+        <div class="kompetenzen">
+          <h3>Kompetenzen</h3>
+          <ul>
+            <li>Du kannst die resultierende Kraft aus mehreren Kräften berechnen und zeichnen.</li>
+            <li>Du kannst Betrag und Richtung der Beschleunigung angeben.</li>
+            <li>Du kannst begründen, warum $\vec{F}_{res}$ nicht in Bewegungsrichtung zeigen muss.</li>
+          </ul>
+        </div>
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">01</span><h2 class="chapter-title">Wenn kein Gleichgewicht herrscht</h2></div>
+        <div class="glass">
+          <p>Ist $\vec{F}_{res} \neq 0$, wird der Körper beschleunigt. Du bestimmst $\vec{F}_{res}$ genauso wie beim Gleichgewicht, nur steht am Ende nicht null:</p><ol style="margin:8px 0 0 20px;"><li>Freikörperbild zeichnen.</li><li>Achsen günstig legen. Auf der schiefen Ebene am besten entlang der Ebene und senkrecht dazu.</li><li>Alle x-Anteile addieren, alle y-Anteile addieren.</li><li>Betrag und Richtung von $\vec{F}_{res}$ bestimmen, dann $a = \dfrac{F_{res}}{m}$.</li></ol>
+        </div>
+        <div class="callout-v2 info">
+          <span class="icon">&#128161;</span>
+          <div class="body">
+            <div class="title">Richtung der Beschleunigung</div>
+            $\vec{a}$ zeigt immer in Richtung von $\vec{F}_{res}$. Wie in F1.4: Auch $\Delta\vec{v}$ zeigt in diese Richtung.
+          </div>
+        </div>
+        <div class="callout-v2 warning">
+          <span class="icon">&#9888;&#65039;</span>
+          <div class="body">
+            <div class="title">Nicht in Bewegungsrichtung</div>
+            $\vec{F}_{res}$ zeigt dorthin, wohin sich die Geschwindigkeit ändert, nicht dorthin, wohin der Körper fliegt. Beim Bremsen zeigt sie nach hinten, in der Kurve zur Mitte, beim Wurf nach unten.
+          </div>
+        </div>
+
+      </section>
+      <section class="chapter">
+        <div class="chapter-label"><span class="chapter-num">02</span><h2 class="chapter-title">Übungsaufgaben</h2></div>
+
+        <div class="glass howto">
+          <div>
+            <strong>So zeichnest du einen Pfeil:</strong>
+            <ol>
+              <li>Tippe auf den Gitterpunkt, an dem der Pfeil anfängt (Fuß).</li>
+              <li>Tippe auf den Gitterpunkt, an dem die Spitze sein soll.</li>
+              <li>Tippe auf „Prüfen“. Falsch gesetzt? Tippe einfach neu.</li>
+            </ol>
+            <p style="margin-top:8px;">Bei Rechenaufgaben: Komma oder Punkt sind beide in Ordnung. Runde auf eine Nachkommastelle. Stell den Taschenrechner auf Grad (DEG).</p>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex1">
+          <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Drei Kräfte</span><span class="ex-tag">Grundlagen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Auf einen Körper wirken drei Kräfte. Zeichne die resultierende Kraft $\vec{F}_{res}$.</p>
+            <div class="board" id="board-r1"></div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="Boards.check('r1')">Prüfen</button>
+              <button class="btn-ghost" onclick="Boards.undo('r1')">Pfeil löschen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h1')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h1">Zähle für jede Kraft die Kästchen nach rechts oder links und nach oben oder unten. Addiere alle x-Werte, dann alle y-Werte.</div>
+            <div class="fb-block" aria-live="polite" id="m3-fb1"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex2">
+          <div class="ex-header"><span class="ex-num">2</span><span class="ex-title">Betrag und Richtung</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Auf einen Körper wirken 50 N nach rechts, 30 N nach oben und 10 N nach links. Berechne $F_{res}$ und den Winkel $\alpha$ gegen die Waagerechte.</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{res}$ =</span>
+              <input class="answer-input" id="m3-a2f" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="answer-row">
+              <span class="answer-prefix">$\alpha$ =</span>
+              <input class="answer-input" id="m3-a2a" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">°</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(3,2)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h2')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h2">Erst $F_{res,x}$ und $F_{res,y}$, dann Pythagoras und $\tan\alpha = \dfrac{F_{res,y}}{F_{res,x}}$.</div>
+            <div class="fb-block" aria-live="polite" id="m3-fb2"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex3">
+          <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Kiste rutscht</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Eine Kiste ($F_G = 200\,\text{N}$) rutscht eine Rampe mit $\alpha = 30^\circ$ hinunter. Die Gleitreibung beträgt $60\,\text{N}$. Wie groß ist $F_{res}$?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$F_{res}$ =</span>
+              <input class="answer-input" id="m3-a3" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">N</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(3,3)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h3')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h3">Senkrecht zur Ebene heben sich $F_N$ und $F_{\perp}$ auf. Entlang der Ebene: $F_H$ hangabwärts, Reibung hangaufwärts.</div>
+            <div class="fb-block" aria-live="polite" id="m3-fb3"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex4">
+          <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Beschleunigung</span><span class="ex-tag">Rechnen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Die Kiste aus Aufgabe 3 hat die Masse $m = 20\,\text{kg}$. Wie groß ist ihre Beschleunigung?</p>
+            <div class="answer-row">
+              <span class="answer-prefix">$a$ =</span>
+              <input class="answer-input" id="m3-a4" inputmode="text" autocomplete="off" placeholder="Zahl">
+              <span class="answer-unit">m/s²</span>
+            </div>
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkNum(3,4)">Prüfen</button>
+              <button class="btn-hint" onclick="toggleHint('m3-h4')">&#128161; Tipp</button>
+            </div>
+            <div class="hint-box" id="m3-h4">$a = \dfrac{F_{res}}{m}$</div>
+            <div class="fb-block" aria-live="polite" id="m3-fb4"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex5">
+          <div class="ex-header"><span class="ex-num">5</span><span class="ex-title">Auto in der Kurve</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Auto fährt mit konstantem Tempo durch eine Linkskurve. Wohin zeigt $\vec{F}_{res}$?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m3-a5','vorne')">In Fahrtrichtung</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a5','aussen')">Nach außen, das ist die Fliehkraft</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a5','mitte')">Zur Kurvenmitte</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a5','keine')">Es gibt keine, das Tempo ist konstant</button>
+            </div>
+            <input type="hidden" id="m3-a5" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(3,5,'m3-a5','m3-fb5','mitte')">Prüfen</button>
+              
+            </div>
+            <div class="fb-block" aria-live="polite" id="m3-fb5"></div>
+          </div>
+        </div>
+
+        <div class="exercise-card" id="m3-ex6">
+          <div class="ex-header"><span class="ex-num">6</span><span class="ex-title">Schräger Wurf</span><span class="ex-tag">Verstehen</span></div>
+          <div class="ex-body">
+            <p class="ex-question">Ein Ball fliegt nach dem Abwurf schräg nach rechts oben. Der Luftwiderstand ist vernachlässigbar. Wohin zeigt $\vec{F}_{res}$?</p>
+            <div class="opt-pills">
+              <button class="opt-pill" onclick="selOpt(this,'m3-a6','flug')">In Flugrichtung, schräg nach rechts oben</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a6','unten')">Senkrecht nach unten</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a6','schraeg')">Schräg nach rechts unten</button>
+              <button class="opt-pill" onclick="selOpt(this,'m3-a6','oben')">Auf dem Weg nach oben nach oben, im höchsten Punkt ist sie null</button>
+            </div>
+            <input type="hidden" id="m3-a6" value="">
+            <div class="btn-row">
+              <button class="btn-check" onclick="checkMC(3,6,'m3-a6','m3-fb6','unten')">Prüfen</button>
+              
+            </div>
+            <div class="fb-block" aria-live="polite" id="m3-fb6"></div>
+          </div>
+        </div>
+
+        <button class="btn-result" onclick="showResult(3)">Ergebnis anzeigen</button>
+        <div class="result-box" id="result-3" aria-live="polite"></div>
+      </section>
+    </div>
+  </div>
+</div>
+<script>
+/* ────────────────────────────────────────────
+   STATE
+   ──────────────────────────────────────────── */
+const MODULE_NAMES = ['F3.1', 'F3.2', 'F3.3', 'F3.4'];
+const MODULE_EX_COUNTS = [7, 7, 7, 6]; // 0 = module not built yet
+let moduleStates = [false, false, false, false];
+let exerciseStates = {};
+
+/* ────────────────────────────────────────────
+   SCORM 1.2 API
+   State lives in suspend_data (4096 chars) as a compact JSON string,
+   not in lesson_location (255 chars).
+   ──────────────────────────────────────────── */
+const SCORM = (() => {
+  let api = null, initialized = false;
+  function findAPI(win) {
+    let tries = 0;
+    while (win && !win.API && tries < 10) {
+      tries++;
+      if (win.parent && win.parent !== win) win = win.parent;
+      else if (win.opener) win = win.opener;
+      else break;
+    }
+    return win ? win.API : null;
+  }
+  function init() {
+    try {
+      api = findAPI(window);
+      if (!api) return;
+      api.LMSInitialize('');
+      initialized = true;
+      const raw = api.LMSGetValue('cmi.suspend_data');
+      if (raw) {
+        try {
+          const saved = JSON.parse(raw);
+          if (Array.isArray(saved.m)) moduleStates = saved.m.map(Boolean);
+          if (Array.isArray(saved.e)) saved.e.forEach(k => { exerciseStates[k] = true; });
+        } catch (e) {}
+      }
+      if (api.LMSGetValue('cmi.core.lesson_status') === 'not attempted') {
+        api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+        api.LMSCommit('');
+      }
+    } catch (e) { console.log('SCORM init:', e); }
+  }
+  function save() {
+    if (!api || !initialized) return;
+    try {
+      const solvedKeys = Object.keys(exerciseStates).filter(k => exerciseStates[k]);
+      api.LMSSetValue('cmi.suspend_data', JSON.stringify({ m: moduleStates.map(Number), e: solvedKeys }));
+      const total = MODULE_EX_COUNTS.reduce((a, b) => a + b, 0);
+      const score = total > 0 ? Math.round((solvedKeys.length / total) * 100) : 0;
+      api.LMSSetValue('cmi.core.score.raw', String(score));
+      api.LMSSetValue('cmi.core.score.min', '0');
+      api.LMSSetValue('cmi.core.score.max', '100');
+      if (moduleStates.every(s => s)) api.LMSSetValue('cmi.core.lesson_status', 'completed');
+      api.LMSCommit('');
+    } catch (e) { console.log('SCORM save:', e); }
+  }
+  function finish() {
+    if (!api || !initialized) return;
+    try { save(); api.LMSFinish(''); initialized = false; } catch (e) {}
+  }
+  return { init, save, finish };
+})();
+
+/* ────────────────────────────────────────────
+   NAVIGATION
+   ──────────────────────────────────────────── */
+function showScreen(id) {
+  document.querySelectorAll('.screen').forEach(s => s.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+  window.scrollTo(0, 0);
+  const onLanding = id === 'screen-landing';
+  document.getElementById('bg-canvas').classList.toggle('hidden', !onLanding);
+  BG.run(onLanding);
+}
+function openModule(idx) {
+  if (!MODULE_EX_COUNTS[idx]) return;
+  showScreen('screen-mod-' + idx);
+  restoreModuleState(idx);
+  typeset();
+}
+function goLanding() {
+  showScreen('screen-landing');
+  updateLanding();
+  SCORM.save();
+}
+function typeset(els) {
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise(els).catch(() => {});
+}
+
+/* ────────────────────────────────────────────
+   VECTOR HELPERS (grid units, y axis points up)
+   ──────────────────────────────────────────── */
+const V = {
+  add: (a, b) => [a[0] + b[0], a[1] + b[1]],
+  sub: (a, b) => [a[0] - b[0], a[1] - b[1]],
+  neg: a => [-a[0], -a[1]],
+  eq: (a, b) => a[0] === b[0] && a[1] === b[1],
+  len: a => Math.hypot(a[0], a[1]),
+  sameDir: (a, b) => a[0] * b[1] - a[1] * b[0] === 0 && a[0] * b[0] + a[1] * b[1] > 0
+};
+function fmt(x) { return (Math.round(x * 10) / 10).toString().replace('.', ','); }
+
+/* ────────────────────────────────────────────
+   SVG DRAWING
+   ──────────────────────────────────────────── */
+const SVGNS = 'http://www.w3.org/2000/svg';
+const COLORS = { v1: '#60a5fa', v2: '#fbbf24', v3: '#2dd4bf', vres: '#c084fc', pen: '#e8e8f0', err: '#f87171' };
+function scaleText(b) { return 'Maßstab: 1 Kästchen ≙ ' + b.scale + ' ' + (b.unit || 'N'); }
+
+function el(tag, attrs, parent) {
+  const n = document.createElementNS(SVGNS, tag);
+  for (const k in attrs) n.setAttribute(k, attrs[k]);
+  if (parent) parent.appendChild(n);
+  return n;
+}
+// Board coordinates (x right, y up) to SVG coordinates (y down).
+function sx(b, x) { return x; }
+function sy(b, y) { return b.h - y; }
+
+function makeSvg(b, label) {
+  const svg = el('svg', { class: 'grid-svg', viewBox: `-0.6 -0.6 ${b.w + 1.2} ${b.h + 1.2}`, role: 'img', 'aria-label': label || 'Pfeil-Gitter' });
+  const slopeDeg = b.slope ? drawSlope(b, svg) : 0;
+  const grid = el('g', { class: 'svg-grid' }, svg);
+  for (let x = 0; x <= b.w; x++) el('line', { x1: x, y1: 0, x2: x, y2: b.h }, grid);
+  for (let y = 0; y <= b.h; y++) el('line', { x1: 0, y1: y, x2: b.w, y2: y }, grid);
+  const dots = el('g', { class: 'svg-dot' }, svg);
+  for (let x = 0; x <= b.w; x++) for (let y = 0; y <= b.h; y++) el('circle', { cx: x, cy: y, r: 0.045 }, dots);
+  if (b.body) {
+    const [px, py] = b.body;
+    el('rect', { class: 'svg-body', x: px - 0.7, y: sy(b, py) - 0.7, width: 1.4, height: 1.4, rx: 0.18, transform: `rotate(${-slopeDeg} ${px} ${sy(b, py)})` }, svg);
+    if (b.bodyName) {
+      const t = el('text', { x: px, y: sy(b, py) + (b.bodyNameAbove ? -0.9 : 1.15), 'text-anchor': 'middle', 'font-size': 0.36, fill: 'rgba(232,232,240,0.6)', 'font-family': 'Outfit, system-ui, sans-serif' }, svg);
+      t.textContent = b.bodyName;
+    }
+  }
+  (b.notes || []).forEach(n => {
+    const t = el('text', { x: n.x, y: sy(b, n.y), 'font-size': n.size || 0.34, fill: n.color || 'rgba(232,232,240,0.75)', 'text-anchor': n.anchor || 'start', 'font-family': 'Outfit, system-ui, sans-serif' }, svg);
+    t.textContent = n.text;
+  });
+  svg._layer = el('g', {}, svg);
+  if (b.body) el('circle', { class: 'svg-anchor', cx: b.body[0], cy: sy(b, b.body[1]), r: 0.1 }, svg);
+  if (b.anchor) el('circle', { class: 'svg-anchor', cx: b.anchor[0], cy: sy(b, b.anchor[1]), r: 0.13 }, svg);
+  return svg;
+}
+
+// Draws an arrow from s to e (board coords, may be fractional).
+function drawArrow(b, layer, s, e, color, opts) {
+  opts = opts || {};
+  const x1 = s[0], y1 = sy(b, s[1]), x2 = e[0], y2 = sy(b, e[1]);
+  const dx = x2 - x1, dy = y2 - y1, L = Math.hypot(dx, dy);
+  if (L < 0.01) return;
+  const ux = dx / L, uy = dy / L, hl = Math.min(0.42, L * 0.45), hw = hl * 0.62;
+  const g = el('g', {}, layer);
+  el('line', {
+    x1, y1, x2: x2 - ux * hl * 0.8, y2: y2 - uy * hl * 0.8,
+    stroke: color, 'stroke-width': opts.width || 0.11, 'stroke-linecap': 'round',
+    'stroke-dasharray': opts.dashed ? '0.28 0.18' : 'none', opacity: opts.faint ? 0.55 : 1
+  }, g);
+  el('polygon', {
+    points: `${x2},${y2} ${x2 - ux * hl + uy * hw},${y2 - uy * hl - ux * hw} ${x2 - ux * hl - uy * hw},${y2 - uy * hl + ux * hw}`,
+    fill: color, opacity: opts.faint ? 0.55 : 1
+  }, g);
+  const lt = opts.labelT || 0.5;
+  if (opts.label) drawLabel(layer, x1 + (x2 - x1) * lt, y1 + (y2 - y1) * lt, -uy, ux, opts.label, color, opts.labelSide || 1);
+}
+
+// Vector label "F_sub" with an arrow over the letter, placed beside the arrow.
+function drawLabel(layer, mx, my, nx, ny, label, color, side) {
+  const off = 0.48 * side;
+  const x = mx + nx * off, y = my + ny * off;
+  const g = el('g', { class: 'svg-label' }, layer);
+  const t = el('text', { x: x - 0.2, y: y + 0.2, 'font-size': 0.58, fill: color }, g);
+  t.appendChild(document.createTextNode(label.main || 'F'));
+  if (label.sub) {
+    const s = el('tspan', { 'font-size': 0.36, dy: 0.13 }, t);
+    s.textContent = label.sub;
+  }
+  const ax = x - 0.2 + (label.arrowX || 0);
+  el('path', { d: `M ${ax} ${y - 0.33} h ${label.arrowW || 0.34} m -0.1 -0.07 l 0.1 0.07 l -0.1 0.07`, stroke: color, 'stroke-width': 0.045, fill: 'none', 'stroke-linecap': 'round' }, g);
+  if (label.note) {
+    const n = el('text', { x: x - 0.2, y: y + 0.62, 'font-size': 0.3, fill: color, 'font-style': 'normal', 'font-weight': 500 }, g);
+    n.textContent = label.note;
+  }
+}
+
+/* ────────────────────────────────────────────
+   PFEIL-GITTER: interactive boards
+   A board has given arrows and a list of target arrows that the student
+   draws one after the other (tap foot, tap tip, check). Each target has a
+   kind ('shift', 'sum', 'missing') that drives the error diagnosis.
+   ──────────────────────────────────────────── */
+const L1 = { sub: '1' }, L2 = { sub: '2' }, L3 = { sub: '3' }, LR = { sub: 'res' };
+const LF = {}, LG = { sub: 'G' }, LS = { sub: 'S' };
+const LX = { sub: 'x' }, LY = { sub: 'y' }, LH = { sub: 'H' }, LP = { sub: '⊥' }, LN = { sub: 'N' };
+const TEX = { A: '$\\vec{F}_1$', B: '$\\vec{F}_2$', R: '$\\vec{F}_{res}$', F: '$\\vec{F}$', X: '$\\vec{F}_x$', Y: '$\\vec{F}_y$', G: '$\\vec{F}_G$', H: '$\\vec{F}_H$', P: '$\\vec{F}_{\\perp}$' };
+
+const BOARD_DEFS = {
+  c1: {
+    ex: '0-1', w: 8, h: 5, body: [2, 1], bodyName: 'Kiste', scale: 10, F: [4, 3],
+    given: [{ s: [2, 1], d: [4, 3], c: 'vres', label: LF }],
+    targets: [
+      { kind: 'compx', s: [2, 1], d: [4, 0], c: 'v1', label: LX, side: -1, prompt: 'Zeichne den x-Anteil ' + TEX.X + '.' },
+      { kind: 'compy', s: [2, 1], d: [0, 3], c: 'v2', label: LY, prompt: 'Zeichne den y-Anteil ' + TEX.Y + '.' }
+    ],
+    ok: 'Richtig: $F_x = 40\\,\\text{N}$ und $F_y = 30\\,\\text{N}$. Setzt du ' + TEX.Y + ' an die Spitze von ' + TEX.X + ', landest du genau an der Spitze von ' + TEX.F + '.'
+  },
+  c6: {
+    ex: '0-6', w: 7, h: 5, body: [5, 1], bodyName: 'Kiste', scale: 10,
+    given: [{ s: [5, 1], d: [-4, 0], c: 'v1', label: LX, side: -1 }, { s: [5, 1], d: [0, 3], c: 'v2', label: LY }],
+    targets: [{ kind: 'fromcomp', s: [5, 1], d: [-4, 3], c: 'vres', label: LF, prompt: 'Zeichne die Kraft ' + TEX.F + '.' }],
+    ok: 'Richtig: 4 Kästchen nach links, 3 nach oben. Mit Pythagoras: $F = \\sqrt{40^2 + 30^2}\\,\\text{N} = 50\\,\\text{N}$.'
+  },
+  s1: {
+    ex: '1-1', w: 9, h: 9, body: [4, 5], slope: [2, 1], scale: 10, G: [0, -5], FH: [-2, -1], FP: [2, -4],
+    given: [{ s: [4, 5], d: [0, -5], c: 'v1', label: LG, side: -1, lt: 0.86 }],
+    targets: [
+      { kind: 'slopeH', s: [4, 5], d: [-2, -1], c: 'vres', label: LH, side: -1, prompt: 'Zeichne die Hangabtriebskraft ' + TEX.H + '.' },
+      { kind: 'slopeP', s: [4, 5], d: [2, -4], c: 'v3', label: LP, lt: 0.7, prompt: 'Zeichne den Anteil ' + TEX.P + ' senkrecht zur Ebene.' }
+    ],
+    ok: 'Richtig: ' + TEX.H + ' zeigt parallel zur Ebene hangabwärts, ' + TEX.P + ' senkrecht in die Ebene hinein. Spitze an Fuß ergeben beide wieder ' + TEX.G + '.'
+  },
+  s5: {
+    ex: '1-5', w: 9, h: 7, body: [5, 5], slope: [1, 2], scale: 10, G: [0, -5], FH: [-2, -4], FP: [2, -1],
+    given: [{ s: [5, 5], d: [0, -5], c: 'v1', label: LG, side: -1, lt: 0.8 }],
+    targets: [
+      { kind: 'slopeH', s: [5, 5], d: [-2, -4], c: 'vres', label: LH, prompt: 'Zeichne die Hangabtriebskraft ' + TEX.H + '.' },
+      { kind: 'slopeP', s: [5, 5], d: [2, -1], c: 'v3', label: LP, prompt: 'Zeichne den Anteil ' + TEX.P + ' senkrecht zur Ebene.' }
+    ],
+    ok: 'Richtig: Auf der steilen Ebene ist ' + TEX.H + ' lang und ' + TEX.P + ' kurz. Die Ebene muss nur noch wenig tragen, fast alles zieht hangabwärts.'
+  },
+  r1: {
+    ex: '3-1', w: 9, h: 7, body: [3, 3], scale: 10,
+    given: [{ s: [3, 3], d: [4, 1], c: 'v1', label: L1, side: -1, lt: 0.78 }, { s: [3, 3], d: [-1, 3], c: 'v2', label: L2, side: -1 }, { s: [3, 3], d: [-1, -2], c: 'v3', label: L3 }],
+    targets: [{ kind: 'res', s: [3, 3], d: [2, 2], c: 'vres', label: LR, side: -1, prompt: 'Zeichne ' + TEX.R + ' am Körper.' }],
+    ok: 'Richtig: x-Anteile $4 - 1 - 1 = 2$, y-Anteile $1 + 3 - 2 = 2$ Kästchen. ' + TEX.R + ' zeigt nach rechts oben, rund $28\\,\\text{N}$. In diese Richtung wird der Körper beschleunigt.'
+  }
+};
+
+// Diagnosis for a wrong arrow. Returns an HTML message (MathJax allowed).
+function diagnose(def, t, s, d) {
+  const P = def.body, startOk = V.eq(s, t.s), vecOk = V.eq(d, t.d);
+  const atBody = 'Setz den Fuß auf den Angriffspunkt, den weißen Punkt am Körper.';
+  if (t.kind === 'compx') {
+    const F = def.F;
+    if (vecOk) return 'Länge und Richtung stimmen. ' + atBody;
+    if (!startOk) return atBody;
+    if (V.eq(d, F)) return 'Das ist ' + TEX.F + ' selbst. Gesucht ist nur der waagerechte Teil davon.';
+    if (d[0] === 0 && d[1] !== 0) return 'Das ist ein senkrechter Pfeil. ' + TEX.X + ' liegt waagerecht, entlang der x-Achse.';
+    if (d[1] !== 0) return TEX.X + ' liegt genau waagerecht. Dein Pfeil ist schräg.';
+    if (d[0] === -t.d[0]) return 'Die Länge stimmt, die Richtung nicht. ' + TEX.F + ' zeigt nach ' + (t.d[0] > 0 ? 'rechts' : 'links') + ', also auch ' + TEX.X + '.';
+    return 'Richtung stimmt, Länge nicht. ' + TEX.X + ' endet genau unter oder über der Spitze von ' + TEX.F + '.';
+  }
+  if (t.kind === 'compy') {
+    const X = def.targets[0].d;
+    if (vecOk && V.eq(s, V.add(P, X))) return 'Als Konstruktion richtig: ' + TEX.X + ' und ' + TEX.Y + ' Spitze an Fuß ergeben ' + TEX.F + '. Als Kraft greift ' + TEX.Y + ' aber am Körper an. Zeichne ihn vom Angriffspunkt aus.';
+    if (vecOk) return 'Länge und Richtung stimmen. ' + atBody;
+    if (!startOk) return atBody;
+    if (V.eq(d, def.F)) return 'Das ist ' + TEX.F + ' selbst. Gesucht ist nur der senkrechte Teil davon.';
+    if (d[1] === 0) return 'Das ist ein waagerechter Pfeil. ' + TEX.Y + ' liegt senkrecht, entlang der y-Achse.';
+    if (d[0] !== 0) return TEX.Y + ' liegt genau senkrecht. Dein Pfeil ist schräg.';
+    if (d[1] === -t.d[1]) return 'Die Länge stimmt, die Richtung nicht. ' + TEX.F + ' zeigt nach ' + (t.d[1] > 0 ? 'oben' : 'unten') + ', also auch ' + TEX.Y + '.';
+    return 'Richtung stimmt, Länge nicht. ' + TEX.Y + ' reicht genau so hoch wie die Spitze von ' + TEX.F + '.';
+  }
+  if (t.kind === 'fromcomp') {
+    const X = def.given[0].d, Y = def.given[1].d;
+    if (vecOk) return 'Länge und Richtung stimmen. ' + atBody;
+    if (V.eq(s, V.add(P, X)) && V.eq(d, Y)) return 'Das ist ' + TEX.Y + ', verschoben an die Spitze von ' + TEX.X + '. Ein guter Hilfspfeil. ' + TEX.F + ' führt vom Angriffspunkt bis zu seiner Spitze.';
+    if (!startOk) return atBody;
+    if (V.eq(d, X) || V.eq(d, Y)) return 'Das ist einer der beiden Anteile. ' + TEX.F + ' fasst beide zusammen.';
+    if (V.eq(d, V.sub(Y, X)) || V.eq(d, V.sub(X, Y))) return 'Du hast die Spitzen der Anteile verbunden. ' + TEX.F + ' beginnt aber am Angriffspunkt und ist die Diagonale des Rechtecks aus ' + TEX.X + ' und ' + TEX.Y + '.';
+    if (V.eq(d, V.neg(t.d))) return 'Genau verkehrt herum.';
+    if (Math.abs(d[0]) === Math.abs(t.d[0]) && Math.abs(d[1]) === Math.abs(t.d[1])) return 'Die Längen der Anteile stimmen, aber ein Vorzeichen nicht. Schau, wohin ' + TEX.X + ' und ' + TEX.Y + ' zeigen.';
+    return 'Noch nicht. Geh vom Angriffspunkt so weit nach links oder rechts wie ' + TEX.X + ' und dann so weit nach oben oder unten wie ' + TEX.Y + '. Dort ist die Spitze von ' + TEX.F + '.';
+  }
+  if (t.kind === 'slopeH') {
+    const along = (def.slope[0] * d[1] - def.slope[1] * d[0]) === 0;
+    if (vecOk) return 'Länge und Richtung stimmen. ' + atBody;
+    if (!startOk) return atBody;
+    if (V.eq(d, def.G)) return 'Das ist ' + TEX.G + ' selbst. ' + TEX.H + ' ist nur der Teil davon, der parallel zur Ebene zieht.';
+    if (V.eq(d, def.FP)) return 'Das ist der Anteil senkrecht zur Ebene. ' + TEX.H + ' liegt parallel zur Ebene.';
+    if (V.eq(d, V.neg(t.d))) return 'Die Länge stimmt, aber ' + TEX.H + ' zeigt hangabwärts, nicht hangaufwärts. Die Gewichtskraft zieht die Kiste nach unten.';
+    if (d[1] === 0) return TEX.H + ' liegt parallel zur Ebene, nicht waagerecht.';
+    if (along && V.sameDir(d, t.d)) return 'Richtung stimmt: parallel zur Ebene, hangabwärts. Die Länge nicht. Fäll von der Spitze von ' + TEX.G + ' ein Lot auf die Richtung der Ebene. Dort endet ' + TEX.H + '.';
+    if (along) return 'Parallel zur Ebene ist gut, aber ' + TEX.H + ' zeigt hangabwärts.';
+    return TEX.H + ' liegt parallel zur Ebene und zeigt hangabwärts. Zusammen mit ' + TEX.P + ' ergibt sie wieder ' + TEX.G + '.';
+  }
+  if (t.kind === 'slopeP') {
+    const perp = (def.slope[0] * d[0] + def.slope[1] * d[1]) === 0;
+    if (vecOk) return 'Länge und Richtung stimmen. ' + atBody;
+    if (!startOk) return atBody;
+    if (V.eq(d, V.neg(t.d))) return 'Das ist die Normalkraft: Die Ebene drückt so auf die Kiste. Gesucht ist der Anteil von ' + TEX.G + ', der in die Ebene hineindrückt. Er zeigt genau andersherum.';
+    if (V.eq(d, def.G)) return 'Das ist ' + TEX.G + ' selbst. ' + TEX.P + ' steht senkrecht auf der Ebene, nicht senkrecht nach unten.';
+    if (V.eq(d, def.FH)) return 'Das ist ' + TEX.H + ' noch einmal. Gesucht ist der Anteil senkrecht zur Ebene.';
+    if (d[0] === 0) return TEX.P + ' steht senkrecht auf der Ebene, nicht senkrecht zum Boden.';
+    if (perp && V.sameDir(d, t.d)) return 'Richtung stimmt, Länge nicht. ' + TEX.H + ' und ' + TEX.P + ' Spitze an Fuß müssen genau ' + TEX.G + ' ergeben. Die Spitze von ' + TEX.P + ' liegt auf gleicher Höhe wie die Spitze von ' + TEX.G + ', wenn du ' + TEX.H + ' dazurechnest.';
+    return TEX.P + ' steht senkrecht auf der Ebene und zeigt in sie hinein. Tipp: ' + TEX.G + ' minus ' + TEX.H + ' ergibt ' + TEX.P + '.';
+  }
+  if (t.kind === 'res') {
+    const G = def.given.map(g => g.d), sumMag = G.reduce((a, g) => a + V.len(g), 0);
+    if (vecOk) return 'Länge und Richtung stimmen. ' + TEX.R + ' greift aber am Körper an. ' + atBody;
+    if (!startOk) return atBody;
+    if (G.some(g => V.eq(d, g))) return 'Das ist eine einzelne Kraft. ' + TEX.R + ' fasst alle drei zusammen.';
+    for (let i = 0; i < G.length; i++) {
+      const rest = G.filter((g, j) => j !== i).reduce((a, g) => V.add(a, g), [0, 0]);
+      if (V.eq(d, rest)) return 'Du hast nur zwei der drei Kräfte zusammengesetzt. ' + TEX.R + ' braucht alle Kräfte.';
+    }
+    if (V.eq(d, V.neg(t.d))) return 'Genau verkehrt herum.';
+    if (V.sameDir(d, t.d)) return 'Richtung stimmt, Länge nicht. Zähle noch einmal alle x-Anteile und alle y-Anteile zusammen.';
+    if (Math.abs(V.len(d) - sumMag) < 0.6) return 'Dein Pfeil ist etwa so lang wie alle Beträge zusammen. Das gilt nur, wenn alle Kräfte in dieselbe Richtung zeigen.';
+    return 'Noch nicht. Zähle für jede Kraft die Kästchen nach rechts oder links und nach oben oder unten. Addiere alle x-Anteile, dann alle y-Anteile, mit Vorzeichen.';
+  }
+  return 'Noch nicht ganz.';
+}
+
+const Boards = (() => {
+  const state = {};
+
+  function mount(id) {
+    const def = BOARD_DEFS[id];
+    const host = document.getElementById('board-' + id);
+    host.innerHTML = '';
+    const status = document.createElement('div');
+    status.className = 'board-status';
+    host.appendChild(status);
+    const svg = makeSvg(def, 'Pfeil-Gitter, ' + scaleText(def).replace('≙', 'entspricht'));
+    host.appendChild(svg);
+    const scale = document.createElement('div');
+    scale.className = 'board-scale';
+    scale.textContent = scaleText(def);
+    host.appendChild(scale);
+    const measure = document.createElement('div');
+    measure.className = 'board-measure';
+    host.appendChild(measure);
+    const st = state[id] = { def, svg, status, measure, step: 0, start: null, end: null, wrong: false, preview: null };
+    svg.addEventListener('click', ev => onTap(id, ev));
+    svg.addEventListener('pointermove', ev => onMove(id, ev));
+    if (exerciseStates[def.ex]) st.step = def.targets.length;
+    render(id);
+  }
+
+  function toGrid(svg, def, ev) {
+    const pt = svg.createSVGPoint();
+    pt.x = ev.clientX; pt.y = ev.clientY;
+    const m = svg.getScreenCTM();
+    if (!m) return null;
+    const p = pt.matrixTransform(m.inverse());
+    const gx = Math.round(p.x), gy = Math.round(def.h - p.y);
+    if (gx < 0 || gx > def.w || gy < 0 || gy > def.h) return null;
+    return [gx, gy];
+  }
+
+  function onTap(id, ev) {
+    const st = state[id];
+    if (st.step >= st.def.targets.length) return;
+    const g = toGrid(st.svg, st.def, ev);
+    if (!g) return;
+    if (st.wrong || st.end) { st.start = null; st.end = null; st.wrong = false; clearFb(st.def); }
+    if (!st.start) st.start = g;
+    else if (V.eq(st.start, g)) st.start = null;
+    else st.end = g;
+    st.preview = null;
+    render(id);
+  }
+
+  function onMove(id, ev) {
+    const st = state[id];
+    if (ev.pointerType !== 'mouse' || !st.start || st.end) return;
+    const pt = st.svg.createSVGPoint();
+    pt.x = ev.clientX; pt.y = ev.clientY;
+    const m = st.svg.getScreenCTM();
+    if (!m) return;
+    const p = pt.matrixTransform(m.inverse());
+    st.preview = [p.x, st.def.h - p.y];
+    render(id);
+  }
+
+  function render(id) {
+    const st = state[id], def = st.def, layer = st.svg._layer;
+    while (layer.firstChild) layer.removeChild(layer.firstChild);
+    def.given.forEach(a => drawArrow(def, layer, a.s, V.add(a.s, a.d), COLORS[a.c], { label: a.label, labelSide: a.side || 1, dashed: a.dashed, labelT: a.lt }));
+    for (let i = 0; i < st.step; i++) {
+      const t = def.targets[i];
+      drawArrow(def, layer, t.s, V.add(t.s, t.d), COLORS[t.c], { label: t.label, dashed: t.dashed, labelSide: t.side || 1, width: 0.12, labelT: t.lt });
+    }
+    if (st.start && st.end) drawArrow(def, layer, st.start, st.end, st.wrong ? COLORS.err : COLORS.pen, { width: 0.12 });
+    else if (st.start && st.preview) drawArrow(def, layer, st.start, st.preview, COLORS.pen, { faint: true });
+    if (st.start) el('circle', { class: 'svg-start', cx: st.start[0], cy: def.h - st.start[1], r: 0.22 }, layer);
+
+    const done = st.step >= def.targets.length;
+    if (done) {
+      st.status.innerHTML = '<span class="step-pill">fertig</span> Alle Pfeile richtig.';
+      const last = def.targets[def.targets.length - 1];
+      const n = V.len(last.d);
+      st.measure.textContent = 'Länge des letzten Pfeils: ' + fmt(n) + ' Kästchen ≙ ' + fmt(n * def.scale) + ' ' + (def.unit || 'N');
+    } else {
+      const t = def.targets[st.step];
+      const pill = def.targets.length > 1 ? '<span class="step-pill">' + (st.step + 1) + ' / ' + def.targets.length + '</span> ' : '';
+      const hint = !st.start ? ' <span style="color:var(--ink-dim)">Tippe den Fuß.</span>'
+        : !st.end ? ' <span style="color:var(--ink-dim)">Tippe die Spitze.</span>' : '';
+      st.status.innerHTML = pill + t.prompt + hint;
+      st.measure.textContent = '';
+      typeset([st.status]);
+    }
+  }
+
+  function cardEls(def) {
+    const [mod, n] = def.ex.split('-');
+    return { mod: +mod, fb: document.getElementById('m' + mod + '-fb' + n), card: document.getElementById('m' + mod + '-ex' + n) };
+  }
+
+  function clearFb(def) {
+    const { fb, card } = cardEls(def);
+    fb.className = 'fb-block';
+    fb.innerHTML = '';
+    card.classList.remove('wrong-state');
+  }
+
+  function check(id) {
+    const st = state[id], def = st.def;
+    if (st.step >= def.targets.length) return;
+    const { mod, fb, card } = cardEls(def);
+    if (!st.start || !st.end) {
+      fb.className = 'fb-block incorrect';
+      fb.innerHTML = 'Zeichne zuerst einen Pfeil: Fuß antippen, dann Spitze antippen.';
+      return;
+    }
+    const t = def.targets[st.step];
+    const d = V.sub(st.end, st.start);
+    if (V.eq(st.start, t.s) && V.eq(d, t.d)) {
+      st.step++;
+      st.start = st.end = null;
+      st.wrong = false;
+      if (st.step >= def.targets.length) {
+        fb.className = 'fb-block correct';
+        fb.innerHTML = '&#10003; ' + def.ok;
+        card.classList.remove('wrong-state');
+        card.classList.add('solved');
+        exerciseStates[def.ex] = true;
+        updateModuleProgress(mod);
+        SCORM.save();
+      } else {
+        fb.className = 'fb-block correct';
+        fb.innerHTML = '&#10003; Schritt ' + st.step + ' stimmt. Weiter mit dem nächsten Pfeil.';
+        card.classList.remove('wrong-state');
+      }
+    } else {
+      st.wrong = true;
+      fb.className = 'fb-block incorrect';
+      fb.innerHTML = '&#10007; ' + diagnose(def, t, st.start, d) + ' <span style="opacity:.75">Tippe neu, um es nochmal zu versuchen.</span>';
+      card.classList.add('wrong-state');
+    }
+    render(id);
+    typeset([fb]);
+  }
+
+  function undo(id) {
+    const st = state[id];
+    st.start = st.end = st.preview = null;
+    st.wrong = false;
+    clearFb(st.def);
+    render(id);
+  }
+
+  return { mount, check, undo };
+})();
+
+/* ────────────────────────────────────────────
+   STATIC FIGURES: explanation figures and read-off boards
+   ──────────────────────────────────────────── */
+/* ────────────────────────────────────────────
+   STATIC FIGURES, SLIDER DEMO, WALKTHROUGH
+   ──────────────────────────────────────────── */
+const STATIC_DEFS = {
+  c2: { w: 6, h: 6, body: [4, 5], scale: 10, given: [{ s: [4, 5], d: [-3, -4], c: 'vres', label: LF }] },
+  fig32: {
+    w: 9, h: 9, body: [4, 5], slope: [2, 1], scale: 10,
+    given: [
+      { s: [4, 5], d: [0, -5], c: 'v1', label: LG, side: -1, lt: 0.86 },
+      { s: [4, 5], d: [-2, -1], c: 'vres', label: LH, side: -1 },
+      { s: [2, 4], d: [2, -4], c: 'v3', dashed: true },
+      { s: [4, 5], d: [2, -4], c: 'v3', label: LP, lt: 0.7 },
+      { s: [4, 5], d: [-2, 4], c: 'v2', label: LN, dashed: true, side: -1 }
+    ]
+  }
+};
+
+// Inclined plane: ramp body, surface line and angle arc. b.slope is the
+// direction vector of the surface (rising to the right).
+function drawSlope(b, svg) {
+  const L = Math.hypot(b.slope[0], b.slope[1]), u = [b.slope[0] / L, b.slope[1] / L], n = [-u[1], u[0]];
+  const Q = [b.body[0] - n[0] * 0.72, b.body[1] - n[1] * 0.72];
+  const lo = Math.max(-Q[0] / u[0], -Q[1] / u[1]), hi = Math.min((b.w - Q[0]) / u[0], (b.h - Q[1]) / u[1]);
+  const A = [Q[0] + u[0] * lo, Q[1] + u[1] * lo], B = [Q[0] + u[0] * hi, Q[1] + u[1] * hi];
+  const pts = [A, B, [b.w, B[1]], [b.w, 0], [A[0], 0]].map(p => p[0] + ',' + sy(b, p[1])).join(' ');
+  el('polygon', { points: pts, fill: 'rgba(232,232,240,0.07)', stroke: 'none' }, svg);
+  el('line', { x1: A[0], y1: sy(b, A[1]), x2: B[0], y2: sy(b, B[1]), stroke: 'rgba(232,232,240,0.55)', 'stroke-width': 0.09, 'stroke-linecap': 'round' }, svg);
+  const a = Math.atan2(u[1], u[0]), r = 1.1;
+  el('line', { x1: A[0], y1: sy(b, A[1]), x2: A[0] + 1.6, y2: sy(b, A[1]), stroke: 'rgba(232,232,240,0.35)', 'stroke-width': 0.04, 'stroke-dasharray': '0.15 0.1' }, svg);
+  el('path', { d: `M ${A[0] + r} ${sy(b, A[1])} A ${r} ${r} 0 0 0 ${A[0] + r * Math.cos(a)} ${sy(b, A[1] + r * Math.sin(a))}`, stroke: 'rgba(232,232,240,0.6)', 'stroke-width': 0.05, fill: 'none' }, svg);
+  const t = el('text', { x: A[0] + 1.45 * Math.cos(a / 2), y: sy(b, A[1] + 1.45 * Math.sin(a / 2)) + 0.12, 'font-size': 0.36, fill: 'rgba(232,232,240,0.75)', 'text-anchor': 'middle', 'font-family': 'Outfit, system-ui, sans-serif' }, svg);
+  t.textContent = 'α';
+  return a * 180 / Math.PI;
+}
+
+function renderStatic(id) {
+  const def = STATIC_DEFS[id], host = document.getElementById('board-' + id);
+  host.innerHTML = '';
+  const svg = makeSvg(def, 'Abbildung, ' + scaleText(def).replace('≙', 'entspricht'));
+  host.appendChild(svg);
+  def.given.forEach(a => drawArrow(def, svg._layer, a.s, V.add(a.s, a.d), COLORS[a.c], { label: a.label, labelSide: a.side || 1, dashed: a.dashed, labelT: a.lt }));
+  const sc = document.createElement('div');
+  sc.className = 'board-scale';
+  sc.textContent = scaleText(def);
+  host.appendChild(sc);
+}
+
+// F3.1: angle slider, a 50 N force and its two components
+const COMP = { w: 7, h: 6, body: [1, 0.5] };
+function drawCompDemo() {
+  const deg = +document.getElementById('comp-slider').value, rad = deg * Math.PI / 180;
+  const host = document.getElementById('board-comp');
+  host.innerHTML = '';
+  const b = COMP, svg = makeSvg(b, 'Kraft mit ' + deg + ' Grad gegen die Waagerechte und ihre Anteile');
+  svg.style.maxWidth = '420px';
+  host.appendChild(svg);
+  const Lr = svg._layer, P = b.body, F = [5 * Math.cos(rad), 5 * Math.sin(rad)];
+  const tX = V.add(P, [F[0], 0]), tY = V.add(P, [0, F[1]]), tF = V.add(P, F);
+  el('line', { x1: tX[0], y1: sy(b, tX[1]), x2: tF[0], y2: sy(b, tF[1]), stroke: 'rgba(232,232,240,0.4)', 'stroke-width': 0.04, 'stroke-dasharray': '0.15 0.1' }, Lr);
+  el('line', { x1: tY[0], y1: sy(b, tY[1]), x2: tF[0], y2: sy(b, tF[1]), stroke: 'rgba(232,232,240,0.4)', 'stroke-width': 0.04, 'stroke-dasharray': '0.15 0.1' }, Lr);
+  drawArrow(b, Lr, P, tX, COLORS.v1, { label: F[0] > 0.9 ? LX : null, labelSide: -1 });
+  drawArrow(b, Lr, P, tY, COLORS.v2, { label: F[1] > 0.9 ? LY : null });
+  drawArrow(b, Lr, P, tF, COLORS.vres, { label: LF, width: 0.13, labelSide: -1 });
+  document.getElementById('comp-val').textContent = deg;
+  document.getElementById('comp-x').textContent = fmt(50 * Math.cos(rad));
+  document.getElementById('comp-y').textContent = fmt(50 * Math.sin(rad));
+}
+
+// F3.3: worked example, lamp on two ropes (1 square = 15 N)
+const LAMP = { w: 10, h: 8, body: [5, 5], bodyName: 'Lampe', bodyNameAbove: true, scale: 15 };
+const LAMP_TEXT = [
+  '<strong>Freikörperbild.</strong> Auf die Lampe wirken <span class="c1">$\\vec{F}_G = 60\\,\\text{N}$</span> und die beiden Seilkräfte <span class="c2">$\\vec{F}_{S1}$</span> und <span class="c3">$\\vec{F}_{S2}$</span>. Beide Seile sind um 30° gegen die Waagerechte geneigt. Die Lampe hängt ruhig, also herrscht Gleichgewicht.',
+  '<strong>Zerlegen.</strong> Jede Seilkraft hat einen x-Anteil und einen y-Anteil: $F_{S,x} = F_S \\cdot \\cos 30^\\circ$ und $F_{S,y} = F_S \\cdot \\sin 30^\\circ$. Die Gewichtskraft hat nur einen y-Anteil.',
+  '<strong>x-Richtung:</strong> $-F_{S1} \\cdot \\cos 30^\\circ + F_{S2} \\cdot \\cos 30^\\circ = 0$. Daraus folgt $F_{S1} = F_{S2}$. Bei gleichen Winkeln ziehen beide Seile gleich stark, wir nennen den Betrag kurz $F_S$.',
+  '<strong>y-Richtung:</strong> $2 \\cdot F_S \\cdot \\sin 30^\\circ - 60\\,\\text{N} = 0$. Also $F_S = \\dfrac{60\\,\\text{N}}{2 \\cdot 0{,}5} = 60\\,\\text{N}$. Jedes Seil zieht so stark, wie die ganze Lampe wiegt. Je flacher die Seile, desto größer wird $F_S$.'
+];
+let lampIdx = 0;
+function renderLamp() {
+  const b = LAMP, host = document.getElementById('board-lamp');
+  host.innerHTML = '';
+  const svg = makeSvg(b, 'Lampe an zwei Seilen, Schritt ' + (lampIdx + 1));
+  svg.style.maxWidth = '480px';
+  host.appendChild(svg);
+  const Lr = svg._layer, P = b.body, c = 4 * Math.cos(Math.PI / 6), s = 4 * Math.sin(Math.PI / 6);
+  if (lampIdx >= 1) {
+    const fx = lampIdx === 2 ? {} : { faint: true }, fy = lampIdx === 3 ? {} : { faint: true };
+    drawArrow(b, Lr, P, V.add(P, [-c, 0]), COLORS.v2, Object.assign({ dashed: true }, fx));
+    drawArrow(b, Lr, P, V.add(P, [c, 0]), COLORS.v3, Object.assign({ dashed: true }, fx));
+    drawArrow(b, Lr, V.add(P, [-c, 0]), V.add(P, [-c, s]), COLORS.v2, Object.assign({ dashed: true }, fy));
+    drawArrow(b, Lr, V.add(P, [c, 0]), V.add(P, [c, s]), COLORS.v3, Object.assign({ dashed: true }, fy));
+  }
+  drawArrow(b, Lr, P, V.add(P, [0, -4]), COLORS.v1, { label: LG });
+  drawArrow(b, Lr, P, V.add(P, [-c, s]), COLORS.v2, { label: { sub: 'S1' }, labelSide: -1 });
+  drawArrow(b, Lr, P, V.add(P, [c, s]), COLORS.v3, { label: { sub: 'S2' } });
+  document.getElementById('lamp-text').innerHTML = LAMP_TEXT[lampIdx];
+  document.getElementById('lamp-tag').textContent = 'Schritt ' + (lampIdx + 1) + ' von 4';
+  document.getElementById('lamp-counter').textContent = (lampIdx + 1) + ' / 4';
+  document.getElementById('lamp-prev').disabled = lampIdx === 0;
+  document.getElementById('lamp-next').disabled = lampIdx === 3;
+  typeset([document.getElementById('lamp-text')]);
+}
+function lampStep(dir) {
+  lampIdx = Math.max(0, Math.min(3, lampIdx + dir));
+  renderLamp();
+}
+
+/* ────────────────────────────────────────────
+   NUMERIC EXERCISES
+   One or more fields, each with a target value and tolerance. Known wrong
+   values (swapped sin/cos, calculator in radians, added magnitudes) get
+   their own diagnosis.
+   ──────────────────────────────────────────── */
+const RAD = 'Dein Taschenrechner rechnet im Bogenmaß (RAD). Stell ihn auf Grad (DEG) um und rechne noch einmal.';
+const NUM_DEFS = {
+  '0-2': {
+    fields: [{ id: 'm0-a2x', v: -30, wrong: [{ v: 30, m: 'Der Betrag von $F_x$ stimmt, das Vorzeichen nicht. Nach links heißt negativ.' }, { v: -40, m: '$F_x$ ist die waagerechte Strecke. Zähle die Kästchen nach links.' }] },
+             { id: 'm0-a2y', v: -40, wrong: [{ v: 40, m: 'Der Betrag von $F_y$ stimmt, das Vorzeichen nicht. Nach unten heißt negativ.' }, { v: -30, m: '$F_y$ ist die senkrechte Strecke. Zähle die Kästchen nach unten.' }] }],
+    diag: [{ v: [30, 40], m: 'Die Beträge stimmen, die Vorzeichen nicht. $\\vec{F}$ zeigt nach links und nach unten, also sind beide Anteile negativ.' },
+           { v: [-40, -30], m: 'x und y sind vertauscht. Der x-Anteil ist die waagerechte Strecke, der y-Anteil die senkrechte.' }],
+    fallback: 'Zähle vom Fuß zur Spitze: wie viele Kästchen nach links (x) und wie viele nach unten (y)? Jedes Kästchen sind 10 N.',
+    ok: 'Richtig: 3 Kästchen nach links und 4 nach unten, also $F_x = -30\\,\\text{N}$ und $F_y = -40\\,\\text{N}$. Der Betrag ist $\\sqrt{30^2 + 40^2}\\,\\text{N} = 50\\,\\text{N}$.'
+  },
+  '0-3': {
+    fields: [{ id: 'm0-a3x', v: 69.28, wrong: [{ v: 40, m: 'Für $F_x$ hast du den Sinus genommen. Der x-Anteil liegt am Winkel an: $F_x = F \\cdot \\cos\\alpha$.' }, { v: 12.34, m: RAD }] },
+             { id: 'm0-a3y', v: 40, wrong: [{ v: 69.28, m: 'Für $F_y$ hast du den Kosinus genommen. Der y-Anteil liegt dem Winkel gegenüber: $F_y = F \\cdot \\sin\\alpha$.' }, { v: -79.04, m: RAD }] }],
+    diag: [{ v: [40, 69.28], m: 'Sinus und Kosinus sind vertauscht. Der Winkel liegt an der Waagerechten, also gehört der Kosinus zu $F_x$.' }, { v: [12.34, -79.04], m: RAD }],
+    fallback: 'Mit $\\alpha$ gegen die Waagerechte gilt $F_x = F \\cdot \\cos\\alpha$ und $F_y = F \\cdot \\sin\\alpha$.',
+    ok: 'Richtig: $F_x = 80\\,\\text{N} \\cdot \\cos 30^\\circ \\approx 69{,}3\\,\\text{N}$ und $F_y = 80\\,\\text{N} \\cdot \\sin 30^\\circ = 40\\,\\text{N}$. Kontrolle: Beide Anteile sind kleiner als 80 N.'
+  },
+  '0-4': {
+    fields: [{ id: 'm0-a4f', v: 100, wrong: [{ v: 140, m: 'Du hast die Anteile einfach addiert. Sie stehen senkrecht aufeinander, deshalb brauchst du Pythagoras.' }, { v: 20, m: 'Die Differenz hilft nicht. $F_x$ und $F_y$ sind die Katheten eines rechtwinkligen Dreiecks, $F$ ist die Hypotenuse.' }] },
+             { id: 'm0-a4a', v: 53.13, wrong: [{ v: 36.87, m: 'Das ist der Winkel gegen die Senkrechte. Gegen die Waagerechte gilt $\\tan\\alpha = \\dfrac{F_y}{F_x}$.' }, { v: 0.93, m: RAD }, { v: 0.64, m: RAD }] }],
+    fallback: '$F = \\sqrt{F_x^2 + F_y^2}$ und $\\tan\\alpha = \\dfrac{F_y}{F_x}$.',
+    ok: 'Richtig: $F = \\sqrt{60^2 + 80^2}\\,\\text{N} = 100\\,\\text{N}$ und $\\alpha = \\tan^{-1}\\!\\left(\\dfrac{80}{60}\\right) \\approx 53{,}1^\\circ$.'
+  },
+  '0-5': {
+    fields: [{ id: 'm0-a5x', v: 30, wrong: [{ v: 50, m: 'Bei $F_{res,x}$ hast du die 10 N addiert. $\\vec{F}_2$ zieht aber nach links, also $F_{2,x} = -10\\,\\text{N}$.' }] },
+             { id: 'm0-a5y', v: 80, wrong: [{ v: 20, m: 'Bei $F_{res,y}$: Beide Kräfte ziehen nach oben, beide y-Anteile sind positiv.' }] }],
+    fallback: 'Addiere getrennt: erst alle x-Anteile, dann alle y-Anteile, jeweils mit Vorzeichen.',
+    ok: 'Richtig: $F_{res,x} = 40\\,\\text{N} - 10\\,\\text{N} = 30\\,\\text{N}$ und $F_{res,y} = 30\\,\\text{N} + 50\\,\\text{N} = 80\\,\\text{N}$. Der Betrag ist $\\sqrt{30^2 + 80^2}\\,\\text{N} \\approx 85{,}4\\,\\text{N}$.'
+  },
+  '1-4': {
+    fields: [{ id: 'm1-a4h', v: 200, wrong: [{ v: 346.41, m: 'Für $F_H$ hast du den Kosinus genommen. Grenzfall-Check: Bei einer flachen Ebene ($\\alpha = 0^\\circ$) muss $F_H = 0$ sein. Das schafft nur der Sinus.' }, { v: -395.2, m: RAD }, { v: 400, m: 'Nicht die ganze Gewichtskraft zieht hangabwärts, nur ihr Anteil parallel zur Ebene.' }] },
+             { id: 'm1-a4n', v: 346.41, wrong: [{ v: 200, m: 'Für $F_N$ hast du den Sinus genommen. Bei $\\alpha = 0^\\circ$ muss die Ebene alles tragen, $F_N = F_G$. Das schafft nur der Kosinus.' }, { v: 400, m: 'Auf der schiefen Ebene trägt die Ebene nicht die volle Gewichtskraft. Ein Teil zieht hangabwärts.' }, { v: 61.7, m: RAD }] }],
+    diag: [{ v: [346.41, 200], m: 'Sinus und Kosinus sind vertauscht. Grenzfall-Check: flache Ebene, $\\alpha = 0^\\circ$, dann $F_H = 0$ und $F_N = F_G$.' }],
+    fallback: '$F_H = F_G \\cdot \\sin\\alpha$ und $F_N = F_G \\cdot \\cos\\alpha$.',
+    ok: 'Richtig: $F_H = 400\\,\\text{N} \\cdot \\sin 30^\\circ = 200\\,\\text{N}$ und $F_N = 400\\,\\text{N} \\cdot \\cos 30^\\circ \\approx 346\\,\\text{N}$.'
+  },
+  '2-1': {
+    fields: [{ id: 'm2-a1', v: 80, wrong: [{ v: 40, m: 'Du hast die Gewichtskraft nur halbiert. Die Seile ziehen schräg, und nur ihr y-Anteil trägt die Lampe.' }, { v: 46.19, m: 'Du hast den Kosinus genommen. Der senkrechte Anteil liegt dem 30°-Winkel gegenüber: $F_S \\cdot \\sin 30^\\circ$.' }, { v: 160, m: 'Beide Seile tragen gemeinsam: $2 \\cdot F_S \\cdot \\sin 30^\\circ = 80\\,\\text{N}$.' }] }],
+    fallback: 'y-Richtung: $2 \\cdot F_S \\cdot \\sin 30^\\circ - F_G = 0$. Nach $F_S$ auflösen.',
+    ok: 'Richtig: $2 \\cdot F_S \\cdot \\sin 30^\\circ = 80\\,\\text{N}$, also $F_S = 80\\,\\text{N}$. Jedes Seil zieht so stark, wie die ganze Lampe wiegt.'
+  },
+  '2-2': {
+    fields: [{ id: 'm2-a2', v: 250, wrong: [{ v: 300, m: 'Hier ist $F_N \\neq F_G$. Das schräge Seil zieht die Kiste ein Stück nach oben und entlastet den Boden.' }, { v: 350, m: 'Das Vorzeichen stimmt nicht. Der y-Anteil des Seils zeigt nach oben, er entlastet den Boden.' }, { v: 213.4, m: 'Für den y-Anteil des Seils gehört der Sinus: $F_Z \\cdot \\sin 30^\\circ = 50\\,\\text{N}$.' }] }],
+    fallback: 'y-Richtung: $F_N + F_Z \\cdot \\sin 30^\\circ - F_G = 0$.',
+    ok: 'Richtig: $F_N = 300\\,\\text{N} - 100\\,\\text{N} \\cdot \\sin 30^\\circ = 250\\,\\text{N}$. Das Seil trägt 50 N der Gewichtskraft mit.'
+  },
+  '2-3': {
+    fields: [{ id: 'm2-a3', v: 86.6, wrong: [{ v: 100, m: 'Nicht die ganze Seilkraft zieht nach vorn, nur ihr x-Anteil.' }, { v: 50, m: 'Das ist der y-Anteil. Für die x-Richtung brauchst du $F_Z \\cdot \\cos 30^\\circ$.' }] }],
+    fallback: 'x-Richtung: $F_Z \\cdot \\cos 30^\\circ - F_R = 0$.',
+    ok: 'Richtig: $F_R = 100\\,\\text{N} \\cdot \\cos 30^\\circ \\approx 86{,}6\\,\\text{N}$. Konstantes Tempo heißt Gleichgewicht, also gleicht die Reibung genau den x-Anteil des Seils aus.'
+  },
+  '2-5': {
+    fields: [{ id: 'm2-a5x', v: -30, wrong: [{ v: 30, m: 'Bei $F_{3,x}$ stimmt das Vorzeichen nicht. $\\vec{F}_3$ muss die anderen Kräfte ausgleichen, nicht verstärken.' }] },
+             { id: 'm2-a5y', v: -30, wrong: [{ v: 30, m: 'Bei $F_{3,y}$ stimmt das Vorzeichen nicht. $\\vec{F}_3$ muss die anderen Kräfte ausgleichen, nicht verstärken.' }] }],
+    diag: [{ v: [30, 30], m: 'Das ist die Resultierende von $\\vec{F}_1$ und $\\vec{F}_2$. Für das Gleichgewicht brauchst du ihren Gegenpfeil, also beide Vorzeichen umdrehen.' }],
+    fallback: 'Im Gleichgewicht gilt $F_{1,x} + F_{2,x} + F_{3,x} = 0$. Genauso für y.',
+    ok: 'Richtig: $F_{3,x} = -(40 - 10)\\,\\text{N} = -30\\,\\text{N}$ und $F_{3,y} = -(-30 + 60)\\,\\text{N} = -30\\,\\text{N}$. $\\vec{F}_3$ zeigt nach links unten.'
+  },
+  '2-6': {
+    fields: [{ id: 'm2-a6', v: 431.9, wrong: [{ v: 75, m: 'Du hast die Gewichtskraft nur halbiert. Bei so flachen Seilen trägt der y-Anteil nur einen kleinen Teil der Seilkraft.' }, { v: 76.16, m: 'Du hast den Kosinus genommen. Der senkrechte Anteil liegt dem 10°-Winkel gegenüber: $F_S \\cdot \\sin 10^\\circ$.' }, { v: 863.8, m: 'Es sind zwei Seilhälften, die gemeinsam tragen: $2 \\cdot F_S \\cdot \\sin 10^\\circ = F_G$.' }, { v: -137.9, m: RAD }] }],
+    fallback: 'y-Richtung: $2 \\cdot F_S \\cdot \\sin 10^\\circ = 150\\,\\text{N}$. Nach $F_S$ auflösen.',
+    ok: 'Richtig: $F_S = \\dfrac{150\\,\\text{N}}{2 \\cdot \\sin 10^\\circ} \\approx 432\\,\\text{N}$. Fast dreimal so viel wie die Ampel wiegt. Deshalb hängen Ampelseile immer etwas durch.'
+  },
+  '3-2': {
+    fields: [{ id: 'm3-a2f', v: 50, wrong: [{ v: 90, m: 'Du hast alle Beträge addiert. Die Kräfte zeigen in verschiedene Richtungen.' }, { v: 70, m: 'Du hast alle Kräfte wie auf einer Linie verrechnet. Die 30 N stehen aber senkrecht zu den anderen beiden.' }] },
+             { id: 'm3-a2a', v: 36.87, wrong: [{ v: 53.13, m: 'Das ist der Winkel gegen die Senkrechte. Gegen die Waagerechte: $\\tan\\alpha = \\dfrac{F_{res,y}}{F_{res,x}}$.' }, { v: 0.64, m: RAD }] }],
+    fallback: 'Erst $F_{res,x}$ und $F_{res,y}$ bestimmen, dann $F_{res} = \\sqrt{F_{res,x}^2 + F_{res,y}^2}$ und $\\tan\\alpha = \\dfrac{F_{res,y}}{F_{res,x}}$.',
+    ok: 'Richtig: $F_{res,x} = 50\\,\\text{N} - 10\\,\\text{N} = 40\\,\\text{N}$, $F_{res,y} = 30\\,\\text{N}$. Also $F_{res} = 50\\,\\text{N}$ unter $36{,}9^\\circ$ gegen die Waagerechte, nach rechts oben.'
+  },
+  '3-3': {
+    fields: [{ id: 'm3-a3', v: 40, wrong: [{ v: 100, m: 'Das ist nur die Hangabtriebskraft. Die Reibung bremst dagegen.' }, { v: 160, m: 'Die Reibung zeigt hangaufwärts, gegen die Bewegung. Sie wird abgezogen.' }, { v: 113.2, m: 'Hangabwärts zieht $F_G \\cdot \\sin\\alpha$, nicht der Kosinus.' }, { v: -40, m: 'Der Betrag stimmt. Gefragt ist nur der Betrag, die Richtung ist hangabwärts.' }] }],
+    fallback: 'Entlang der Ebene: $F_{res} = F_G \\cdot \\sin\\alpha - F_R$.',
+    ok: 'Richtig: $F_H = 200\\,\\text{N} \\cdot \\sin 30^\\circ = 100\\,\\text{N}$ hangabwärts, die Reibung bremst mit 60 N. Bleiben $F_{res} = 40\\,\\text{N}$ hangabwärts. Senkrecht zur Ebene heben sich $F_N$ und $F_{\\perp}$ auf.'
+  },
+  '3-4': {
+    fields: [{ id: 'm3-a4', v: 2, wrong: [{ v: 5, m: 'Du hast mit der Hangabtriebskraft allein gerechnet. Für die Beschleunigung zählt die resultierende Kraft.' }, { v: 0.2, m: 'Teile durch die Masse in kg, nicht durch die Gewichtskraft.' }, { v: 800, m: 'Die Beschleunigung ist $a = \\dfrac{F_{res}}{m}$, nicht $F_{res} \\cdot m$.' }] }],
+    fallback: '$a = \\dfrac{F_{res}}{m}$ mit $F_{res}$ aus Aufgabe 3.',
+    ok: 'Richtig: $a = \\dfrac{40\\,\\text{N}}{20\\,\\text{kg}} = 2\\,\\dfrac{\\text{m}}{\\text{s}^2}$, hangabwärts wie $\\vec{F}_{res}$.'
+  }
+};
+
+// Reads a number; tolerates a trailing unit ("40 N", "53°").
+function numVal(raw) {
+  const s = normalize(raw), m = s.match(/^[-+]?(\d+\.?\d*|\.\d+)/);
+  if (!m || /\d/.test(s.slice(m[0].length))) return NaN;
+  return parseFloat(m[0]);
+}
+function near(a, b) { return Math.abs(a - b) <= Math.max(0.5, Math.abs(b) * 0.012); }
+function checkNum(mod, ex) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const def = NUM_DEFS[key];
+  const vals = def.fields.map(f => numVal(document.getElementById(f.id).value));
+  const fb = document.getElementById('m' + mod + '-fb' + ex);
+  if (vals.some(v => isNaN(v))) {
+    fb.className = 'fb-block incorrect';
+    fb.innerHTML = def.fields.length > 1 ? 'Trag in jedes Feld eine Zahl ein.' : 'Trag eine Zahl ein.';
+    return;
+  }
+  const ok = def.fields.map((f, i) => near(vals[i], f.v));
+  def.fields.forEach((f, i) => { document.getElementById(f.id).className = 'answer-input ' + (ok[i] ? 'correct' : 'incorrect'); });
+  if (ok.every(Boolean)) { markResult(mod, ex, true, def.ok); return; }
+  let msg = null;
+  (def.diag || []).forEach(d => { if (!msg && d.v.every((v, i) => near(vals[i], v))) msg = d.m; });
+  if (!msg) {
+    const i = ok.indexOf(false), f = def.fields[i];
+    (f.wrong || []).forEach(w => { if (!msg && near(vals[i], w.v)) msg = w.m; });
+  }
+  if (!msg) msg = def.fallback;
+  if (def.fields.length > 1 && ok.some(Boolean)) msg = 'Ein Feld stimmt schon (grün). ' + msg;
+  markResult(mod, ex, false, msg);
+}
+
+/* ────────────────────────────────────────────
+   MC FEEDBACK
+   ──────────────────────────────────────────── */
+const EX_FEEDBACK = {
+  '0-7': {
+    ok: 'Richtig: $\\vec{F}_x$ und $\\vec{F}_y$ sind die Katheten eines rechtwinkligen Dreiecks, $\\vec{F}$ ist die Hypotenuse. Die Hypotenuse ist immer die längste Seite.',
+    wrong: {
+      'klein': 'Bei kleinem Winkel wird $F_x$ fast so groß wie $F$, aber nie größer. Der Kosinus ist höchstens 1.',
+      'summe': 'Die Beträge der Anteile ergeben zusammen nicht $F$. Bei 45° wären es zum Beispiel etwa 1,4-mal so viel. Es gilt Pythagoras.',
+      '45': 'Bei 45° sind beide Anteile gleich groß, aber beide kleiner als $F$.'
+    }
+  },
+  '1-2': {
+    ok: 'Richtig: Die Kraftpfeile stehen senkrecht auf den Seiten des Ebenen-Dreiecks. Deshalb steckt der Winkel α zwischen $\\vec{F}_G$ und $\\vec{F}_{\\perp}$.',
+    wrong: {
+      'gh': 'Zwischen $\\vec{F}_G$ und $\\vec{F}_H$ liegt $90^\\circ - \\alpha$. Prüf es am Grenzfall: Bei flacher Ebene steht $\\vec{F}_H$ waagerecht, also $90^\\circ$ zu $\\vec{F}_G$.',
+      'hp': '$\\vec{F}_H$ und $\\vec{F}_{\\perp}$ stehen immer senkrecht aufeinander. Dort ist der rechte Winkel.',
+      'nirgends': 'Doch, α steckt im Kräftedreieck. Prüf es am Grenzfall: flache Ebene, α = 0, dann zeigt $\\vec{F}_{\\perp}$ genau wie $\\vec{F}_G$ nach unten.'
+    }
+  },
+  '1-3': {
+    ok: 'Richtig: Der Grenzfall-Check ist der sicherste Weg. Flache Ebene, α = 0°: Nichts zieht hangabwärts, $F_H = 0$. Weil $\\sin 0^\\circ = 0$ ist, gehört der Sinus zu $F_H$.',
+    wrong: {
+      'cos_an': 'Die Regel „anliegend gleich Kosinus“ hilft nur, wenn du weißt, woran der Winkel anliegt. Im Kräftedreieck liegt α an $\\vec{F}_{\\perp}$ an, nicht an $\\vec{F}_H$.',
+      'sin_voll': 'Bei α = 0° ist die Ebene flach. Dann zieht gar nichts hangabwärts, also $F_H = 0$, nicht $F_G$.',
+      'cos_90': 'Bei α = 90° ist die Wand senkrecht, dann zieht die volle Gewichtskraft nach unten: $F_H = F_G$. Das passt nicht zu $\\cos 90^\\circ = 0$.'
+    }
+  },
+  '1-6': {
+    ok: 'Richtig: $F_H = 500\\,\\text{N} \\cdot \\sin 20^\\circ \\approx 171\\,\\text{N}$. Die Haftreibung schafft höchstens $0{,}5 \\cdot 500\\,\\text{N} \\cdot \\cos 20^\\circ \\approx 235\\,\\text{N}$. Das reicht, die Kiste bleibt liegen.',
+    wrong: {
+      'rutscht_hang': 'Eine Hangabtriebskraft gibt es auf jeder schiefen Ebene. Entscheidend ist, ob die Haftreibung sie ausgleichen kann.',
+      'liegt_fn': 'Das Ergebnis stimmt, die Begründung nicht. $F_N$ und $F_H$ wirken in verschiedene Richtungen, man kann sie nicht direkt vergleichen. Vergleiche $F_H$ mit der größten Haftreibung $\\mu_H \\cdot F_N$.',
+      'rutscht_fg': 'Die Haftreibung hängt von $F_N$ ab, nicht von $F_G$. Mit $F_N = F_G \\cdot \\cos 20^\\circ$ kommst du auf 235 N, und das reicht.'
+    }
+  },
+  '1-7': {
+    ok: 'Richtig: Mit steilerer Ebene wächst $\\sin\\alpha$ und $\\cos\\alpha$ wird kleiner. Mehr zieht hangabwärts, weniger drückt auf die Ebene. Deshalb rutscht eine Kiste ab einem bestimmten Winkel los.',
+    wrong: {
+      'beide': 'Beide können nicht wachsen. $\\vec{F}_H$ und $\\vec{F}_{\\perp}$ ergeben zusammen immer genau $\\vec{F}_G$, und die bleibt gleich.',
+      'nur_h': 'Auch $F_N$ ändert sich. Grenzfall senkrechte Wand: Die Wand trägt gar nichts mehr.',
+      'gleich': '$F_G$ bleibt gleich, aber die Aufteilung ändert sich mit dem Winkel.'
+    }
+  },
+  '2-7': {
+    ok: 'Richtig: Ein waagerechtes Seil hat keinen y-Anteil, der die Ampel tragen könnte. Je flacher das Seil, desto größer muss $F_S$ sein. Bei 0° bräuchte man eine unendlich große Kraft.',
+    wrong: {
+      'stark': 'Kein Seil ist stark genug: Bei 0° ist $\\sin 0^\\circ = 0$, und dann trägt auch die größte Seilkraft nichts nach oben.',
+      'klein': 'Andersherum: Je flacher das Seil, desto größer die Seilkraft. Das hast du in Aufgabe 6 gesehen.',
+      'schwer': 'Das Gewicht der Ampel ändert sich nicht. Das Problem ist die Richtung des Seils.'
+    }
+  },
+  '3-5': {
+    ok: 'Richtig: Der Geschwindigkeitspfeil dreht sich ständig zur Kurveninnenseite. $\\Delta\\vec{v}$ und damit $\\vec{F}_{res}$ zeigen zur Mitte der Kurve.',
+    wrong: {
+      'vorne': 'Nach vorn heben sich Antrieb und Widerstände auf, das Tempo bleibt ja gleich. Es ändert sich nur die Richtung.',
+      'aussen': 'Eine „Fliehkraft“ nach außen spürst du als Mitfahrer, weil dein Körper geradeaus weiter will. Auf das Auto wirkt keine solche Kraft. Die Straße drückt die Reifen zur Mitte.',
+      'keine': 'Das Tempo bleibt gleich, aber die Richtung ändert sich. Auch das ist eine Änderung der Geschwindigkeit.'
+    }
+  },
+  '3-6': {
+    ok: 'Richtig: Ohne Luftwiderstand wirkt nur die Gewichtskraft, egal wohin der Ball fliegt. $\\vec{F}_{res}$ zeigt immer senkrecht nach unten, auch auf dem Weg nach oben.',
+    wrong: {
+      'flug': 'Ein Körper braucht keine Kraft in Flugrichtung. Er fliegt weiter, weil er schon schnell ist.',
+      'schraeg': 'Nach dem Abwurf schiebt nichts mehr nach vorn. Die einzige Kraft ist die Gewichtskraft, und die zeigt senkrecht nach unten.',
+      'oben': 'Auch im höchsten Punkt wirkt die Gewichtskraft. Sonst würde der Ball dort waagerecht weiterfliegen und nie herunterkommen.'
+    }
+  }
+};
+
+// Tolerant matching: exact or numeric equality ("50" == "50.0" == "50,0").
+function matchesPattern(val, p) {
+  if (val === p) return true;
+  if (/^[-+]?[0-9.]+$/.test(val) && /^[-+]?[0-9.]+$/.test(p)) return parseFloat(val) === parseFloat(p);
+  return false;
+}
+function normalize(v) {
+  return v.trim().replace(/\s+/g, '').toLowerCase().replace(/,/g, '.').replace(/\u2212/g, '-');
+}
+function selOpt(btn, hiddenId, val) {
+  btn.closest('.opt-pills').querySelectorAll('.opt-pill').forEach(b => b.classList.remove('selected'));
+  btn.classList.add('selected');
+  document.getElementById(hiddenId).value = val;
+}
+function markResult(mod, ex, ok, html) {
+  const key = mod + '-' + ex;
+  const fb = document.getElementById('m' + mod + '-fb' + ex);
+  const card = document.getElementById('m' + mod + '-ex' + ex);
+  fb.className = 'fb-block ' + (ok ? 'correct' : 'incorrect');
+  fb.innerHTML = (ok ? '&#10003; ' : '&#10007; ') + html;
+  card.classList.toggle('solved', ok);
+  card.classList.toggle('wrong-state', !ok);
+  if (ok) exerciseStates[key] = true;
+  updateModuleProgress(mod);
+  typeset([fb]);
+  SCORM.save();
+}
+function checkMC(mod, ex, inputId, fbId, correctVal) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const val = document.getElementById(inputId).value;
+  if (!val) return;
+  const f = EX_FEEDBACK[key] || {};
+  markResult(mod, ex, val === correctVal, val === correctVal ? f.ok : ((f.wrong || {})[val] || 'Nicht ganz.'));
+}
+function checkInput(mod, ex, inputId, fbId, patterns) {
+  const key = mod + '-' + ex;
+  if (exerciseStates[key]) return;
+  const inp = document.getElementById(inputId);
+  const val = normalize(inp.value);
+  if (!val) return;
+  const ok = patterns.split('|').map(normalize).some(p => matchesPattern(val, p));
+  const f = EX_FEEDBACK[key] || {};
+  inp.className = 'answer-input ' + (ok ? 'correct' : 'incorrect');
+  markResult(mod, ex, ok, ok ? f.ok : ((f.wrong || {})[val] || f.fallback || 'Noch nicht ganz.'));
+}
+function toggleHint(id) {
+  const h = document.getElementById(id);
+  h.classList.toggle('open');
+  if (h.classList.contains('open')) typeset([h]);
+}
+
+/* ────────────────────────────────────────────
+   ZUORDNUNG: one choice per row, all rows checked together
+   ──────────────────────────────────────────── */
+const ROWSEL_DEFS = {
+  r4: { ex: '2-4', options: [['ja', 'Gleichgewicht'], ['nein', 'kein Gleichgewicht']],
+    rows: [
+      { t: 'Körper A: (30 | 40), (−50 | 10), (20 | −50)', c: 'ja', why: 'x: 30 − 50 + 20 = 0, y: 40 + 10 − 50 = 0. Beide Summen sind null.' },
+      { t: 'Körper B: (60 | 0), (0 | −80), (−60 | 60)', c: 'nein', why: 'x: 60 − 60 = 0, aber y: −80 + 60 = −20. Es bleibt eine Kraft nach unten.' },
+      { t: 'Körper C: (−20 | −30), (50 | 30), (−30 | 0)', c: 'ja', why: 'x: −20 + 50 − 30 = 0, y: −30 + 30 = 0. Beide Summen sind null.' },
+      { t: 'Körper D: (40 | 0), (0 | 30), (−50 | 0)', c: 'nein', why: 'Die 50 N passen zwar zum Betrag von (40 | 30), zeigen aber nur nach links. x: 40 − 50 = −10, y: 30. Das Krafteck ist offen.' }
+    ],
+    ok: 'Richtig: Gleichgewicht nur dann, wenn die x-Summe und die y-Summe beide null sind. Gleiche Beträge allein reichen nicht.' }
+};
+const RowSel = (() => {
+  const st = {};
+  function mount(id) {
+    const def = ROWSEL_DEFS[id];
+    st[id] = { def, pick: {}, locked: false };
+    if (exerciseStates[def.ex]) { def.rows.forEach((r, i) => { st[id].pick[i] = r.c; }); st[id].locked = true; }
+    render(id);
+  }
+  function render(id, marks) {
+    const s = st[id], def = s.def, host = document.getElementById('rows-' + id);
+    host.innerHTML = def.rows.map((r, i) => `<div class="rs-row${marks ? (marks[i] ? ' ok' : ' bad') : (s.locked ? ' ok' : '')}">
+        <div class="rs-text">${i + 1}. ${r.t}</div>
+        <div class="rs-btns">${def.options.map(([v, label]) => `<button class="rs-btn${s.pick[i] === v ? ' sel' : ''}" onclick="RowSel.pick('${id}',${i},'${v}')">${label}</button>`).join('')}</div>
+      </div>`).join('');
+  }
+  function pick(id, i, v) { const s = st[id]; if (s.locked) return; s.pick[i] = v; render(id); }
+  function check(id) {
+    const s = st[id], def = s.def;
+    if (s.locked) return;
+    const [mod, n] = def.ex.split('-');
+    const fb = document.getElementById('m' + mod + '-fb' + n), card = document.getElementById('m' + mod + '-ex' + n);
+    if (def.rows.some((r, i) => !s.pick[i])) { fb.className = 'fb-block incorrect'; fb.innerHTML = 'Ordne erst alle Zeilen zu.'; return; }
+    const marks = def.rows.map((r, i) => s.pick[i] === r.c);
+    if (marks.every(Boolean)) {
+      s.locked = true;
+      fb.className = 'fb-block correct';
+      fb.innerHTML = '&#10003; ' + def.ok;
+      card.classList.remove('wrong-state');
+      card.classList.add('solved');
+      exerciseStates[def.ex] = true;
+      updateModuleProgress(+mod);
+      SCORM.save();
+    } else {
+      fb.className = 'fb-block incorrect';
+      fb.innerHTML = '&#10007; ' + def.rows.map((r, i) => marks[i] ? '' : 'Zeile ' + (i + 1) + ': ' + r.why).filter(Boolean).join(' ');
+      card.classList.add('wrong-state');
+    }
+    render(id, marks);
+    typeset([fb]);
+  }
+  return { mount, pick, check };
+})();
+
+/* ────────────────────────────────────────────
+   PROGRESS
+   ──────────────────────────────────────────── */
+function solvedCount(mod) {
+  let n = 0;
+  for (let i = 1; i <= MODULE_EX_COUNTS[mod]; i++) if (exerciseStates[mod + '-' + i]) n++;
+  return n;
+}
+function updateModuleProgress(mod) {
+  const total = MODULE_EX_COUNTS[mod], solved = solvedCount(mod);
+  document.getElementById('prog-fill-' + mod).style.width = (solved / total * 100) + '%';
+  document.getElementById('prog-text-' + mod).textContent = solved + ' / ' + total;
+  if (solved === total) moduleStates[mod] = true;
+}
+function updateLanding() {
+  const done = moduleStates.filter(Boolean).length;
+  document.getElementById('opFill').style.width = (done / 4 * 100) + '%';
+  document.getElementById('opLabel').textContent = done + ' / 4 Module';
+  for (let i = 0; i < 4; i++) {
+    if (!MODULE_EX_COUNTS[i]) continue;
+    const card = document.getElementById('card-' + i), status = document.getElementById('status-' + i);
+    card.classList.toggle('completed', moduleStates[i]);
+    status.classList.toggle('done', moduleStates[i]);
+    status.textContent = moduleStates[i] ? 'Erledigt' : (solvedCount(i) ? 'Angefangen' : 'Starten');
+  }
+}
+function restoreModuleState(mod) {
+  for (let i = 1; i <= MODULE_EX_COUNTS[mod]; i++) {
+    if (!exerciseStates[mod + '-' + i]) continue;
+    document.getElementById('m' + mod + '-ex' + i).classList.add('solved');
+    const fb = document.getElementById('m' + mod + '-fb' + i);
+    if (!fb.innerHTML) { fb.className = 'fb-block correct'; fb.innerHTML = '&#10003; Bereits gelöst.'; }
+  }
+  updateModuleProgress(mod);
+}
+function showResult(mod) {
+  const total = MODULE_EX_COUNTS[mod], solved = solvedCount(mod);
+  const box = document.getElementById('result-' + mod);
+  if (solved === total) {
+    moduleStates[mod] = true;
+    box.className = 'result-box show done';
+    box.textContent = 'Modul ' + MODULE_NAMES[mod] + ' abgeschlossen: alle ' + total + ' Aufgaben richtig.';
+  } else {
+    const open = [];
+    for (let i = 1; i <= total; i++) if (!exerciseStates[mod + '-' + i]) open.push(i);
+    box.className = 'result-box show partial';
+    box.textContent = solved + ' von ' + total + ' Aufgaben richtig. Noch offen: Aufgabe ' + open.join(', ') + '.';
+  }
+  SCORM.save();
+}
+
+/* ────────────────────────────────────────────
+   BACKGROUND: slowly drifting force arrows (landing only)
+   ──────────────────────────────────────────── */
+const BG = (() => {
+  const canvas = document.getElementById('bg-canvas');
+  const ctx = canvas.getContext('2d');
+  const reduce = window.matchMedia && window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let W, H, arrows = [], raf = null;
+  const cols = ['rgba(96,165,250,', 'rgba(251,191,36,', 'rgba(192,132,252,', 'rgba(251,113,133,'];
+  function resize() {
+    W = canvas.width = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+    arrows = [];
+    const n = Math.round(Math.min(26, W * H / 45000));
+    for (let i = 0; i < n; i++) arrows.push({
+      x: Math.random() * W, y: Math.random() * H, a: Math.random() * Math.PI * 2,
+      l: 40 + Math.random() * 70, va: (Math.random() - 0.5) * 0.004, vx: (Math.random() - 0.5) * 0.25, vy: (Math.random() - 0.5) * 0.25,
+      c: cols[i % cols.length], o: 0.12 + Math.random() * 0.18
+    });
+  }
+  function frame() {
+    ctx.fillStyle = '#0c0c1d';
+    ctx.fillRect(0, 0, W, H);
+    for (const r of arrows) {
+      if (!reduce) { r.a += r.va; r.x += r.vx; r.y += r.vy; }
+      if (r.x < -100) r.x = W + 100; if (r.x > W + 100) r.x = -100;
+      if (r.y < -100) r.y = H + 100; if (r.y > H + 100) r.y = -100;
+      const ex = r.x + Math.cos(r.a) * r.l, ey = r.y + Math.sin(r.a) * r.l;
+      ctx.strokeStyle = ctx.fillStyle = r.c + r.o + ')';
+      ctx.lineWidth = 2.2;
+      ctx.beginPath(); ctx.moveTo(r.x, r.y); ctx.lineTo(ex - Math.cos(r.a) * 9, ey - Math.sin(r.a) * 9); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(ex, ey);
+      ctx.lineTo(ex - Math.cos(r.a - 0.45) * 13, ey - Math.sin(r.a - 0.45) * 13);
+      ctx.lineTo(ex - Math.cos(r.a + 0.45) * 13, ey - Math.sin(r.a + 0.45) * 13);
+      ctx.closePath(); ctx.fill();
+    }
+    ctx.fillStyle = '#0c0c1d';
+    raf = reduce ? null : requestAnimationFrame(frame);
+  }
+  function run(on) {
+    if (on && !raf) frame();
+    if (!on && raf) { cancelAnimationFrame(raf); raf = null; }
+  }
+  window.addEventListener('resize', () => { resize(); if (reduce) frame(); });
+  resize();
+  return { run };
+})();
+
+/* ────────────────────────────────────────────
+   INIT
+   ──────────────────────────────────────────── */
+window.addEventListener('load', () => {
+  SCORM.init();
+  Object.keys(BOARD_DEFS).forEach(Boards.mount);
+  Object.keys(STATIC_DEFS).forEach(renderStatic);
+  drawCompDemo();
+  renderLamp();
+  Object.keys(ROWSEL_DEFS).forEach(RowSel.mount);
+  updateLanding();
+  BG.run(true);
+});
+window.addEventListener('beforeunload', () => SCORM.finish());
+window.addEventListener('pagehide', () => SCORM.finish());
+</script>
+</body>
+</html>
