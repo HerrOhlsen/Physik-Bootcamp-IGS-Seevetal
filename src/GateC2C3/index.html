@@ -297,7 +297,7 @@ body::before{
     <div class="q-text">Beschreibe die Bewegung in Phase 2 ($t = 4$ bis $6\,\text{s}$).</div>
     <div class="options" id="opts4">
       <label class="opt"><input type="radio" name="q4" value="0" onchange="pick(4,0)"> Gleichförmig beschleunigt</label>
-      <label class="opt"><input type="radio" name="q4" value="1" onchange="pick(4,1)"> Gleichförmig – konstante Geschwindigkeit (kein Beschleunigen)</label>
+      <label class="opt"><input type="radio" name="q4" value="1" onchange="pick(4,1)"> Gleichförmig</label>
       <label class="opt"><input type="radio" name="q4" value="2" onchange="pick(4,2)"> Verzögert</label>
       <label class="opt"><input type="radio" name="q4" value="3" onchange="pick(4,3)"> Ruht</label>
     </div>
@@ -330,7 +330,7 @@ body::before{
     <div class="options" id="opts7">
       <label class="opt"><input type="radio" name="q7" value="0" onchange="pick(7,0)"> Der Körper fährt mit konstanter Geschwindigkeit.</label>
       <label class="opt"><input type="radio" name="q7" value="1" onchange="pick(7,1)"> Der Körper ruht.</label>
-      <label class="opt"><input type="radio" name="q7" value="2" onchange="pick(7,2)"> Der Körper beschleunigt (oder verzögert) – die Geschwindigkeit ändert sich.</label>
+      <label class="opt"><input type="radio" name="q7" value="2" onchange="pick(7,2)"> Die Geschwindigkeit des Körpers ändert sich.</label>
       <label class="opt"><input type="radio" name="q7" value="3" onchange="pick(7,3)"> Der Körper bewegt sich rückwärts.</label>
     </div>
   </div>
@@ -341,7 +341,7 @@ body::before{
     <div class="q-text">Wie lautet die Formel für den zurückgelegten Weg $s$ aus einem v-t-Diagramm bei gleichförmiger Bewegung?</div>
     <div class="options" id="opts8">
       <label class="opt"><input type="radio" name="q8" value="0" onchange="pick(8,0)"> $s = v + t$</label>
-      <label class="opt"><input type="radio" name="q8" value="1" onchange="pick(8,1)"> $s = v \cdot t$ (Fläche des Rechtecks)</label>
+      <label class="opt"><input type="radio" name="q8" value="1" onchange="pick(8,1)"> $s = v \cdot t$</label>
       <label class="opt"><input type="radio" name="q8" value="2" onchange="pick(8,2)"> $s = v \div t$</label>
       <label class="opt"><input type="radio" name="q8" value="3" onchange="pick(8,3)"> $s = v^2 \cdot t$</label>
     </div>
@@ -684,7 +684,7 @@ function submitTest() {
   const rl = document.getElementById('reviewList');
   rl.innerHTML = results.map(r=>`<div class="review-item ${r.ok?'correct':'wrong'}">${r.ok?'✅':'❌'} ${r.label}</div>`).join('');
   document.getElementById('modal').classList.add('show');
-  MathJax.typesetPromise([rl]);
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([rl]);
 }
 function retryTest() {
   answers.fill(null);
@@ -700,8 +700,12 @@ function retryTest() {
 }
 document.addEventListener('DOMContentLoaded', () => {
   shuffleOptions(); // must run before SCORM.init() restores the bookmark
-  MathJax.startup.promise.then(() => MathJax.typesetPromise());
   SCORM.init();
+  // MathJax loads async from the CDN: typeset once it is ready, never block the LMS connection on it
+  (function typesetWhenReady(n) {
+    if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(() => MathJax.typesetPromise());
+    else if (n > 0) setTimeout(() => typesetWhenReady(n - 1), 250);
+  })(40);
 });
 window.addEventListener('beforeunload', () => SCORM.finish());
 </script>

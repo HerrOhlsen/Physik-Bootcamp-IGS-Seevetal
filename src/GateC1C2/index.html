@@ -643,7 +643,7 @@ function submitTest() {
   const rl = document.getElementById('reviewList');
   rl.innerHTML = results.map(r=>`<div class="review-item ${r.ok?'correct':'wrong'}">${r.ok?'✅':'❌'} ${r.label}</div>`).join('');
   document.getElementById('modal').classList.add('show');
-  MathJax.typesetPromise([rl]);
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([rl]);
 }
 function retryTest() {
   answers.fill(null);
@@ -659,8 +659,12 @@ function retryTest() {
 }
 document.addEventListener('DOMContentLoaded', () => {
   shuffleOptions(); // must run before SCORM.init() restores the bookmark
-  MathJax.startup.promise.then(() => MathJax.typesetPromise());
   SCORM.init();
+  // MathJax loads async from the CDN: typeset once it is ready, never block the LMS connection on it
+  (function typesetWhenReady(n) {
+    if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(() => MathJax.typesetPromise());
+    else if (n > 0) setTimeout(() => typesetWhenReady(n - 1), 250);
+  })(40);
 });
 window.addEventListener('beforeunload', () => SCORM.finish());
 </script>

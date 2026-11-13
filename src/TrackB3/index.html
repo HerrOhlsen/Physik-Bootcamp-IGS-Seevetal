@@ -1279,18 +1279,18 @@ button, [onclick] {
             <span class="ex-tag">Fermi</span>
           </div>
           <div class="ex-body">
-            <p class="ex-question">Ein Auto fährt mit $v = 30\,\text{m/s}$ (Autobahn). Es bremst mit $a = -6\,\text{m/s}^2$. Schätze den Bremsweg mit $s = \frac{v^2}{2|a|}$. Runde auf 10 m.</p>
+            <p class="ex-question">Ein Auto fährt mit $v = 30\,\text{m/s}$ (Autobahn). Es bremst mit $a = -6\,\text{m/s}^2$. Berechne den Bremsweg mit $s = \frac{v^2}{2|a|}$. Welcher Wert stimmt?</p>
             <div class="answer-row">
               <span class="answer-prefix">$s \approx$</span>
               <div class="opt-pills" id="m0-og4">
-                <button class="opt-pill" onclick="selOpt(this,'m0-a4','75')">75</button>
-                <button class="opt-pill" onclick="selOpt(this,'m0-a4','80')">80</button>
+                <button class="opt-pill" onclick="selOpt(this,'m0-a4','2.5')">2,5</button>
                 <button class="opt-pill" onclick="selOpt(this,'m0-a4','150')">150</button>
-                <button class="opt-pill" onclick="selOpt(this,'m0-a4','70')">70</button>
+                <button class="opt-pill" onclick="selOpt(this,'m0-a4','75')">75</button>
+                <button class="opt-pill" onclick="selOpt(this,'m0-a4','450')">450</button>
               </div>
               <input type="hidden" id="m0-a4" value="">
               <span class="answer-unit">m</span>
-              <button class="btn-check" onclick="checkInput(0,4,'m0-a4','m0-fb4','75|80|70')">Prüfen</button>
+              <button class="btn-check" onclick="checkInput(0,4,'m0-a4','m0-fb4','75')">Prüfen</button>
               <button class="btn-hint" onclick="toggleHint('m0-h4')">&#128161; Tipp</button>
             </div>
             <div class="hint-box" id="m0-h4">$s = \frac{(30)^2}{2 \cdot 6} = \frac{900}{12} = 75\,\text{m}$</div>
@@ -2175,7 +2175,11 @@ const EX_FEEDBACK = {
   },
   '0-4': {
     ok: 'Richtig: $s = \\frac{v^2}{2|a|} = \\frac{30^2}{2 \\cdot 6}\\,\\text{m} = \\frac{900}{12}\\,\\text{m} = 75\\,\\text{m}$. Merke die Reihenfolge: erst $v$ quadrieren, dann durch das Doppelte der Bremsverzögerung teilen.',
-    wrong: 'Kontrolliere den Nenner: In der Formel $s = \\frac{v^2}{2|a|}$ steht das <strong>Doppelte</strong> der Bremsverzögerung. Wer $v^2 = 900$ nur durch $6$ statt durch $2 \\cdot 6$ teilt, erhält den doppelten Bremsweg. Rechne mit dem korrigierten Nenner noch einmal.'
+    wrong: {
+      '150': 'Kontrolliere den Nenner: In der Formel $s = \\frac{v^2}{2|a|}$ steht das <strong>Doppelte</strong> der Bremsverzögerung. Wer $v^2 = 900$ nur durch $6$ statt durch $2 \\cdot 6$ teilt, erhält den doppelten Bremsweg.',
+      '2.5': 'Du hast $v$ nicht quadriert: $\\frac{30}{12} = 2{,}5$. In der Formel steht $v^2 = 30^2 = 900$. Plausibilitäts-Check: 2,5 m Bremsweg bei Autobahntempo ist viel zu kurz.',
+      '450': 'Im Nenner fehlt die Bremsverzögerung: $\\frac{900}{2} = 450$. Es heißt $2 \\cdot |a| = 2 \\cdot 6 = 12$.'
+    }
   },
   '1-2': {
     ok: 'Richtig: relativer Fehler $= \\frac{\\Delta s}{s} \\cdot 100\\,\\% = \\frac{2\\,\\text{m}}{50\\,\\text{m}} \\cdot 100\\,\\% = 4\\,\\%$. Da sich die Einheit Meter wegkürzt, bleibt eine reine Prozentangabe übrig.',
@@ -2204,6 +2208,9 @@ const EX_FEEDBACK = {
 // letters with a negation guard ("nichtverdoppelt" must not match).
 function matchesPattern(val, p) {
   if (val === p) return true;
+  // A common unit after the right number is fine ("80 m", "25m/s"); only for numeric targets
+  const unit = val.match(/^([-+]?[0-9.]+)(m|cm|mm|km|s|min|h|kg|g|n|kn|j|kj|w|kw|v|a|pa|hz|m\/s|km\/h|m\/s\^?2|m\/s²|n\/kg|kg\/m\^?3|kg\/m³|g\/cm\^?3|g\/cm³|°|%|ω|ohm|l|ℓ)$/);
+  if (unit && /^[-+]?[0-9.]+$/.test(p)) return matchesPattern(unit[1], p);
   if (/^[-+]?[0-9.]+$/.test(val) && /^[-+]?[0-9.]+$/.test(p)) {
     const nv = parseFloat(val), np = parseFloat(p);
     if (!Number.isNaN(nv) && !Number.isNaN(np)) return nv === np;

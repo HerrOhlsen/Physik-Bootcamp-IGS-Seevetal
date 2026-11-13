@@ -1480,6 +1480,9 @@ function goLanding() {
 // letters with a negation guard ("nichtverdoppelt" must not match).
 function matchesPattern(val, p) {
   if (val === p) return true;
+  // A common unit after the right number is fine ("80 m", "25m/s"); only for numeric targets
+  const unit = val.match(/^([-+]?[0-9.]+)(m|cm|mm|km|s|min|h|kg|g|n|kn|j|kj|w|kw|v|a|pa|hz|m\/s|km\/h|m\/s\^?2|m\/s²|n\/kg|kg\/m\^?3|kg\/m³|g\/cm\^?3|g\/cm³|°|%|ω|ohm|l|ℓ)$/);
+  if (unit && /^[-+]?[0-9.]+$/.test(p)) return matchesPattern(unit[1], p);
   if (/^[-+]?[0-9.]+$/.test(val) && /^[-+]?[0-9.]+$/.test(p)) {
     const nv = parseFloat(val), np = parseFloat(p);
     if (!Number.isNaN(nv) && !Number.isNaN(np)) return nv === np;

@@ -280,7 +280,7 @@ body::before{
     <div class="q-num">Aufgabe 5</div>
     <div class="q-text">Eine Kiste wird mit konstantem Tempo geradeaus über den Boden geschoben. Herrscht ein Kräftegleichgewicht?</div>
     <div class="options" id="opts5">
-      <label class="opt"><input type="radio" name="q5" value="ja" onchange="pick(5,'ja')"> Ja: Die Geschwindigkeit ändert sich nicht, also ist die resultierende Kraft null. Schubkraft und Reibung sind gleich groß.</label>
+      <label class="opt"><input type="radio" name="q5" value="ja" onchange="pick(5,'ja')"> Ja: Die Geschwindigkeit ändert sich nicht, also ist die resultierende Kraft null.</label>
       <label class="opt"><input type="radio" name="q5" value="mehr" onchange="pick(5,'mehr')"> Nein: Sie bewegt sich, also muss die Schubkraft größer sein als die Reibung.</label>
       <label class="opt"><input type="radio" name="q5" value="nie" onchange="pick(5,'nie')"> Nein: Wo Reibung wirkt, gibt es nie ein Kräftegleichgewicht.</label>
       <label class="opt"><input type="radio" name="q5" value="nurschub" onchange="pick(5,'nurschub')"> Nein: Ohne Schubkraft käme die Kiste zum Stehen, also zählt nur die Schubkraft.</label>
@@ -291,7 +291,7 @@ body::before{
     <div class="q-num">Aufgabe 6</div>
     <div class="q-text">Ein Satellit umkreist die Erde mit konstantem Tempo auf einer Kreisbahn. Herrscht ein Kräftegleichgewicht?</div>
     <div class="options" id="opts6">
-      <label class="opt"><input type="radio" name="q6" value="nein" onchange="pick(6,'nein')"> Nein: Die Richtung der Geschwindigkeit ändert sich ständig. Es wirkt eine resultierende Kraft zur Erde hin.</label>
+      <label class="opt"><input type="radio" name="q6" value="nein" onchange="pick(6,'nein')"> Nein: Die Richtung der Geschwindigkeit ändert sich ständig.</label>
       <label class="opt"><input type="radio" name="q6" value="tempo" onchange="pick(6,'tempo')"> Ja: Das Tempo bleibt konstant, also ist $\Delta\vec{v} = 0$.</label>
       <label class="opt"><input type="radio" name="q6" value="flieh" onchange="pick(6,'flieh')"> Ja: Die Gravitation wird von einer Fliehkraft nach außen genau ausgeglichen.</label>
       <label class="opt"><input type="radio" name="q6" value="luft" onchange="pick(6,'luft')"> Ja: Im Weltall gibt es keine Luft, also wirken keine Kräfte.</label>
@@ -683,8 +683,12 @@ function retryTest() {
 document.addEventListener('DOMContentLoaded', () => {
   shuffleOptions(); // must run before SCORM.init() restores the answers
   BOARDS.forEach(Board.mount);
-  MathJax.startup.promise.then(() => MathJax.typesetPromise());
   SCORM.init();
+  // MathJax loads async from the CDN: typeset once it is ready, never block the LMS connection on it
+  (function typesetWhenReady(n) {
+    if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(() => MathJax.typesetPromise());
+    else if (n > 0) setTimeout(() => typesetWhenReady(n - 1), 250);
+  })(40);
 });
 window.addEventListener('beforeunload', () => SCORM.finish());
 window.addEventListener('pagehide', () => SCORM.finish());

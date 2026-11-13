@@ -649,8 +649,12 @@ function resetTest() {
 }
 
 document.addEventListener('DOMContentLoaded', () => {
-  MathJax.startup.promise.then(() => MathJax.typesetPromise());
   SCORM.init();
+  // MathJax loads async from the CDN: typeset once it is ready, never block the LMS connection on it
+  (function typesetWhenReady(n) {
+    if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(() => MathJax.typesetPromise());
+    else if (n > 0) setTimeout(() => typesetWhenReady(n - 1), 250);
+  })(40);
   updateProgress();
 });
 window.addEventListener('beforeunload', () => SCORM.finish());

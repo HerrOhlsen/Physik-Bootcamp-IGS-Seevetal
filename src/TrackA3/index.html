@@ -1539,7 +1539,7 @@ button, [onclick] {
         <div class="exercise-card" id="m2-ex1">
           <div class="ex-header"><span class="ex-num">1</span><span class="ex-title">Leistung und Spannung</span><span class="ex-tag">Analyse</span></div>
           <div class="ex-body">
-            <p class="ex-question">$P = U \cdot I$. <strong>„Die Leistung $P$ nimmt zu, wenn $U$ zunimmt."</strong> Richtig oder falsch?</p>
+            <p class="ex-question">Glühlampe aus der Kennlinie oben: Die Spannung steigt von $2\,\text{V}$ auf $6\,\text{V}$.<br>$P = U \cdot I$. <strong>„Die Leistung $P$ nimmt zu, wenn $U$ zunimmt."</strong> Richtig oder falsch?</p>
             <div class="opt-pills" id="m2-og1">
               <button class="opt-pill" onclick="selOpt(this,'m2-a1','A')">Richtig — $P$ nimmt zu.</button>
               <button class="opt-pill" onclick="selOpt(this,'m2-a1','B')">Falsch — $P$ nimmt ab, weil $R$ wächst.</button>
@@ -1571,7 +1571,7 @@ button, [onclick] {
         <div class="exercise-card" id="m2-ex3">
           <div class="ex-header"><span class="ex-num">3</span><span class="ex-title">Widerstand und Leitwert</span><span class="ex-tag">Analyse</span></div>
           <div class="ex-body">
-            <p class="ex-question">$R = \frac{U}{I}$, $G_L = \frac{I}{U}$. Welche Aussage ist <strong>korrekt</strong>?</p>
+            <p class="ex-question">Glühlampe aus der Kennlinie oben: Die Spannung steigt von $2\,\text{V}$ auf $6\,\text{V}$.<br>$R = \frac{U}{I}$, $G_L = \frac{I}{U}$. Welche Aussage ist <strong>korrekt</strong>?</p>
             <div class="opt-pills" id="m2-og3">
               <button class="opt-pill" onclick="selOpt(this,'m2-a3','A')">$R$ nimmt zu und $G_L$ nimmt ab.</button>
               <button class="opt-pill" onclick="selOpt(this,'m2-a3','B')">$R$ nimmt ab und $G_L$ nimmt zu.</button>
@@ -1587,7 +1587,7 @@ button, [onclick] {
         <div class="exercise-card" id="m2-ex4">
           <div class="ex-header"><span class="ex-num">4</span><span class="ex-title">Vollständige Analyse</span><span class="ex-tag">Prüfung</span></div>
           <div class="ex-body">
-            <p class="ex-question">Fünf Aussagen: (1) $P=U \cdot I$ nimmt zu. (2) $U$ und $I$ proportional. (3) $U$ nimmt zu wenn $I$ zunimmt. (4) $R$ nimmt zu. (5) $G_L$ nimmt zu.<br>Welche Kombination richtig/falsch stimmt?</p>
+            <p class="ex-question">Glühlampe aus der Kennlinie oben: Die Spannung steigt von $2\,\text{V}$ auf $6\,\text{V}$.<br>Fünf Aussagen: (1) $P=U \cdot I$ nimmt zu. (2) $U$ und $I$ proportional. (3) $U$ nimmt zu wenn $I$ zunimmt. (4) $R$ nimmt zu. (5) $G_L$ nimmt zu.<br>Welche Kombination richtig/falsch stimmt?</p>
             <div class="opt-pills" id="m2-og4">
               <button class="opt-pill" onclick="selOpt(this,'m2-a4','A')">richtig, falsch, richtig, richtig, falsch</button>
               <button class="opt-pill" onclick="selOpt(this,'m2-a4','B')">richtig, richtig, richtig, falsch, falsch</button>
@@ -1947,6 +1947,9 @@ function goLanding() {
 // letters with a negation guard ("nichtverdoppelt" must not match).
 function matchesPattern(val, p) {
   if (val === p) return true;
+  // A common unit after the right number is fine ("80 m", "25m/s"); only for numeric targets
+  const unit = val.match(/^([-+]?[0-9.]+)(m|cm|mm|km|s|min|h|kg|g|n|kn|j|kj|w|kw|v|a|pa|hz|m\/s|km\/h|m\/s\^?2|m\/s²|n\/kg|kg\/m\^?3|kg\/m³|g\/cm\^?3|g\/cm³|°|%|ω|ohm|l|ℓ)$/);
+  if (unit && /^[-+]?[0-9.]+$/.test(p)) return matchesPattern(unit[1], p);
   if (/^[-+]?[0-9.]+$/.test(val) && /^[-+]?[0-9.]+$/.test(p)) {
     const nv = parseFloat(val), np = parseFloat(p);
     if (!Number.isNaN(nv) && !Number.isNaN(np)) return nv === np;
