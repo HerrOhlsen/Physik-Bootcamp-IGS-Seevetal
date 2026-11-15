@@ -234,7 +234,7 @@ body::before{
   <div class="q-card" id="qc3">
     <div class="q-num">Aufgabe 3 – Umrechnung</div>
     <div class="q-text">Rechne um: $36\,\text{km/h} = \,?\,\text{m/s}$</div>
-    <input type="number" class="text-input" id="ans3" placeholder="Antwort eingeben …" oninput="pickText(3)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans3" placeholder="Antwort eingeben …" oninput="pickText(3)">
     <div class="unit-hint">Einheit: m/s · Tipp: durch 3,6 dividieren</div>
   </div>
 
@@ -242,7 +242,7 @@ body::before{
   <div class="q-card" id="qc4">
     <div class="q-num">Aufgabe 4 – Umrechnung</div>
     <div class="q-text">Rechne um: $5\,\text{km} = \,?\,\text{m}$</div>
-    <input type="number" class="text-input" id="ans4" placeholder="Antwort eingeben …" oninput="pickText(4)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans4" placeholder="Antwort eingeben …" oninput="pickText(4)">
     <div class="unit-hint">Einheit: Meter (m)</div>
   </div>
 
@@ -274,7 +274,7 @@ body::before{
   <div class="q-card" id="qc7">
     <div class="q-num">Aufgabe 7 – Umrechnung</div>
     <div class="q-text">Rechne um: $72\,\text{km/h} = \,?\,\text{m/s}$</div>
-    <input type="number" class="text-input" id="ans7" placeholder="Antwort eingeben …" oninput="pickText(7)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans7" placeholder="Antwort eingeben …" oninput="pickText(7)">
     <div class="unit-hint">Einheit: m/s</div>
   </div>
 
@@ -294,7 +294,7 @@ body::before{
   <div class="q-card" id="qc9">
     <div class="q-num">Aufgabe 9 – Umrechnung</div>
     <div class="q-text">Rechne um: $2{,}5\,\text{kg} = \,?\,\text{g}$</div>
-    <input type="number" class="text-input" id="ans9" placeholder="Antwort eingeben …" oninput="pickText(9)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans9" placeholder="Antwort eingeben …" oninput="pickText(9)">
     <div class="unit-hint">Einheit: Gramm (g)</div>
   </div>
 
@@ -302,7 +302,7 @@ body::before{
   <div class="q-card" id="qc10">
     <div class="q-num">Aufgabe 10 – Umrechnung</div>
     <div class="q-text">Rechne um: $3{,}2\,\text{m} = \,?\,\text{cm}$</div>
-    <input type="number" class="text-input" id="ans10" placeholder="Antwort eingeben …" oninput="pickText(10)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans10" placeholder="Antwort eingeben …" oninput="pickText(10)">
     <div class="unit-hint">Einheit: Zentimeter (cm)</div>
   </div>
 
@@ -310,7 +310,7 @@ body::before{
   <div class="q-card" id="qc11">
     <div class="q-num">Aufgabe 11 – Umrechnung</div>
     <div class="q-text">Ein Radprofi fährt mit $v = 15\,\text{m/s}$. Rechne um: $15\,\text{m/s} = \,?\,\text{km/h}$</div>
-    <input type="number" class="text-input" id="ans11" placeholder="Antwort eingeben …" oninput="pickText(11)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans11" placeholder="Antwort eingeben …" oninput="pickText(11)">
     <div class="unit-hint">Einheit: km/h · Achtung: Richtung beachten!</div>
   </div>
 
@@ -448,7 +448,10 @@ const answers = new Array(TOTAL).fill(null);
 
 // Tolerant number normalization: trim, comma to dot, parseFloat round-trip
 function normNum(v) {
-  return String(parseFloat(String(v).replace(',', '.').trim()));
+  let s = String(v).trim().replace(/−/g, '-');
+  s = s.replace(/(\d)[\s  ]+(?=\d{3}(?!\d))/g, '$1'); // "360 000"
+  if (/^[-+]?\d{1,3}(\.\d{3})+(?![\d.,])/.test(s)) s = s.replace(/\./g, ''); // "360.000" (thousands dots)
+  return String(parseFloat(s.replace(',', '.')));
 }
 function isCorrect(i) { // i = 0-based question index
   if (answers[i] === null) return false;

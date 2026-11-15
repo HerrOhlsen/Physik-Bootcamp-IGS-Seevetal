@@ -1257,15 +1257,15 @@ button, [onclick] {
             <p class="ex-question">Ein Schüler berechnet die Gewichtskraft seines Rucksacks ($m = 5\,\text{kg}$): Er bekommt $F = 500\,\text{N}$. Ist dieses Ergebnis plausibel?</p>
             <div class="mc-option" onclick="checkMCdetail(0,3,this,true,'Genau! $F = m \\cdot g = 5\\,\\text{kg} \\times 10\\,\\text{m/s}^2 = 50\\,\\text{N}$. 500 N wäre die Kraft für 50 kg. Unplausibel!')">
               <div class="mc-marker">A</div>
-              <div class="mc-text">Nein – 500 N für einen 5-kg-Rucksack ist zu groß (Faktor 10 zu viel).<div class="mc-explanation"></div></div>
+              <div class="mc-text">Nein: Das ist um den Faktor 10 zu groß.<div class="mc-explanation"></div></div>
             </div>
             <div class="mc-option" onclick="checkMCdetail(0,3,this,false,'Falsch. Prüfe selbst: $F = 5\\,\\text{kg} \\cdot 10\\,\\text{m/s}^2 = 50\\,\\text{N}$, nicht 500 N.')">
               <div class="mc-marker">B</div>
-              <div class="mc-text">Ja – 500 N klingt für einen Rucksack realistisch.<div class="mc-explanation"></div></div>
+              <div class="mc-text">Ja: 500 N sind für einen vollen Rucksack realistisch.<div class="mc-explanation"></div></div>
             </div>
             <div class="mc-option" onclick="checkMCdetail(0,3,this,false,'Falsch. 500 N ist genau Faktor 10 zu viel, nicht drei Größenordnungen.')">
               <div class="mc-marker">C</div>
-              <div class="mc-text">Das Ergebnis ist drei Größenordnungen zu groß.<div class="mc-explanation"></div></div>
+              <div class="mc-text">Nein: Das ist um den Faktor 1000 zu groß.<div class="mc-explanation"></div></div>
             </div>
             <div class="fb-block" aria-live="polite" id="m0-fb3"></div>
           </div>
@@ -1338,10 +1338,10 @@ button, [onclick] {
         <div class="exercise-card extra-card">
           <div class="ex-header"><span class="ex-num">+1</span><span class="ex-title">Fermi: Sekunden pro Jahr</span><span class="ex-tag extra-tag">Zusatz</span></div>
           <div class="ex-body">
-            <p class="ex-question">Schätze: Wie viele Sekunden hat ein Jahr? Runde auf die nächste Zehnerpotenz (z.B. 3e7 oder 10^7).</p>
+            <p class="ex-question">Schätze: Wie viele Sekunden hat ein Jahr? Runde auf eine gültige Ziffer (z.&nbsp;B. 3e7 oder 3·10^7).</p>
             <div class="answer-row">
               <input class="answer-input" id="m0-eA1" placeholder="Schätzung eingeben...">
-              <button class="btn-check extra-btn" onclick="checkExtra('m0-eA1','m0-eFb1','3e7|3*10^7|10^7|31536000|3.15e7','&#10003; Richtig! $365 \\times 86\\,400 \\approx 3{,}15 \\times 10^7\\,\\text{s}$.','&#10007; $365 \\times 86\\,400 \\approx 3 \\times 10^7\\,\\text{s}$.')">Prüfen</button>
+              <button class="btn-check extra-btn" onclick="checkExtra('m0-eA1','m0-eFb1','3e7|3*10^7|31536000|3.15e7|3.2e7|3.2*10^7|3.15*10^7','&#10003; Richtig! $365 \\times 86\\,400 \\approx 3{,}15 \\times 10^7\\,\\text{s}$.','&#10007; $365 \\times 86\\,400 \\approx 3 \\times 10^7\\,\\text{s}$.')">Prüfen</button>
             </div>
             <div class="fb-block" aria-live="polite" id="m0-eFb1"></div>
           </div>
@@ -1684,11 +1684,11 @@ button, [onclick] {
         <div class="exercise-card extra-card">
           <div class="ex-header"><span class="ex-num">+4</span><span class="ex-title">Messergebnis korrekt aufschreiben</span><span class="ex-tag extra-tag">Zusatz</span></div>
           <div class="ex-body">
-            <p class="ex-question">Schreibe das Messergebnis korrekt auf: Messwert $t_0 = 15{,}0\,\text{s}$, absoluter Fehler $\Delta t = 0{,}5\,\text{s}$.</p>
+            <p class="ex-question">Schreibe das Messergebnis korrekt auf: Messwert $t_0 = 15{,}0\,\text{s}$, absoluter Fehler $\Delta t = 0{,}5\,\text{s}$. Das Zeichen ± kannst du als +- tippen.</p>
             <div class="answer-row">
               <span class="answer-prefix">$t$ =</span>
               <input class="answer-input" id="m1-eA4" placeholder="(... ± ...) s">
-              <button class="btn-check extra-btn" onclick="checkExtra('m1-eA4','m1-eFb4','(15.0±0.5)s|(15.0±0.5)','&#10003; Richtig! $t = (15{,}0 \\pm 0{,}5)\\,\\text{s}$.','&#10007; Korrekte Schreibweise: $t = (15{,}0 \\pm 0{,}5)\\,\\text{s}$.')">Prüfen</button>
+              <button class="btn-check extra-btn" onclick="checkExtra('m1-eA4','m1-eFb4','(15.0±0.5)s|t=(15.0±0.5)s|(15.0±0.5)|t=(15.0±0.5)|15.0±0.5s|t=15.0±0.5s|15.0±0.5|t=15.0±0.5|(15.0+-0.5)s|t=(15.0+-0.5)s|(15.0+-0.5)|t=(15.0+-0.5)|15.0+-0.5s|t=15.0+-0.5s|15.0+-0.5|t=15.0+-0.5|(15.0+/-0.5)s|t=(15.0+/-0.5)s|(15.0+/-0.5)|t=(15.0+/-0.5)|15.0+/-0.5s|t=15.0+/-0.5s|15.0+/-0.5|t=15.0+/-0.5','&#10003; Richtig! $t = (15{,}0 \\pm 0{,}5)\\,\\text{s}$.','&#10007; Korrekte Schreibweise: $t = (15{,}0 \\pm 0{,}5)\\,\\text{s}$.')">Prüfen</button>
             </div>
             <div class="fb-block" aria-live="polite" id="m1-eFb4"></div>
           </div>

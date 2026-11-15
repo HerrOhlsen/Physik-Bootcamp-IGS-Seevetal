@@ -246,7 +246,7 @@ body::before{
   <div class="q-card" id="qc4">
     <div class="q-num">Aufgabe 4 – Berechnung</div>
     <div class="q-text">$P = \dfrac{W}{t}$. Stelle nach $t$ um und berechne: $P = 500\,\text{W}$, $W = 2000\,\text{J}$. Wie groß ist $t$?</div>
-    <input type="number" class="text-input" id="ans4" placeholder="Antwort eingeben …" oninput="pickText(4)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans4" placeholder="Antwort eingeben …" oninput="pickText(4)">
     <div class="unit-hint">Einheit: Sekunden (s)</div>
   </div>
 
@@ -254,7 +254,7 @@ body::before{
   <div class="q-card" id="qc5">
     <div class="q-num">Aufgabe 5 – Berechnung</div>
     <div class="q-text">$W = m \cdot g \cdot h$. Berechne $h$: $W = 980\,\text{J}$, $m = 10\,\text{kg}$, $g = 9{,}8\,\text{m/s}^2$.</div>
-    <input type="number" class="text-input" id="ans5" placeholder="Antwort eingeben …" oninput="pickText(5)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans5" placeholder="Antwort eingeben …" oninput="pickText(5)">
     <div class="unit-hint">Einheit: Meter (m)</div>
   </div>
 
@@ -310,7 +310,7 @@ body::before{
   <div class="q-card" id="qc10">
     <div class="q-num">Aufgabe 10 – Berechnung</div>
     <div class="q-text">$s = \dfrac{1}{2} a t^2$ (mit $v_0 = 0$). Ein Objekt beschleunigt mit $a = 2\,\text{m/s}^2$ für $t = 3\,\text{s}$. Berechne $s$.</div>
-    <input type="number" class="text-input" id="ans10" placeholder="Antwort eingeben …" oninput="pickText(10)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans10" placeholder="Antwort eingeben …" oninput="pickText(10)">
     <div class="unit-hint">Einheit: Meter (m)</div>
   </div>
 
@@ -330,7 +330,7 @@ body::before{
   <div class="q-card" id="qc12">
     <div class="q-num">Aufgabe 12 – Berechnung</div>
     <div class="q-text">$s = \dfrac{1}{2} a t^2$ (mit $v_0 = 0$). Stelle die Formel nach $t$ um und berechne: $s = 45\,\text{m}$, $a = 10\,\text{m/s}^2$. Wie lange dauert die Bewegung?</div>
-    <input type="number" class="text-input" id="ans12" placeholder="Antwort eingeben …" oninput="pickText(12)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans12" placeholder="Antwort eingeben …" oninput="pickText(12)">
     <div class="unit-hint">Einheit: Sekunden (s)</div>
   </div>
 
@@ -456,7 +456,10 @@ const answers = new Array(TOTAL).fill(null);
 
 // Tolerant number normalization: trim, comma to dot, parseFloat round-trip
 function normNum(v) {
-  return String(parseFloat(String(v).replace(',', '.').trim()));
+  let s = String(v).trim().replace(/−/g, '-');
+  s = s.replace(/(\d)[\s  ]+(?=\d{3}(?!\d))/g, '$1'); // "360 000"
+  if (/^[-+]?\d{1,3}(\.\d{3})+(?![\d.,])/.test(s)) s = s.replace(/\./g, ''); // "360.000" (thousands dots)
+  return String(parseFloat(s.replace(',', '.')));
 }
 function isCorrect(i) { // i = 0-based question index
   if (answers[i] === null) return false;

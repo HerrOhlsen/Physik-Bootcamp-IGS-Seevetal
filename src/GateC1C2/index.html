@@ -293,7 +293,7 @@ body::before{
   <div class="q-card" id="qc3">
     <div class="q-num">Aufgabe 3 – Berechnung</div>
     <div class="q-text">Berechne die Geschwindigkeit in Phase A ($t = 0$ bis $2\,\text{s}$). Tipp: $v = s/t$</div>
-    <input type="number" step="any" class="text-input" id="ans3" placeholder="Zahl eingeben …" oninput="pickText(3)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans3" placeholder="Zahl eingeben …" oninput="pickText(3)">
     <div class="unit-hint">Einheit: m/s (Steigung des Graphen)</div>
   </div>
 
@@ -390,7 +390,7 @@ body::before{
       <circle cx="200" cy="110" r="4" fill="#c7d2fe"/>
       <circle cx="350" cy="110" r="4" fill="#c7d2fe"/>
     </svg>
-    <input type="number" step="any" class="text-input" id="ans8" placeholder="Zahl eingeben …" oninput="pickText(8)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans8" placeholder="Zahl eingeben …" oninput="pickText(8)">
     <div class="unit-hint">Einheit: m/s</div>
   </div>
 
@@ -519,7 +519,10 @@ const answers = new Array(TOTAL).fill(null);
 
 // Tolerant number normalization: trim, comma to dot, parseFloat round-trip
 function normNum(v) {
-  return String(parseFloat(String(v).replace(',', '.').trim()));
+  let s = String(v).trim().replace(/−/g, '-');
+  s = s.replace(/(\d)[\s  ]+(?=\d{3}(?!\d))/g, '$1'); // "360 000"
+  if (/^[-+]?\d{1,3}(\.\d{3})+(?![\d.,])/.test(s)) s = s.replace(/\./g, ''); // "360.000" (thousands dots)
+  return String(parseFloat(s.replace(',', '.')));
 }
 function isCorrect(i) { // i = 0-based question index
   if (answers[i] === null) return false;

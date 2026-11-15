@@ -275,7 +275,7 @@ body::before{
   <div class="q-card" id="qc2">
     <div class="q-num">Aufgabe 2 – Berechnung</div>
     <div class="q-text">Berechne die Beschleunigung in Phase 1 ($t = 0$ bis $4\,\text{s}$). Formel: $a = \Delta v / \Delta t$</div>
-    <input type="number" class="text-input" id="ans2" placeholder="Zahl eingeben …" oninput="pickText(2)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans2" placeholder="Zahl eingeben …" oninput="pickText(2)">
     <div class="unit-hint">Einheit: m/s²</div>
   </div>
 
@@ -319,7 +319,7 @@ body::before{
   <div class="q-card" id="qc6">
     <div class="q-num">Aufgabe 6 – Berechnung</div>
     <div class="q-text">Berechne den Weg in <strong>Phase 3</strong> ($t = 6$ bis $8\,\text{s}$) als Fläche unter dem Graphen. Die Fläche ist ein Dreieck: $s = \dfrac{1}{2} \cdot \Delta t \cdot v$</div>
-    <input type="number" class="text-input" id="ans6" placeholder="Antwort in m …" oninput="pickText(6)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans6" placeholder="Antwort in m …" oninput="pickText(6)">
     <div class="unit-hint">Einheit: Meter (m)</div>
   </div>
 
@@ -351,7 +351,7 @@ body::before{
   <div class="q-card" id="qc9">
     <div class="q-num">Aufgabe 9 – Berechnung</div>
     <div class="q-text">Berechne den Weg in Phase 2 ($v = 10\,\text{m/s}$, $t = 2\,\text{s}$): $s = v \cdot t$</div>
-    <input type="number" class="text-input" id="ans9" placeholder="Antwort in m …" oninput="pickText(9)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans9" placeholder="Antwort in m …" oninput="pickText(9)">
     <div class="unit-hint">Einheit: Meter (m)</div>
   </div>
 
@@ -402,7 +402,7 @@ body::before{
   <div class="q-card" id="qc10">
     <div class="q-num">Aufgabe 10 – Berechnung</div>
     <div class="q-text">Berechne die Geschwindigkeit von Körper A als <strong>Steigung</strong> aus den beiden markierten Punkten $(0\,\text{s} \mid 0\,\text{m})$ und $(4\,\text{s} \mid 12\,\text{m})$: $v = \Delta s / \Delta t$</div>
-    <input type="number" class="text-input" id="ans10" placeholder="Antwort in m/s …" oninput="pickText(10)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans10" placeholder="Antwort in m/s …" oninput="pickText(10)">
     <div class="unit-hint">Einheit: m/s</div>
   </div>
 
@@ -556,7 +556,10 @@ const answers = new Array(TOTAL).fill(null);
 
 // Tolerant number normalization: trim, comma to dot, parseFloat round-trip
 function normNum(v) {
-  return String(parseFloat(String(v).replace(',', '.').trim()));
+  let s = String(v).trim().replace(/−/g, '-');
+  s = s.replace(/(\d)[\s  ]+(?=\d{3}(?!\d))/g, '$1'); // "360 000"
+  if (/^[-+]?\d{1,3}(\.\d{3})+(?![\d.,])/.test(s)) s = s.replace(/\./g, ''); // "360.000" (thousands dots)
+  return String(parseFloat(s.replace(',', '.')));
 }
 function isCorrect(i) { // i = 0-based question index
   if (answers[i] === null) return false;

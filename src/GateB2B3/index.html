@@ -210,7 +210,7 @@ body::before{
   <div class="q-card" id="qc1">
     <div class="q-num">Aufgabe 1 – Berechnung</div>
     <div class="q-text">Ein Körper der Masse $m = 2\,\text{kg}$ wird mit $a = 5\,\text{m/s}^2$ beschleunigt. Berechne die Kraft $F = m \cdot a$.</div>
-    <input type="number" class="text-input" id="ans1" placeholder="Antwort eingeben …" oninput="pickText(1)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans1" placeholder="Antwort eingeben …" oninput="pickText(1)">
     <div class="unit-hint">Einheit: Newton (N)</div>
   </div>
 
@@ -230,7 +230,7 @@ body::before{
   <div class="q-card" id="qc3">
     <div class="q-num">Aufgabe 3 – Berechnung</div>
     <div class="q-text">Berechne die kinetische Energie: $m = 1000\,\text{kg}$, $v = 20\,\text{m/s}$. Formel: $E_{kin} = \frac{1}{2}mv^2$</div>
-    <input type="number" class="text-input" id="ans3" placeholder="Antwort eingeben …" oninput="pickText(3)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans3" placeholder="Antwort eingeben …" oninput="pickText(3)">
     <div class="unit-hint">Einheit: Joule (J)</div>
   </div>
 
@@ -250,7 +250,7 @@ body::before{
   <div class="q-card" id="qc5">
     <div class="q-num">Aufgabe 5 – Berechnung</div>
     <div class="q-text">$3500\,\text{m} = \,?\,\text{km}$</div>
-    <input type="number" class="text-input" id="ans5" placeholder="Antwort eingeben …" oninput="pickText(5)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans5" placeholder="Antwort eingeben …" oninput="pickText(5)">
     <div class="unit-hint">Einheit: Kilometer (km)</div>
   </div>
 
@@ -258,7 +258,7 @@ body::before{
   <div class="q-card" id="qc6">
     <div class="q-num">Aufgabe 6 – Berechnung</div>
     <div class="q-text">Eine Lampe hat die Leistung $P = 100\,\text{W}$. Sie läuft $t = 3600\,\text{s}$. Berechne die verrichtete Arbeit $W = P \cdot t$.</div>
-    <input type="number" class="text-input" id="ans6" placeholder="Antwort eingeben …" oninput="pickText(6)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans6" placeholder="Antwort eingeben …" oninput="pickText(6)">
     <div class="unit-hint">Einheit: Joule (J)</div>
   </div>
 
@@ -290,7 +290,7 @@ body::before{
   <div class="q-card" id="qc9">
     <div class="q-num">Aufgabe 9 – Berechnung</div>
     <div class="q-text">Hubarbeit: $W = m \cdot g \cdot h$. Berechne $W$: $m = 5\,\text{kg}$, $g = 10\,\text{m/s}^2$, $h = 3\,\text{m}$.</div>
-    <input type="number" class="text-input" id="ans9" placeholder="Antwort eingeben …" oninput="pickText(9)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans9" placeholder="Antwort eingeben …" oninput="pickText(9)">
     <div class="unit-hint">Einheit: Joule (J)</div>
   </div>
 
@@ -310,7 +310,7 @@ body::before{
   <div class="q-card" id="qc11">
     <div class="q-num">Aufgabe 11 – Berechnung</div>
     <div class="q-text">Eine Zugmaschine zieht einen Schlitten mit der konstanten Kraft $F = 40\,\text{N}$ über die Strecke $s = 2\,\text{km}$. Rechne die Strecke zuerst in Meter um und berechne dann die Arbeit $W = F \cdot s$.</div>
-    <input type="number" class="text-input" id="ans11" placeholder="Antwort eingeben …" oninput="pickText(11)">
+    <input type="text" inputmode="decimal" autocomplete="off" class="text-input" id="ans11" placeholder="Antwort eingeben …" oninput="pickText(11)">
     <div class="unit-hint">Einheit: Joule (J)</div>
   </div>
 
@@ -448,7 +448,10 @@ const answers = new Array(TOTAL).fill(null);
 
 // Tolerant number normalization: trim, comma to dot, parseFloat round-trip
 function normNum(v) {
-  return String(parseFloat(String(v).replace(',', '.').trim()));
+  let s = String(v).trim().replace(/−/g, '-');
+  s = s.replace(/(\d)[\s  ]+(?=\d{3}(?!\d))/g, '$1'); // "360 000"
+  if (/^[-+]?\d{1,3}(\.\d{3})+(?![\d.,])/.test(s)) s = s.replace(/\./g, ''); // "360.000" (thousands dots)
+  return String(parseFloat(s.replace(',', '.')));
 }
 function isCorrect(i) { // i = 0-based question index
   if (answers[i] === null) return false;

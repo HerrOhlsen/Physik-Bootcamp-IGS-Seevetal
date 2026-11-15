@@ -1291,10 +1291,10 @@ button, [onclick] {
           <div class="ex-body">
             <p class="ex-question">Was ist der Unterschied zwischen <strong>Frequenz</strong> und <strong>Periodendauer</strong>?</p>
             <div class="opt-pills" id="m0-og5">
-              <button class="opt-pill" onclick="selOpt(this,'m0-a5','a')">Es ist dasselbe, nur mit anderen Vorzeichen.</button>
-              <button class="opt-pill" onclick="selOpt(this,'m0-a5','b')">Frequenz ist in Hz, Periodendauer in m/s.</button>
-              <button class="opt-pill" onclick="selOpt(this,'m0-a5','c')">Frequenz = Schwingungen pro Sekunde; Periodendauer = Zeit für eine Schwingung. Es gilt $T = 1/f$.</button>
-              <button class="opt-pill" onclick="selOpt(this,'m0-a5','d')">Frequenz gilt nur für Wellen, Periodendauer nur für Pendel.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','a')">Beides ist dasselbe: die Zahl der Schwingungen pro Sekunde, nur anders benannt.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','b')">Frequenz wird in Hz gemessen, Periodendauer in m/s; beide hängen nicht zusammen.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','c')">Frequenz: Schwingungen pro Sekunde; Periodendauer: Zeit für eine Schwingung; $T = 1/f$.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m0-a5','d')">Frequenz gibt es nur bei Wellen, Periodendauer nur bei Pendeln und Federn.</button>
             </div>
             <input type="hidden" id="m0-a5" value="">
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -1533,7 +1533,7 @@ button, [onclick] {
             <p class="ex-question">Eine Klausurantwort enthält: <em>These + Formel + Ergebnis</em>. Welcher Schritt fehlt?</p>
             <div class="opt-pills" id="m1-og2">
               <button class="opt-pill" onclick="selOpt(this,'m1-a2','a')">Die Formel</button>
-              <button class="opt-pill" onclick="selOpt(this,'m1-a2','b')">Die Begründung (physikalisches Gesetz / Prinzip)</button>
+              <button class="opt-pill" onclick="selOpt(this,'m1-a2','b')">Die Begründung</button>
               <button class="opt-pill" onclick="selOpt(this,'m1-a2','c')">Das Ergebnis</button>
               <button class="opt-pill" onclick="selOpt(this,'m1-a2','d')">Die These</button>
             </div>
@@ -1804,10 +1804,10 @@ button, [onclick] {
           <div class="ex-body">
             <p class="ex-question">Welcher Fehler steckt in dieser Antwort? <em>&#8222;$F = 5 \text{ kg} \cdot 3 = 15$&#8220;</em></p>
             <div class="opt-pills" id="m2-og1">
-              <button class="opt-pill" onclick="selOpt(this,'m2-a1','a')">Die Formel ist falsch.</button>
-              <button class="opt-pill" onclick="selOpt(this,'m2-a1','b')">Der Zahlenwert ist falsch.</button>
-              <button class="opt-pill" onclick="selOpt(this,'m2-a1','c')">Die Einheit fehlt beim Ergebnis und bei der Beschleunigung.</button>
-              <button class="opt-pill" onclick="selOpt(this,'m2-a1','d')">Es fehlt ein Abschluss-Satz.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','a')">Die Formel ist falsch, es müsste $F = m / a$ heißen.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','b')">Der Zahlenwert ist falsch, richtig wären 8 statt 15.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','c')">Die Einheiten fehlen bei $a$ und beim Ergebnis.</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a1','d')">Es fehlt nur ein Abschluss-Satz mit dem Ergebnis.</button>
             </div>
             <input type="hidden" id="m2-a1" value="">
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -1828,7 +1828,7 @@ button, [onclick] {
             <p class="ex-question">Eine Antwort enthält: Formel $W = m \cdot g \cdot h$, Rechnung, Ergebnis. Welches physikalische Gesetz / Prinzip sollte noch erwähnt werden?</p>
             <div class="opt-pills" id="m2-og2">
               <button class="opt-pill" onclick="selOpt(this,'m2-a2','a')">Das Trägheitsgesetz</button>
-              <button class="opt-pill" onclick="selOpt(this,'m2-a2','b')">Der Energieerhaltungssatz / Definition der Hubarbeit</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a2','b')">Die Definition der Hubarbeit</button>
               <button class="opt-pill" onclick="selOpt(this,'m2-a2','c')">Das Hooksche Gesetz</button>
               <button class="opt-pill" onclick="selOpt(this,'m2-a2','d')">Die Impulserhaltung</button>
             </div>
@@ -1869,10 +1869,10 @@ button, [onclick] {
           <div class="ex-body">
             <p class="ex-question">Schreibe den passenden Abschluss-Satz für: Berechnung ergibt $v = 12 \text{ m/s}$.</p>
             <div class="opt-pills" id="m2-og4">
-              <button class="opt-pill" onclick="selOpt(this,'m2-a4','a')">&#8222;= 12&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','a')">&#8222;Die Geschwindigkeit beträgt 12.&#8220;</button>
               <button class="opt-pill" onclick="selOpt(this,'m2-a4','b')">&#8222;Die Geschwindigkeit des Körpers beträgt $v = 12 \text{ m/s}$.&#8220;</button>
-              <button class="opt-pill" onclick="selOpt(this,'m2-a4','c')">&#8222;Ergebnis: irgendwas.&#8220;</button>
-              <button class="opt-pill" onclick="selOpt(this,'m2-a4','d')">&#8222;Ich habe 12 bekommen.&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','c')">&#8222;Das Ergebnis ist $v = 12 \text{ m/s}$, glaube ich.&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a4','d')">&#8222;Ich habe für $v$ den Wert 12 m/s bekommen.&#8220;</button>
             </div>
             <input type="hidden" id="m2-a4" value="">
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
@@ -1892,10 +1892,10 @@ button, [onclick] {
           <div class="ex-body">
             <p class="ex-question">Welche der folgenden Antworten ist laut Rubric <strong>vollständig</strong>?</p>
             <div class="opt-pills" id="m2-og5">
-              <button class="opt-pill" onclick="selOpt(this,'m2-a5','a')">&#8222;Kraft = Masse mal Beschleunigung, Ergebnis = 30.&#8220;</button>
-              <button class="opt-pill" onclick="selOpt(this,'m2-a5','b')">&#8222;$F = m \cdot a = 3 \cdot 10 = 30$&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a5','a')">&#8222;Kraft ist Masse mal Beschleunigung, also 3 mal 10. Das Ergebnis ist 30.&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a5','b')">&#8222;$F = m \cdot a = 3 \text{ kg} \cdot 10 \text{ m/s}^2 = 30 \text{ N}$&#8220;</button>
               <button class="opt-pill" onclick="selOpt(this,'m2-a5','c')">&#8222;Nach dem 2. Newtonschen Gesetz gilt $F = m \cdot a = 3 \text{ kg} \cdot 10 \text{ m/s}^2 = 30 \text{ N}$. Die Kraft auf den Körper beträgt 30 N.&#8220;</button>
-              <button class="opt-pill" onclick="selOpt(this,'m2-a5','d')">&#8222;30 N&#8220;</button>
+              <button class="opt-pill" onclick="selOpt(this,'m2-a5','d')">&#8222;Nach dem 2. Newtonschen Gesetz beträgt die Kraft auf den Körper 30 N.&#8220;</button>
             </div>
             <input type="hidden" id="m2-a5" value="">
             <div style="display:flex; gap:8px; flex-wrap:wrap;">
