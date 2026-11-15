@@ -1656,8 +1656,8 @@ button, [onclick] {
             <p class="ex-question">Die folgende Schülerantwort enthält drei Fehler:<br>
             <em>&bdquo;$F = m + a = 70 + 5 = 75$. Der Springer beschleunigt schneller.&ldquo;</em><br><br>
             Identifiziere alle drei Fehlertypen (Formel, Einheit, Sprache) und schreibe die korrekte Version.</p>
-            <textarea class="answer-textarea" rows="4" placeholder="Fehlertypen:&#10;1. ...&#10;2. ...&#10;3. ...&#10;Korrekt: ..."></textarea>
-            <button class="btn-check extra-btn" onclick="toggleSolution('m1-sol1')" style="margin-top:10px;">Musterlösung anzeigen</button>
+            <textarea class="answer-textarea" rows="4" placeholder="Fehlertypen:&#10;1. ...&#10;2. ...&#10;3. ...&#10;Korrekt: ..." id="kz-m1-sol1-ta"></textarea>
+            <button class="btn-check extra-btn" onclick="zusatzFeedback('kz-m1-sol1-ta','kz-m1-sol1-fb','pb-tracke2-z-m1-sol1','kz-m1-sol1-sol')" style="margin-top:10px;">KI-Feedback holen</button><div id="kz-m1-sol1-fb" aria-live="polite"></div><button class="btn-check extra-btn" id="kz-m1-sol1-sol" onclick="toggleSolution('m1-sol1')" style="margin-top:10px;display:none;">Musterlösung anzeigen</button>
             <div class="solution-box" id="m1-sol1" style="display:none;">
               <div class="solution-title">Musterlösung</div>
               <p><strong>Fehler 1 (Formel):</strong> $F = m + a$ ist falsch &mdash; muss $F = m \cdot a$ sein.<br>
@@ -2113,6 +2113,56 @@ window.addEventListener('load', () => {
 window.addEventListener('beforeunload', () => {
   SCORM.finish();
 });
+
+/* ────────────────────────────────────────────
+   KI-FEEDBACK FÜR ZUSATZAUFGABEN
+   Edge Function ki-feedback (Supabase, EU Frankfurt) -> IONOS AI Model Hub (Berlin).
+   Aufgabe und Musterlösung liegen als Prompt serverseitig in ki_prompts (pb-...-z-...);
+   der Client schickt nur modul_id, Moodle-Kennung und den Schülertext.
+   ──────────────────────────────────────────── */
+const KI_URL = "https://wyvjgcxfyserubtgkink.supabase.co/functions/v1/ki-feedback";
+const KI_KEY = "sb_publishable_vs6Dt-kOErLDbSAK7gEqeA_HWt2E9Fq";
+function kiUserName() {
+  const wins = [];
+  try { wins.push(window); } catch(e) {}
+  try { if (window.parent && window.parent !== window) wins.push(window.parent); } catch(e) {}
+  try { if (window.top && window.top !== window) wins.push(window.top); } catch(e) {}
+  for (const w of wins) {
+    try {
+      const m = w.M;
+      if (m && m.cfg && m.cfg.userId && /^\d{1,20}$/.test(String(m.cfg.userId))) return 'moodle_' + m.cfg.userId;
+    } catch(e) {}
+  }
+  return 'dev_bootcamp';
+}
+async function kiFeedback(modulId, text) {
+  const res = await fetch(KI_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': KI_KEY },
+    body: JSON.stringify({ modul_id: modulId, user_name: kiUserName(), text: text })
+  });
+  let j = null;
+  try { j = await res.json(); } catch(e) {}
+  if (!res.ok || !j || !j.ok) throw new Error((j && j.error) || 'Das Feedback ist gerade nicht erreichbar.');
+  return j.feedback;
+}
+// Feedback first, then the model answer: the solution button appears after the first
+// attempt (also when the KI is unreachable, so nobody gets stuck).
+async function zusatzFeedback(taId, fbId, modulId, solBtnId) {
+  const ta = document.getElementById(taId), fb = document.getElementById(fbId), sol = document.getElementById(solBtnId);
+  const text = ta.value.trim();
+  if (!text) { fb.innerHTML = '<span style="color:#f59e0b">Bitte schreibe zuerst deinen Text.</span>'; return; }
+  fb.innerHTML = '<span style="color:#a5b4fc">Die KI liest deinen Text ...</span>';
+  try {
+    const t = await kiFeedback(modulId, text);
+    fb.innerHTML = '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:14px 16px;margin-top:10px;line-height:1.65;white-space:pre-wrap"></div>';
+    fb.firstChild.textContent = t;
+  } catch(err) {
+    fb.innerHTML = '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:12px 16px;margin-top:10px;color:#fca5a5"></div>';
+    fb.firstChild.textContent = err.message;
+  }
+  if (sol) sol.style.display = '';
+}
 </script>
 </body>
 </html>

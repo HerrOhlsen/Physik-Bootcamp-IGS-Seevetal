@@ -1642,7 +1642,7 @@ button, [onclick] {
               <em>&#8222;Ein Körper der Masse $m = 5\,\text{kg}$ wird mit $a = 4\,\text{m/s}^2$ beschleunigt. Welche Kraft wirkt?&#8220;</em><br><br>
               Schreibe alle vier Schritte (These &#8594; Begründung &#8594; Formel+Rechnung &#8594; Ergebnis als Satz).</p>
               <textarea class="answer-textarea" id="m1-eTA2" rows="5" placeholder="1. These: ...&#10;2. Begründung (Gesetz): ...&#10;3. Formel + Rechnung: ...&#10;4. Ergebnis als Satz: ..."></textarea>
-              <button class="btn-check extra-btn" onclick="toggleSolution('m1-eSol2')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <button class="btn-check extra-btn" onclick="zusatzFeedback('m1-eTA2','kz-m1-eSol2-fb','pb-trackd2-z-m1-eSol2','kz-m1-eSol2-sol')" style="margin-top:10px;">KI-Feedback holen</button><div id="kz-m1-eSol2-fb" aria-live="polite"></div><button class="btn-check extra-btn" id="kz-m1-eSol2-sol" onclick="toggleSolution('m1-eSol2')" style="margin-top:10px;display:none;">Musterlösung anzeigen</button>
               <div class="solution-box" id="m1-eSol2" style="display:none;">
                 <div class="solution-title">Musterlösung</div>
                 <p><strong>1. These:</strong> Auf den Körper wirkt eine Kraft ungleich null.<br>
@@ -1923,7 +1923,7 @@ button, [onclick] {
               <em>&#8222;Ein Körper der Masse $m = 2\,\text{kg}$ wird mit $a = 5\,\text{m/s}^2$ beschleunigt. Welche Kraft wirkt?&#8220;</em><br><br>
               Nutze das 4-Schritt-Schema: These &#8594; Begründung &#8594; Formel+Rechnung &#8594; Ergebnis-Satz.</p>
               <textarea class="answer-textarea" id="m2-eTA1" rows="5" placeholder="Schreibe deine vollständige Antwort ..."></textarea>
-              <button class="btn-check extra-btn" onclick="toggleSolution('m2-eSol1')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <button class="btn-check extra-btn" onclick="zusatzFeedback('m2-eTA1','kz-m2-eSol1-fb','pb-trackd2-z-m2-eSol1','kz-m2-eSol1-sol')" style="margin-top:10px;">KI-Feedback holen</button><div id="kz-m2-eSol1-fb" aria-live="polite"></div><button class="btn-check extra-btn" id="kz-m2-eSol1-sol" onclick="toggleSolution('m2-eSol1')" style="margin-top:10px;display:none;">Musterlösung anzeigen</button>
               <div class="solution-box" id="m2-eSol1" style="display:none;">
                 <div class="solution-title">Musterlösung</div>
                 <p>Die Kraft auf den Körper ist ungleich null [<em>These</em>]. Nach dem 2. Newtonschen Gesetz gilt $F = m \cdot a$ [<em>Begründung</em>]. $F = 2\,\text{kg} \cdot 5\,\text{m/s}^2 = 10\,\text{N}$ [<em>Rechnung</em>]. Die auf den Körper wirkende Kraft beträgt $F = 10\,\text{N}$ [<em>Ergebnis-Satz</em>].</p>
@@ -1944,7 +1944,7 @@ button, [onclick] {
               <p class="ex-question">Die folgende Schülerantwort ist unvollständig: <em>&#8222;$F = 2 \cdot 5 = 10$&#8220;</em><br>
               Schreibe sie so um, dass sie alle Rubric-Kriterien erfüllt (These, Gesetz, Einheiten, Ergebnis-Satz).</p>
               <textarea class="answer-textarea" id="m2-eTA2" rows="4" placeholder="Verbesserte Version ..."></textarea>
-              <button class="btn-check extra-btn" onclick="toggleSolution('m2-eSol2')" style="margin-top:10px;">Musterlösung anzeigen</button>
+              <button class="btn-check extra-btn" onclick="zusatzFeedback('m2-eTA2','kz-m2-eSol2-fb','pb-trackd2-z-m2-eSol2','kz-m2-eSol2-sol')" style="margin-top:10px;">KI-Feedback holen</button><div id="kz-m2-eSol2-fb" aria-live="polite"></div><button class="btn-check extra-btn" id="kz-m2-eSol2-sol" onclick="toggleSolution('m2-eSol2')" style="margin-top:10px;display:none;">Musterlösung anzeigen</button>
               <div class="solution-box" id="m2-eSol2" style="display:none;">
                 <div class="solution-title">Musterlösung</div>
                 <p>Auf den Körper wirkt eine resultierende Kraft. Nach dem 2. Newtonschen Gesetz gilt $F = m \cdot a = 2\,\text{kg} \cdot 5\,\text{m/s}^2 = 10\,\text{N}$. Die wirkende Kraft beträgt also $F = 10\,\text{N}$.</p>
@@ -2476,6 +2476,30 @@ window.addEventListener('load', () => {
 window.addEventListener('beforeunload', () => {
   SCORM.finish();
 });
+
+/* ────────────────────────────────────────────
+   KI-FEEDBACK FÜR ZUSATZAUFGABEN
+   Edge Function ki-feedback (Supabase, EU Frankfurt) -> IONOS AI Model Hub (Berlin).
+   Aufgabe und Musterlösung liegen als Prompt serverseitig in ki_prompts (pb-...-z-...);
+   der Client schickt nur modul_id, Moodle-Kennung und den Schülertext.
+   ──────────────────────────────────────────── */
+// Feedback first, then the model answer: the solution button appears after the first
+// attempt (also when the KI is unreachable, so nobody gets stuck).
+async function zusatzFeedback(taId, fbId, modulId, solBtnId) {
+  const ta = document.getElementById(taId), fb = document.getElementById(fbId), sol = document.getElementById(solBtnId);
+  const text = ta.value.trim();
+  if (!text) { fb.innerHTML = '<span style="color:#f59e0b">Bitte schreibe zuerst deinen Text.</span>'; return; }
+  fb.innerHTML = '<span style="color:#a5b4fc">Die KI liest deinen Text ...</span>';
+  try {
+    const t = await kiFeedback(modulId, text);
+    fb.innerHTML = '<div style="background:rgba(16,185,129,0.1);border:1px solid rgba(16,185,129,0.3);border-radius:8px;padding:14px 16px;margin-top:10px;line-height:1.65;white-space:pre-wrap"></div>';
+    fb.firstChild.textContent = t;
+  } catch(err) {
+    fb.innerHTML = '<div style="background:rgba(239,68,68,0.1);border:1px solid rgba(239,68,68,0.3);border-radius:8px;padding:12px 16px;margin-top:10px;color:#fca5a5"></div>';
+    fb.firstChild.textContent = err.message;
+  }
+  if (sol) sol.style.display = '';
+}
 </script>
 </body>
 </html>

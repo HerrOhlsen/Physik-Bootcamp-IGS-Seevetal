@@ -540,6 +540,7 @@ async function requestEvaluation() {
       const s = String(roh);
       data = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}') + 1));
       if (!Array.isArray(data.aufgaben) || data.aufgaben.length !== 2) throw new Error('shape');
+      if (!data.aufgaben.every(x => x && Array.isArray(x.kriterien) && x.kriterien.length === 10 && x.kriterien.every(k => typeof k === 'boolean'))) throw new Error('shape');
     } catch(e) {
       throw new Error('Die Bewertung kam unvollständig zurück. Bitte noch einmal versuchen.');
     }
@@ -568,16 +569,14 @@ const PFLICHT = [
     5: /\d\s*(m|meter)(?![a-zäöü\/²])/i }                                                       // length unit
 ];
 
-// Points per task = number of fulfilled criteria (list of 10 booleans); falls back to "punkte".
+// Points per task = number of fulfilled criteria. Fails closed: only a list of exactly
+// 10 booleans counts (checked in requestEvaluation); a bare "punkte" value is never trusted,
+// because it would bypass the hard checks above.
 function punkteVon(a, i) {
   const teile = i === 0 ? ['t1a', 't1b'] : ['t2a', 't2b'];
   const txt = teile.map(id => document.getElementById(id).value).join('\n');
-  if (a && Array.isArray(a.kriterien) && a.kriterien.length === 10) {
-    const krit = a.kriterien.map((k, c) => k === true && (!PFLICHT[i][c] || PFLICHT[i][c].test(txt)));
-    return { pts: krit.filter(Boolean).length, krit };
-  }
-  const p = Math.max(0, Math.min(10, Math.round(Number(a && a.punkte) || 0)));
-  return { pts: p, krit: null };
+  const krit = a.kriterien.map((k, c) => k === true && (!PFLICHT[i][c] || PFLICHT[i][c].test(txt)));
+  return { pts: krit.filter(Boolean).length, krit };
 }
 
 function showResults(data) {
@@ -594,7 +593,7 @@ function showResults(data) {
     document.getElementById('card' + n).classList.add('evaluated');
     for (let c = 1; c <= 10; c++) {
       const el = document.getElementById('pts' + n + '-' + c);
-      if (el) el.classList.toggle('earned', krit ? krit[c - 1] : c <= pts);
+      if (el) el.classList.toggle('earned', krit[c - 1]);
     }
   });
   textIds.forEach(id => { document.getElementById(id).disabled = true; });
