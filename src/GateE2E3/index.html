@@ -216,6 +216,60 @@ textarea.long{min-height:140px}
   .btn-print,.btn-submit{display:none}
   #doneModal{display:none !important}
 }
+/* KI-Bewertung (aus Gate D2->D3) */
+.points.earned{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+/* AI Feedback */
+.ai-feedback{margin-top:14px;border-radius:var(--r-md);padding:14px 16px;display:none}
+.ai-feedback.show{display:block}
+.ai-feedback.pass{background:var(--ok-bg);border:1px solid var(--ok-border)}
+.ai-feedback.partial{background:var(--warn-bg);border:1px solid var(--warn-border)}
+.ai-feedback.fail{background:var(--err-bg);border:1px solid var(--err-border)}
+.ai-score{font-family:var(--mono);font-size:1.05rem;font-weight:700;margin-bottom:6px}
+.ai-score.pass{color:var(--ok)}
+.ai-score.partial{color:var(--warn)}
+.ai-score.fail{color:var(--err)}
+.ai-fb-text{font-size:0.88rem;line-height:1.6;color:var(--ink)}
+/* Submit */
+.submit-area{text-align:center;padding:20px 0 36px}
+.btn-row{display:flex;gap:12px;justify-content:center;flex-wrap:wrap}
+.btn-ai{
+  background:linear-gradient(135deg,var(--accent-deep),var(--accent));color:#fff;
+  border:none;border-radius:var(--r-md);padding:14px 36px;
+  font-family:var(--font);font-size:1rem;font-weight:700;cursor:pointer;
+  transition:all .2s;box-shadow:var(--shadow), var(--glow);
+}
+.btn-ai:hover:not(:disabled){transform:translateY(-1px);filter:brightness(1.1)}
+.btn-ai:disabled{background:var(--bg-elevated);color:var(--ink-dim);cursor:not-allowed;transform:none;box-shadow:none;filter:none}
+.btn-retry{
+  background:var(--bg-elevated);color:var(--ink-muted);border:1px solid var(--border);
+  border-radius:var(--r-md);padding:14px 28px;font-family:var(--font);
+  font-size:0.95rem;font-weight:600;cursor:pointer;transition:all .2s;
+}
+.btn-retry:hover{border-color:var(--accent);color:var(--accent-bright)}
+/* Loading */
+.loading-hint{font-size:0.85rem;color:var(--accent-bright);margin-top:12px;display:none}
+.loading-hint.show{display:block}
+/* Total result */
+.total-result{
+  background:var(--bg-glass);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);
+  border:1px solid var(--border-strong);
+  border-radius:var(--r-lg);padding:28px;margin-bottom:24px;text-align:center;
+  box-shadow:var(--shadow-lg);display:none;
+}
+.total-result.show{display:block;animation:popIn .3s ease}
+@keyframes popIn{from{transform:scale(.95);opacity:0}to{transform:scale(1);opacity:1}}
+.total-icon{font-size:3rem;margin-bottom:8px}
+.total-score{font-family:var(--mono);font-size:2.5rem;font-weight:700;margin-bottom:4px}
+.total-score.pass{color:var(--ok)}
+.total-score.fail{color:var(--err)}
+.total-badge{display:inline-block;padding:8px 24px;border-radius:var(--r-full);font-weight:700;font-size:1rem;margin-bottom:12px;border:1px solid transparent}
+.total-badge.pass{background:var(--ok-bg);color:var(--ok);border-color:var(--ok-border)}
+.total-badge.fail{background:var(--err-bg);color:var(--err);border-color:var(--err-border)}
+.total-msg{font-size:0.95rem;color:var(--ink-muted);line-height:1.6}
+.task-card.evaluated{border-left-color:var(--ok)}
+.btn-ai,.btn-retry{touch-action:manipulation}
+
 </style>
 </head>
 <body>
@@ -223,7 +277,7 @@ textarea.long{min-height:140px}
   <div class="header-top">
     <span class="badge track-badge">Track E – SYNTHESE</span>
     <span class="badge gate-badge">Gate-Test</span>
-    <span class="badge teacher-badge">Lehrkraft bewertet</span>
+    <span class="badge teacher-badge">KI bewertet</span>
   </div>
   <h1>Gate-Test: Level 2 → Level 3</h1>
   <p>2 offene Aufgaben – alle Tracks kombiniert</p>
@@ -237,12 +291,19 @@ textarea.long{min-height:140px}
   <div class="progress-info" id="progInfo">0 von 2 ausgefüllt</div>
 
   <div class="teacher-note">
-    <h3>Hinweis für die Lehrkraft</h3>
-    <p>Beide Aufgaben verlangen vollständige Lösungswege mit korrekter Fachsprache, Formeln und Einheiten. Jede Aufgabe gibt bis zu 10 Punkte. Bestanden ab <strong>15 von 20 Punkten</strong>. Nutze den Drucken-Button für ein PDF zur Bewertung.</p>
+    <h3>So wird bewertet</h3>
+    <p>Eine KI prüft beide Aufgaben nach der Rubrik unter jeder Aufgabe. Jede Aufgabe gibt bis zu 10 Punkte, bestanden ab <strong>15 von 20 Punkten</strong>. Nicht bestanden? Lies die Rückmeldung, überarbeite deine Lösung und lass sie erneut bewerten.</p>
+  </div>
+
+  <div class="total-result" id="totalResult">
+    <div class="total-icon" id="totalIcon">🎉</div>
+    <div class="total-score" id="totalScore">0/20</div>
+    <div class="total-badge" id="totalBadge">Bestanden ✓</div>
+    <div class="total-msg" id="totalMsg"></div>
   </div>
 
   <!-- Aufgabe 1 -->
-  <div class="task-card">
+  <div class="task-card" id="card1">
     <div class="task-num">Aufgabe 1 · bis zu 10 Punkte</div>
     <div class="task-title">Vollständige Lösung: Energieumwandlung beim Sprung</div>
     <div class="task-desc">Löse die Aufgabe mit einem vollständigen Lösungsweg. Nutze alle gelernten Kompetenzen.</div>
@@ -260,34 +321,38 @@ textarea.long{min-height:140px}
 
     <div class="part-label">Teil 1: Berechnung</div>
     <div class="task-desc" style="margin-top:0">a) Berechne die potenzielle Energie am Turm. b) Berechne die Geschwindigkeit beim Eintauchen (Energieerhaltung: $E_{pot} = E_{kin}$). c) Gib alle Ergebnisse mit Einheit an.</div>
-    <textarea class="long" id="t1a" placeholder="a) Epot = m · g · h = …&#10;   Epot = …&#10;&#10;b) Ekin = ½mv²  →  v = √(2·Ekin/m) = …&#10;   v = …" oninput="updateProgress()"></textarea>
+    <textarea class="long" id="t1a" placeholder="a) …&#10;b) …&#10;c) …" oninput="updateProgress()"></textarea>
     <div class="char-count" id="cc1a">0 Zeichen</div>
 
     <div class="part-label">Teil 2: Fachtext</div>
     <div class="task-desc" style="margin-top:0">Beschreibe den Sprung in 3–5 Sätzen mit Fachsprache: Was passiert mit $E_{pot}$ und $E_{kin}$ während des Falls?</div>
-    <textarea class="long" id="t1b" placeholder="Beim Absprung besitzt die Person eine potenzielle Energie von … Die potenzielle Energie wird während des Falls in …" oninput="updateProgress()"></textarea>
+    <textarea class="long" id="t1b" placeholder="Beim Absprung …" oninput="updateProgress()"></textarea>
     <div class="char-count" id="cc1b">0 Zeichen</div>
 
     <div class="rubric-section">
       <h4>Bewertungsrubrik <span class="total-points">10 Punkte</span></h4>
       <table class="rubric-table">
         <tr><th>Kriterium</th><th style="width:80px">Punkte</th></tr>
-        <tr><td>$E_{pot} = m \cdot g \cdot h$ korrekt aufgestellt</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Zahlenwert: $E_{pot} = 6000\,\text{J}$ (korrekt)</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Einheit korrekt angegeben (Joule)</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Energieerhaltung korrekt angewendet: $E_{kin} = E_{pot}$</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Formel korrekt umgestellt: $v = \sqrt{2 E_{kin} / m}$</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Zahlenwert: $v = \sqrt{200} \approx 14{,}1\,\text{m/s}$</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Einheit der Geschwindigkeit korrekt (m/s)</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Fachtext: Energieerhaltungssatz korrekt beschrieben</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Fachtext: $E_{pot}$ nimmt ab, $E_{kin}$ nimmt zu – korrekt erklärt</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Vollständige Fachsprache (keine Umgangssprache)</td><td><span class="points">1 Pt.</span></td></tr>
+        <tr><td>Formel für $E_{pot}$ korrekt aufgestellt</td><td><span class="points" id="pts1-1">1 Pt.</span></td></tr>
+        <tr><td>Zahlenwert für $E_{pot}$ korrekt</td><td><span class="points" id="pts1-2">1 Pt.</span></td></tr>
+        <tr><td>Einheit der Energie korrekt</td><td><span class="points" id="pts1-3">1 Pt.</span></td></tr>
+        <tr><td>Energieerhaltung korrekt angewendet</td><td><span class="points" id="pts1-4">1 Pt.</span></td></tr>
+        <tr><td>Formel korrekt nach $v$ umgestellt</td><td><span class="points" id="pts1-5">1 Pt.</span></td></tr>
+        <tr><td>Zahlenwert für $v$ korrekt</td><td><span class="points" id="pts1-6">1 Pt.</span></td></tr>
+        <tr><td>Einheit der Geschwindigkeit korrekt</td><td><span class="points" id="pts1-7">1 Pt.</span></td></tr>
+        <tr><td>Fachtext: Energieerhaltungssatz korrekt beschrieben</td><td><span class="points" id="pts1-8">1 Pt.</span></td></tr>
+        <tr><td>Fachtext: Änderung von $E_{pot}$ und $E_{kin}$ korrekt erklärt</td><td><span class="points" id="pts1-9">1 Pt.</span></td></tr>
+        <tr><td>Vollständige Fachsprache (keine Umgangssprache)</td><td><span class="points" id="pts1-10">1 Pt.</span></td></tr>
       </table>
+    </div>
+    <div class="ai-feedback" id="fb1">
+      <div class="ai-score" id="score1"></div>
+      <div class="ai-fb-text" id="fbtext1"></div>
     </div>
   </div>
 
   <!-- Aufgabe 2 -->
-  <div class="task-card">
+  <div class="task-card" id="card2">
     <div class="task-num">Aufgabe 2 · bis zu 10 Punkte</div>
     <div class="task-title">Vollständige Lösung: Bremsvorgang analysieren</div>
     <div class="task-desc">Löse mit vollständigem Lösungsweg, Diagramm-Beschreibung und Fachtext.</div>
@@ -306,55 +371,52 @@ textarea.long{min-height:140px}
 
     <div class="part-label">Teil 1: Berechnung</div>
     <div class="task-desc" style="margin-top:0">a) Berechne die Bremszeit $\Delta t$. b) Berechne den Bremsweg $s$. c) Gib alle Werte mit Einheiten an.</div>
-    <textarea class="long" id="t2a" placeholder="a) Δt = Δv / |a| = …&#10;   Δt = …&#10;&#10;b) s = v₀² / (2|a|) = …&#10;   s = …" oninput="updateProgress()"></textarea>
+    <textarea class="long" id="t2a" placeholder="a) …&#10;b) …&#10;c) …" oninput="updateProgress()"></textarea>
     <div class="char-count" id="cc2a">0 Zeichen</div>
 
     <div class="part-label">Teil 2: Diagramm beschreiben + Fachtext</div>
     <div class="task-desc" style="margin-top:0">Beschreibe, wie ein v-t-Diagramm dieses Bremsvorgangs aussehen würde. Schreibe dann 2–3 Sätze über die Bewegung in Fachsprache.</div>
-    <textarea class="long" id="t2b" placeholder="Das v-t-Diagramm zeigt eine gerade Linie, die von v₀ = 20 m/s bis v = 0 m/s fällt.&#10;Die Steigung beträgt …&#10;&#10;Fachtext: Das Auto verzögert gleichmäßig mit …" oninput="updateProgress()"></textarea>
+    <textarea class="long" id="t2b" placeholder="Diagramm: …&#10;&#10;Fachtext: …" oninput="updateProgress()"></textarea>
     <div class="char-count" id="cc2b">0 Zeichen</div>
 
     <div class="rubric-section">
       <h4>Bewertungsrubrik <span class="total-points">10 Punkte</span></h4>
       <table class="rubric-table">
         <tr><th>Kriterium</th><th style="width:80px">Punkte</th></tr>
-        <tr><td>Formel für Bremszeit korrekt: $\Delta t = \Delta v / |a|$</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Zahlenwert: $\Delta t = 20\,\text{m/s} / 4\,\text{m/s}^2 = 5\,\text{s}$</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Einheit korrekt (Sekunden)</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Formel für Bremsweg korrekt: $s = v_0^2 / (2|a|)$</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Zahlenwert: $s = 400 / 8 = 50\,\text{m}$</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Einheit korrekt (Meter)</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>v-t-Diagramm korrekt beschrieben (fallende Gerade von 20 auf 0)</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Steigung des Graphen als Bremsbeschleunigung benannt</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Fachtext: „gleichmäßig verzögert" oder äquivalent korrekt</td><td><span class="points">1 Pt.</span></td></tr>
-        <tr><td>Fachtext: Alle Werte (v, a, s) mit korrekten Einheiten im Text</td><td><span class="points">1 Pt.</span></td></tr>
+        <tr><td>Formel für die Bremszeit korrekt angewendet</td><td><span class="points" id="pts2-1">1 Pt.</span></td></tr>
+        <tr><td>Zahlenwert für $\Delta t$ korrekt</td><td><span class="points" id="pts2-2">1 Pt.</span></td></tr>
+        <tr><td>Einheit der Zeit korrekt</td><td><span class="points" id="pts2-3">1 Pt.</span></td></tr>
+        <tr><td>Formel für den Bremsweg korrekt angewendet</td><td><span class="points" id="pts2-4">1 Pt.</span></td></tr>
+        <tr><td>Zahlenwert für $s$ korrekt</td><td><span class="points" id="pts2-5">1 Pt.</span></td></tr>
+        <tr><td>Einheit des Wegs korrekt</td><td><span class="points" id="pts2-6">1 Pt.</span></td></tr>
+        <tr><td>v-t-Diagramm korrekt beschrieben (Form, Anfangs- und Endwert)</td><td><span class="points" id="pts2-7">1 Pt.</span></td></tr>
+        <tr><td>Steigung des Graphen physikalisch gedeutet</td><td><span class="points" id="pts2-8">1 Pt.</span></td></tr>
+        <tr><td>Fachtext: Art der Bewegung fachsprachlich korrekt benannt</td><td><span class="points" id="pts2-9">1 Pt.</span></td></tr>
+        <tr><td>Fachtext: Alle Werte (v, a, s) mit korrekten Einheiten im Text</td><td><span class="points" id="pts2-10">1 Pt.</span></td></tr>
       </table>
+    </div>
+    <div class="ai-feedback" id="fb2">
+      <div class="ai-score" id="score2"></div>
+      <div class="ai-fb-text" id="fbtext2"></div>
     </div>
   </div>
 
   <div class="submit-area">
     <div class="btn-row">
-      <button class="btn-print" onclick="window.print()">Drucken / PDF exportieren</button>
-      <button class="btn-submit" onclick="markComplete()">Test abgeschlossen</button>
+      <button class="btn-ai" id="btnEval" onclick="requestEvaluation()" disabled>✦ KI-Bewertung anfordern</button>
+      <button class="btn-retry" id="btnRetry" style="display:none" onclick="reviseTest()">✏️ Überarbeiten</button>
+      <button class="btn-print" onclick="window.print()">Drucken / PDF</button>
     </div>
-    <p style="font-size:.82rem;color:var(--ink-dim);margin-top:12px">Die Bewertung erfolgt durch deine Lehrkraft. Drucke deine Antworten aus oder zeige den Bildschirm.</p>
+    <div class="loading-hint" id="loadingHint">⏳ KI wertet aus … das dauert ca. 10–20 Sekunden.</div>
+    <p style="font-size:.82rem;color:var(--ink-dim);margin-top:10px" id="submitHint">Bearbeite beide Aufgaben (Berechnung und Text), um die KI-Bewertung zu starten.</p>
   </div>
 </div>
 
-<div style="display:none;position:fixed;inset:0;background:rgba(5,5,15,.7);-webkit-backdrop-filter:blur(8px);backdrop-filter:blur(8px);z-index:100;align-items:center;justify-content:center;padding:16px" id="doneModal">
-  <div style="background:var(--bg-card);border:1px solid var(--border-strong);border-radius:var(--r-lg);padding:32px;max-width:420px;width:100%;text-align:center;box-shadow:var(--shadow-lg)">
-    <div style="font-size:3rem">🏁</div>
-    <h2 style="margin:12px 0 8px;color:#fff">Test eingereicht!</h2>
-    <p style="color:var(--ink-muted);font-size:.95rem;line-height:1.6">Deine Antworten wurden gespeichert. Deine Lehrkraft bewertet sie und gibt dir Rückmeldung.</p>
-    <p style="margin-top:12px;font-size:.88rem;color:var(--ink-dim)">Bestanden ab 15 von 20 Punkten. Bei Erfolg: Level 3 freischalten!</p>
-    <button onclick="document.getElementById('doneModal').style.display='none'" style="margin-top:16px;background:linear-gradient(135deg,var(--accent-deep),var(--accent));color:#fff;border:none;border-radius:var(--r-md);padding:10px 24px;font-family:var(--font);font-size:.95rem;font-weight:600;cursor:pointer">Schließen</button>
-  </div>
-</div>
-
-<div style="text-align:center;padding:8px;font-size:0.7rem;color:var(--ink-dim);font-family:var(--mono);margin-top:8px;position:relative;z-index:1">Gate-Test E2→E3 · v4</div>
+<div style="text-align:center;padding:8px;font-size:0.7rem;color:var(--ink-dim);font-family:var(--mono);margin-top:8px;position:relative;z-index:1">Gate-Test E2→E3 · v5</div>
 
 <script>
-// SCORM 1.2 API Wrapper
+// SCORM 1.2 API wrapper. Texts and the last result live in suspend_data (4096 chars),
+// not in lesson_location (255 chars, too short for four answers).
 const SCORM = (() => {
   let api = null, initialized = false;
   function findAPI(win) {
@@ -370,78 +432,218 @@ const SCORM = (() => {
   function init() {
     try {
       api = findAPI(window);
-      if (api) {
-        api.LMSInitialize('');
-        initialized = true;
-        const status = api.LMSGetValue('cmi.core.lesson_status');
-        if (status === 'not attempted') {
-          api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
-          api.LMSCommit('');
-        }
-        const bookmark = api.LMSGetValue('cmi.core.lesson_location');
-        if (bookmark) {
-          try {
-            const saved = JSON.parse(bookmark);
-            if (saved.texts) {
-              textIds.forEach((id, i) => {
-                if (saved.texts[i]) document.getElementById(id).value = saved.texts[i];
-              });
-              updateProgress();
-            }
-          } catch(e) {}
-        }
+      if (!api) return;
+      api.LMSInitialize('');
+      initialized = true;
+      if (api.LMSGetValue('cmi.core.lesson_status') === 'not attempted') {
+        api.LMSSetValue('cmi.core.lesson_status', 'incomplete');
+        api.LMSCommit('');
+      }
+      let saved = null;
+      try { saved = JSON.parse(api.LMSGetValue('cmi.suspend_data') || 'null'); } catch(e) {}
+      if (!saved) { try { saved = JSON.parse(api.LMSGetValue('cmi.core.lesson_location') || 'null'); } catch(e) {} }
+      if (saved && Array.isArray(saved.texts)) {
+        textIds.forEach((id, i) => { if (saved.texts[i]) document.getElementById(id).value = saved.texts[i]; });
+        updateProgress();
       }
     } catch(e) { console.log('SCORM init:', e); }
   }
-  function saveTexts() {
+  function save(total, passed) {
     if (!api || !initialized) return;
     try {
       const texts = textIds.map(id => document.getElementById(id).value);
-      api.LMSSetValue('cmi.core.lesson_location', JSON.stringify({ texts }));
-      api.LMSCommit('');
-    } catch(e) {}
-  }
-  function markCompleted() {
-    if (!api || !initialized) return;
-    try {
-      saveTexts();
-      api.LMSSetValue('cmi.core.lesson_status', 'completed');
-      api.LMSSetValue('cmi.core.score.raw', '0');
-      api.LMSSetValue('cmi.core.score.min', '0');
-      api.LMSSetValue('cmi.core.score.max', '100');
+      api.LMSSetValue('cmi.suspend_data', JSON.stringify({ texts }).slice(0, 4000));
+      if (total !== undefined) {
+        api.LMSSetValue('cmi.core.score.raw', String(Math.round(total / 20 * 100)));
+        api.LMSSetValue('cmi.core.score.min', '0');
+        api.LMSSetValue('cmi.core.score.max', '100');
+        api.LMSSetValue('cmi.core.lesson_status', passed ? 'passed' : 'failed');
+      }
       api.LMSCommit('');
     } catch(e) {}
   }
   function finish() {
     if (!api || !initialized) return;
-    try { saveTexts(); api.LMSFinish(''); } catch(e) {}
+    try { save(); api.LMSFinish(''); initialized = false; } catch(e) {}
   }
-  return { init, markCompleted, finish };
+  return { init, save, finish };
 })();
 
 const textIds = ['t1a','t1b','t2a','t2b'];
+let evaluated = false;
 
 function updateProgress() {
-  textIds.forEach((id) => {
-    const v = document.getElementById(id).value.trim();
-    const ccId = 'cc'+id.replace('t','');
-    const cc = document.getElementById(ccId);
-    if (cc) cc.textContent = v.length+' Zeichen';
+  textIds.forEach(id => {
+    const cc = document.getElementById('cc' + id.replace('t', ''));
+    if (cc) cc.textContent = document.getElementById(id).value.trim().length + ' Zeichen';
   });
-  const a1 = document.getElementById('t1a').value.trim().length > 30 && document.getElementById('t1b').value.trim().length > 30;
-  const a2 = document.getElementById('t2a').value.trim().length > 30 && document.getElementById('t2b').value.trim().length > 30;
-  const done = (a1 ? 1 : 0) + (a2 ? 1 : 0);
-  document.getElementById('progFill').style.width = (done/2*100)+'%';
-  document.getElementById('progInfo').textContent = done+' von 2 ausgefüllt';
+  const ok = id => document.getElementById(id).value.trim().length > 30;
+  const done = (ok('t1a') && ok('t1b') ? 1 : 0) + (ok('t2a') && ok('t2b') ? 1 : 0);
+  document.getElementById('progFill').style.width = (done / 2 * 100) + '%';
+  document.getElementById('progInfo').textContent = done + ' von 2 ausgefüllt';
+  if (!evaluated) document.getElementById('btnEval').disabled = done < 2;
 }
 
-function markComplete() {
-  SCORM.markCompleted();
-  document.getElementById('doneModal').style.display = 'flex';
+/* ────────────────────────────────────────────
+   KI-BEWERTUNG
+   Kette wie bei Gate D2->D3: Edge Function ki-feedback (Supabase, EU Frankfurt)
+   -> IONOS AI Model Hub (Berlin). Rubrik und Erwartungshorizont liegen
+   serverseitig in ki_prompts (pb-gate-e2e3); der Client schickt nur die Texte.
+   ──────────────────────────────────────────── */
+const KI_URL = "https://wyvjgcxfyserubtgkink.supabase.co/functions/v1/ki-feedback";
+const KI_KEY = "sb_publishable_vs6Dt-kOErLDbSAK7gEqeA_HWt2E9Fq";
+
+// Pseudonymous Moodle id for rate limit and log; the function rejects anything else.
+function kiUserName() {
+  const wins = [];
+  try { wins.push(window); } catch(e) {}
+  try { if (window.parent && window.parent !== window) wins.push(window.parent); } catch(e) {}
+  try { if (window.top && window.top !== window) wins.push(window.top); } catch(e) {}
+  for (const w of wins) {
+    try {
+      const m = w.M;
+      if (m && m.cfg && m.cfg.userId && /^\d{1,20}$/.test(String(m.cfg.userId))) return 'moodle_' + m.cfg.userId;
+    } catch(e) {}
+  }
+  return 'dev_bootcamp';
+}
+
+async function kiFeedback(modulId, text) {
+  const res = await fetch(KI_URL, {
+    method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'apikey': KI_KEY },
+    body: JSON.stringify({ modul_id: modulId, user_name: kiUserName(), text: text })
+  });
+  let j = null;
+  try { j = await res.json(); } catch(e) {}
+  if (!res.ok || !j || !j.ok) throw new Error((j && j.error) || 'Die Bewertung ist gerade nicht erreichbar.');
+  return j.feedback;
+}
+
+async function requestEvaluation() {
+  const btn = document.getElementById('btnEval');
+  const loading = document.getElementById('loadingHint');
+  const hint = document.getElementById('submitHint');
+  btn.disabled = true;
+  loading.classList.add('show');
+  hint.style.display = 'none';
+  SCORM.save();
+
+  const v = id => document.getElementById(id).value.trim();
+  const text = 'AUFGABE 1 (Sprung vom Turm)\nTEIL 1 (Berechnung):\n' + v('t1a') + '\nTEIL 2 (Fachtext):\n' + v('t1b')
+    + '\n\nAUFGABE 2 (Bremsvorgang)\nTEIL 1 (Berechnung):\n' + v('t2a') + '\nTEIL 2 (Diagramm und Fachtext):\n' + v('t2b');
+  try {
+    const roh = await kiFeedback('pb-gate-e2e3', text);
+    // The model should return pure JSON; strip fences or extra sentences anyway.
+    let data = null;
+    try {
+      const s = String(roh);
+      data = JSON.parse(s.slice(s.indexOf('{'), s.lastIndexOf('}') + 1));
+      if (!Array.isArray(data.aufgaben) || data.aufgaben.length !== 2) throw new Error('shape');
+    } catch(e) {
+      throw new Error('Die Bewertung kam unvollständig zurück. Bitte noch einmal versuchen.');
+    }
+    showResults(data);
+  } catch(err) {
+    loading.classList.remove('show');
+    btn.disabled = false;
+    hint.style.display = '';
+    hint.textContent = '⚠️ ' + err.message;
+    hint.style.color = '#ef4444';
+  }
+}
+
+// Hard checks for the result and unit criteria (index 0-based within the 10 criteria).
+// They can only take a point away, never add one: a criterion the model marks as met
+// must also be visible in the student's text. This keeps prompt tricks below the pass
+// mark, because 8 of the 20 points need the actual numbers and units.
+const PFLICHT = [
+  { 1: /(^|[^\d.,])6\s*(000|\.000)([.,]0+)?(?!\d)|(^|[^\d.,])6([.,]0+)?\s*kJ/i,           // E_pot = 6000 J
+    2: /\d\s*(k?J|Nm|Joule)(?![a-zäöü])/i,                                                     // energy unit
+    5: /(^|[^\d.,])14([.,]\d+)?(?!\d)|√\s*\(?\s*200|wurzel\s*\(?\s*200|sqrt\s*\(?\s*200/i,      // v ≈ 14,1
+    6: /\d\s*(m\s*\/\s*s|m\s*·\s*s\s*\^?\s*-\s*1|m\s*s\s*\^?\s*-\s*1|m\s*s⁻¹)(?![²2])/i },    // velocity unit
+  { 1: /(^|[^\d.,])5([.,]0+)?\s*s(?![a-zäöü])|=\s*5([.,]0+)?(?![\d.,])/i,                     // Δt = 5 s
+    2: /\d\s*(s|sek|sekunden)(?![a-zäöü\/])/i,                                                  // time unit
+    4: /(^|[^\d.,])50([.,]0+)?\s*m(?![a-zäöü\/])|=\s*50([.,]0+)?(?![\d.,])/i,                   // s = 50 m
+    5: /\d\s*(m|meter)(?![a-zäöü\/²])/i }                                                       // length unit
+];
+
+// Points per task = number of fulfilled criteria (list of 10 booleans); falls back to "punkte".
+function punkteVon(a, i) {
+  const teile = i === 0 ? ['t1a', 't1b'] : ['t2a', 't2b'];
+  const txt = teile.map(id => document.getElementById(id).value).join('\n');
+  if (a && Array.isArray(a.kriterien) && a.kriterien.length === 10) {
+    const krit = a.kriterien.map((k, c) => k === true && (!PFLICHT[i][c] || PFLICHT[i][c].test(txt)));
+    return { pts: krit.filter(Boolean).length, krit };
+  }
+  const p = Math.max(0, Math.min(10, Math.round(Number(a && a.punkte) || 0)));
+  return { pts: p, krit: null };
+}
+
+function showResults(data) {
+  let total = 0;
+  data.aufgaben.forEach((a, i) => {
+    const n = i + 1, { pts, krit } = punkteVon(a, i);
+    total += pts;
+    const cls = pts >= 8 ? 'pass' : pts >= 5 ? 'partial' : 'fail';
+    document.getElementById('fb' + n).className = 'ai-feedback show ' + cls;
+    const sc = document.getElementById('score' + n);
+    sc.className = 'ai-score ' + cls;
+    sc.textContent = '✦ ' + pts + ' / 10 Punkte';
+    document.getElementById('fbtext' + n).textContent = String((a && a.feedback) || '');
+    document.getElementById('card' + n).classList.add('evaluated');
+    for (let c = 1; c <= 10; c++) {
+      const el = document.getElementById('pts' + n + '-' + c);
+      if (el) el.classList.toggle('earned', krit ? krit[c - 1] : c <= pts);
+    }
+  });
+  textIds.forEach(id => { document.getElementById(id).disabled = true; });
+
+  const passed = total >= 15;
+  const box = document.getElementById('totalResult');
+  box.classList.add('show');
+  document.getElementById('totalIcon').textContent = passed ? '🎉' : '💪';
+  const ts = document.getElementById('totalScore');
+  ts.textContent = total + ' / 20 Punkte';
+  ts.className = 'total-score ' + (passed ? 'pass' : 'fail');
+  const badge = document.getElementById('totalBadge');
+  badge.textContent = passed ? 'Bestanden ✓' : 'Noch nicht bestanden';
+  badge.className = 'total-badge ' + (passed ? 'pass' : 'fail');
+  document.getElementById('totalMsg').textContent = passed
+    ? 'Sehr gut! Du hast den Gate-Test bestanden und kannst mit Level 3 weitermachen.'
+    : 'Du hast ' + total + ' von 15 benötigten Punkten. Lies die Rückmeldungen, überarbeite deine Lösung und lass sie erneut bewerten.';
+  box.scrollIntoView({ behavior: 'smooth', block: 'start' });
+
+  document.getElementById('loadingHint').classList.remove('show');
+  document.getElementById('btnEval').style.display = 'none';
+  document.getElementById('btnRetry').style.display = passed ? 'none' : '';
+  document.getElementById('submitHint').style.display = 'none';
+  evaluated = true;
+  SCORM.save(total, passed);
+  if (window.MathJax && MathJax.typesetPromise) MathJax.typesetPromise([box]);
+}
+
+// Revise: keep the texts, unlock them, allow a new evaluation.
+function reviseTest() {
+  evaluated = false;
+  textIds.forEach(id => { document.getElementById(id).disabled = false; });
+  for (let n = 1; n <= 2; n++) {
+    document.getElementById('fb' + n).className = 'ai-feedback';
+    document.getElementById('card' + n).classList.remove('evaluated');
+    for (let c = 1; c <= 10; c++) { const el = document.getElementById('pts' + n + '-' + c); if (el) el.classList.remove('earned'); }
+  }
+  document.getElementById('totalResult').classList.remove('show');
+  document.getElementById('btnEval').style.display = '';
+  document.getElementById('btnRetry').style.display = 'none';
+  const hint = document.getElementById('submitHint');
+  hint.style.display = ''; hint.style.color = ''; hint.textContent = 'Überarbeite deine Lösung und fordere dann eine neue Bewertung an.';
+  updateProgress();
+  window.scrollTo(0, 0);
 }
 
 document.addEventListener('DOMContentLoaded', () => {
   SCORM.init();
+  updateProgress();
   // MathJax loads async from the CDN: typeset once it is ready, never block the LMS connection on it
   (function typesetWhenReady(n) {
     if (window.MathJax && MathJax.startup && MathJax.startup.promise) MathJax.startup.promise.then(() => MathJax.typesetPromise());
@@ -449,6 +651,7 @@ document.addEventListener('DOMContentLoaded', () => {
   })(40);
 });
 window.addEventListener('beforeunload', () => SCORM.finish());
+window.addEventListener('pagehide', () => SCORM.finish());
 </script>
 </body>
 </html>
